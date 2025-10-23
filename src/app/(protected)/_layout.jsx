@@ -1,13 +1,15 @@
 // app/(protected)/_layout.js
 import { Drawer } from "expo-router/drawer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { DrawerToggleButton } from "@react-navigation/drawer";
 
 export default function ProtectedLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
-          headerShown: true,
+            headerShown: true,
+            headerLeft: () => <DrawerToggleButton />,
           drawerType: "front",
           drawerStyle: { width: 260 },
         }}
