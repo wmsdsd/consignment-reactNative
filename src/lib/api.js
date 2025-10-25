@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:4000/api';
+const BASE_URL = 'http://192.168.0.15:4000/api';
 
 // 기본 fetch 함수
 const apiCall = async (endpoint, options = {}) => {
