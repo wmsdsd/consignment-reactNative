@@ -1,10 +1,10 @@
 // app/(protected)/(tabs)/home.js
-import { View, Text } from "react-native";
+import { View, Image } from 'react-native';
 
 export default function HomeScreen() {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>🏠 홈 탭</Text>
+    <View className="flex-1 items-center justify-center bg-white">
+      <Image source={require('@assets/logo.png')} className="h-48 w-48" resizeMode="contain" />
     </View>
   );
 }
