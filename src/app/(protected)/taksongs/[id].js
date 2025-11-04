@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { checkAllPermissionsAsync } from '../../../lib/utils';
 
 // 상태 타입 정의
 const STATUS = {
@@ -253,8 +254,17 @@ export default function TaksongDetailScreen() {
   };
 
   // 탁송 시작 핸들러 - 예약 확인 페이지로 이동
-  const handleStart = () => {
-    router.push(`/(protected)/taksongs/${id}/confirm`);
+
+  const handleStart = async () => {
+    const result = await checkAllPermissionsAsync();
+
+    if (result?.allGranted) {
+      // ✅ 모든 권한 허용 → 다음 화면으로 이동
+      router.push(`/(protected)/taksongs/${id}/confirm`);
+    } else {
+      // ❌ 하나라도 거부됨 → 경고 표시
+      Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.');
+    }
   };
 
   if (!taksong) {

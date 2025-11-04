@@ -17,9 +17,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.mozart25.allgo",
       "infoPlist": {
-        "NSCameraUsageDescription": "탁송 서비스를 위해 사진 촬영이 필요합니다.",
-        "NSPhotoLibraryUsageDescription": "탁송 서비스를 위해 사진 선택이 필요합니다.",
-        "NSLocationWhenInUseUsageDescription": "탁송 서비스를 위해 위치 정보 수집이 필요합니다."
+        "NSLocationWhenInUseUsageDescription": "이 앱은 위치 기반 기능을 위해 위치 권한이 필요합니다.",
+        "NSCameraUsageDescription": "이 앱은 사진/영상 촬영을 위해 카메라 접근 권한이 필요합니다.",
+        "NSMicrophoneUsageDescription": "이 앱은 영상 녹화 시 오디오 녹음을 위해 마이크 접근 권한이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "이 앱은 사진 업로드를 위해 앨범 접근 권한이 필요합니다."
       }
     },
     "android": {
@@ -29,12 +30,14 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ]
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.mozart25.allgo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
