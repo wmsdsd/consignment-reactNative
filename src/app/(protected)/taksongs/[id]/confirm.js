@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import * as Linking from 'expo-linking';
 
 // 상태 타입 정의
 const STATUS = {
@@ -241,6 +242,77 @@ export default function ConfirmScreen() {
     router.push(`/(protected)/taksongs/${id}/prepare`);
   };
 
+  // 네비게이션 앱 열기 핸들러
+  const handleOpenNavigation = async () => {
+    // 임시로 서울시청 좌표로 고정 (위도, 경도)
+    const goalName = encodeURIComponent('서울시청');
+    const goalX = 126.9783881; // 경도
+    const goalY = 37.5666103; // 위도
+
+    // 사용자에게 앱 선택 옵션 제공
+    Alert.alert(
+      '네비게이션 앱 선택',
+      '사용할 네비게이션 앱을 선택해주세요',
+      [
+        {
+          text: 'TMap',
+          onPress: async () => {
+            // TMap은 goalname, goalx, goaly 파라미터 사용
+            const tmapUrl = `tmap://route?goalname=${goalName}&goalx=${goalX}&goaly=${goalY}`;
+            try {
+              const canOpen = await Linking.canOpenURL(tmapUrl);
+              if (canOpen) {
+                await Linking.openURL(tmapUrl);
+              } else {
+                // TMap이 설치되어 있지 않은 경우 앱스토어로 이동
+                const storeUrl = Platform.select({
+                  ios: 'https://apps.apple.com/kr/app/tmap/id431589174',
+                  android: 'market://details?id=com.skt.tmap.ku',
+                });
+                if (storeUrl) {
+                  await Linking.openURL(storeUrl);
+                }
+              }
+            } catch (error) {
+              console.error('TMap 열기 오류:', error);
+              Alert.alert('오류', 'TMap을 열 수 없습니다.');
+            }
+          },
+        },
+        {
+          text: '카카오맵',
+          onPress: async () => {
+            // 카카오맵은 ep(위도,경도)와 by(이동수단) 파라미터 사용
+            const kakaoMapUrl = `kakaomap://route?ep=${goalY},${goalX}&by=CAR`;
+            try {
+              const canOpen = await Linking.canOpenURL(kakaoMapUrl);
+              if (canOpen) {
+                await Linking.openURL(kakaoMapUrl);
+              } else {
+                // 카카오맵이 설치되어 있지 않은 경우 앱스토어로 이동
+                const storeUrl = Platform.select({
+                  ios: 'https://apps.apple.com/kr/app/kakaomap/id304608425',
+                  android: 'market://details?id=net.daum.android.map',
+                });
+                if (storeUrl) {
+                  await Linking.openURL(storeUrl);
+                }
+              }
+            } catch (error) {
+              console.error('카카오맵 열기 오류:', error);
+              Alert.alert('오류', '카카오맵을 열 수 없습니다.');
+            }
+          },
+        },
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   if (!taksong) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
@@ -347,8 +419,17 @@ export default function ConfirmScreen() {
       </ScrollView>
 
       {/* 하단 버튼 영역 */}
-      <View className="border-t border-gray-200 bg-white px-4 py-4 pb-12">
-        <TouchableOpacity onPress={handleTransportStart} className="rounded-lg bg-blue-500 p-4">
+      <View className="flex-row gap-x-3 border-t border-gray-200 bg-white px-4 py-4 pb-12">
+        <TouchableOpacity
+          onPress={handleOpenNavigation}
+          className="flex-1 rounded-lg bg-green-500 p-4"
+        >
+          <Text className="text-center text-xl font-semibold text-white">네비연동</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleTransportStart}
+          className="flex-1 rounded-lg bg-blue-500 p-4"
+        >
           <Text className="text-center text-xl font-semibold text-white">운송 시작</Text>
         </TouchableOpacity>
       </View>
