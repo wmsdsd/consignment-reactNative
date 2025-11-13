@@ -5,13 +5,19 @@ import { DrawerToggleButton } from '@react-navigation/drawer';
 
 export default function ProtectedLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView className="flex-1 bg-black">
       <Drawer
         screenOptions={{
           headerShown: true,
-          headerLeft: () => <DrawerToggleButton />,
+          // headerLeft: () => <DrawerToggleButton tintColor="#ffffff" />,
           drawerType: 'front',
-          drawerStyle: { width: 260 },
+          drawerStyle: { width: 260, backgroundColor: '#1E1E1E' },
+          drawerActiveTintColor: '#ffffff',
+          drawerInactiveTintColor: '#888888',
+          headerStyle: { backgroundColor: '#000000' },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: { color: '#ffffff' },
+          contentStyle: { backgroundColor: '#000000' },
         }}
       >
         {/* Drawer 안의 탭 그룹 */}

@@ -14,7 +14,10 @@ export default function TaksongsLayout() {
         options={{
           headerShown: true,
           title: '탁송 목록',
-          headerLeft: () => <DrawerToggleButton />,
+          headerLeft: () => <DrawerToggleButton tintColor="#ffffff" />,
+          headerStyle: { backgroundColor: '#000000' },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: { color: '#ffffff' },
         }}
       />
       <Stack.Screen

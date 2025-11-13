@@ -71,7 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="bg-primary flex-1">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -102,7 +102,7 @@ export default function LoginPage() {
               }}
             >
               <Image
-                source={require('../../../assets/logo.png')}
+                source={require('../../../assets/logo_main.png')}
                 className="mb-8 h-48 w-48"
                 resizeMode="contain"
               />
