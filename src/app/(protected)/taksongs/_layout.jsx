@@ -36,8 +36,13 @@ export default function TaksongsLayout() {
         name="[id]/confirm"
         options={{
           headerShown: true,
-          title: '예약 확인',
+          title: '예약 완료',
           headerBackVisible: true,
+          headerLeft: undefined, // Stack의 기본 뒤로가기 버튼 사용
+          headerRight: () => <DrawerToggleButton tintColor="#ffffff" />,
+          headerStyle: { backgroundColor: '#000000' },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: { color: '#ffffff' },
         }}
       />
       <Stack.Screen

@@ -1,6 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Pressable, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import * as Linking from 'expo-linking';
+import { useState } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // 상태 타입 정의
 const STATUS = {
@@ -237,6 +239,51 @@ export default function ConfirmScreen() {
   const { id } = useLocalSearchParams();
   const taksong = mockTaksongs.find(item => item.id === id);
 
+  // 날짜와 시간 상태 관리
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  // 날짜 포맷팅 함수
+  const formatDate = date => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일`;
+  };
+
+  // 시간 포맷팅 함수
+  const formatTime = date => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? '오후' : '오전';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    return `${ampm} ${displayHours}:${displayMinutes}`;
+  };
+
+  // 날짜 선택 핸들러
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(false);
+    if (date) {
+      const newDate = new Date(date);
+      newDate.setHours(selectedDate.getHours());
+      newDate.setMinutes(selectedDate.getMinutes());
+      setSelectedDate(newDate);
+    }
+  };
+
+  // 시간 선택 핸들러
+  const handleTimeChange = (event, date) => {
+    setShowTimePicker(false);
+    if (date) {
+      const newDate = new Date(selectedDate);
+      newDate.setHours(date.getHours());
+      newDate.setMinutes(date.getMinutes());
+      setSelectedDate(newDate);
+    }
+  };
+
   // 운송 시작 핸들러 - 차량 도착 사진 촬영 페이지로 이동
   const handleTransportStart = () => {
     router.push(`/(protected)/taksongs/${id}/prepare`);
@@ -315,8 +362,8 @@ export default function ConfirmScreen() {
 
   if (!taksong) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <Text className="text-lg text-gray-600">탁송 정보를 찾을 수 없습니다.</Text>
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-lg text-white">탁송 정보를 찾을 수 없습니다.</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
@@ -327,111 +374,107 @@ export default function ConfirmScreen() {
     );
   }
 
-  const statusColors = getStatusColor(taksong.status);
-
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1">
-        {/* 예약 확인 헤더 */}
-        <View className="mx-4 mt-6 rounded-xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
-          <View className="mb-2 items-center">
-            <Text className="text-2xl font-bold text-blue-700">✓ 예약 확인</Text>
-            <Text className="mt-2 text-center text-sm text-gray-600">예약 정보를 확인해주세요</Text>
+    <View className="flex-1 bg-black">
+      <View className="flex-1 px-4">
+        {/* 기본 정보 */}
+        <View className="mt-6">
+          <Text className="mb-3 text-lg font-semibold text-white">기본 정보</Text>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">차량번호</Text>
+            <Text className="font-semibold text-white">{taksong.vehicleNumber || '-'}</Text>
+          </View>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">특이사항</Text>
+            <Text className="font-semibold text-white">-</Text>
           </View>
         </View>
 
-        {/* 예약 상세 정보 */}
-        <View className="mx-4 my-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          {/* 상태 배지 */}
-          <View className="mb-6 flex-row items-center justify-between">
-            <View
-              className={`rounded-full border px-4 py-2 ${statusColors.bg} ${statusColors.border}`}
+        <View className="my-5 h-[1px] bg-gray-700" />
+
+        {/* 이동 정보 */}
+        <View className="flex-1">
+          <Text className="mb-3 text-lg font-semibold text-white">이동 정보</Text>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">이름</Text>
+            <Text className="font-semibold text-white">-</Text>
+          </View>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">연락처</Text>
+            <Text className="font-semibold text-white">-</Text>
+          </View>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">도로명 주소</Text>
+            <Text className="flex-1 font-semibold text-white">{taksong.destination}</Text>
+          </View>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">지번 주소</Text>
+            <Text className="flex-1 font-semibold text-white">{taksong.departure}</Text>
+          </View>
+
+          <View className="mb-3 flex-row">
+            <Text className="w-28 text-gray-300">상태</Text>
+            <Text className="font-semibold text-white">{taksong.status}</Text>
+          </View>
+        </View>
+
+        <View className="my-5 h-[1px] bg-gray-700" />
+
+        {/* 도착예정일시 */}
+        <View className="mb-6">
+          <Text className="mb-4 text-lg font-semibold text-white">도착예정일시</Text>
+
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={() => setShowDatePicker(true)}
+              className="flex-1 rounded-xl bg-white px-4 py-3"
             >
-              <Text className={`text-sm font-semibold ${statusColors.text}`}>{taksong.status}</Text>
-            </View>
-            {taksong.vehicleNumber && (
-              <View className="rounded-full bg-gray-100 px-4 py-2">
-                <Text className="text-sm font-medium text-gray-700">
-                  🚗 {taksong.vehicleNumber}
-                </Text>
-              </View>
-            )}
-          </View>
+              <Text className="text-base font-medium text-black">{formatDate(selectedDate)} ▼</Text>
+            </Pressable>
 
-          {/* 출발지 */}
-          <View className="mb-4 flex-row items-start">
-            <View className="mr-4 mt-2 h-3 w-3 rounded-full bg-green-500" />
-            <View className="flex-1">
-              <Text className="mb-2 text-sm font-medium text-gray-500">출발지</Text>
-              <Text className="text-base font-semibold leading-6 text-gray-900">
-                {taksong.departure}
-              </Text>
-            </View>
-          </View>
-
-          {/* 도착지 */}
-          <View className="mb-6 flex-row items-start">
-            <View className="mr-4 mt-2 h-3 w-3 rounded-full bg-red-500" />
-            <View className="flex-1">
-              <Text className="mb-2 text-sm font-medium text-gray-500">도착지</Text>
-              <Text className="text-base font-semibold leading-6 text-gray-900">
-                {taksong.destination}
-              </Text>
-            </View>
-          </View>
-
-          {/* 구분선 */}
-          <View className="mb-6 border-t border-gray-200 pt-6">
-            <View className="space-y-4">
-              {/* 거리 */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-gray-500">거리</Text>
-                <Text className="text-lg font-semibold text-gray-900">{taksong.distance}</Text>
-              </View>
-
-              {/* 소요시간 */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-gray-500">소요시간</Text>
-                <Text className="text-lg font-semibold text-gray-900">{taksong.time}</Text>
-              </View>
-
-              {/* 요금 */}
-              <View className="flex-row items-center justify-between border-t border-gray-200 pt-4">
-                <Text className="text-base font-medium text-gray-700">요금</Text>
-                <Text className="text-2xl font-bold text-red-600">{taksong.price}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 추가 정보 영역 */}
-          <View className="rounded-lg bg-gray-50 p-4">
-            <Text className="mb-2 text-xs font-medium text-gray-500">예약 번호</Text>
-            <Text className="text-sm font-semibold text-gray-900">#{taksong.id}</Text>
+            <Pressable
+              onPress={() => setShowTimePicker(true)}
+              className="flex-1 rounded-xl bg-white px-4 py-3"
+            >
+              <Text className="text-base font-medium text-black">{formatTime(selectedDate)} ▼</Text>
+            </Pressable>
           </View>
         </View>
+      </View>
 
-        {/* 안내 메시지 */}
-        <View className="mx-4 mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-          <Text className="text-sm text-yellow-800">
-            💡 운송 시작 버튼을 누르시면 운송을 시작할 수 있습니다.
-          </Text>
-        </View>
-      </ScrollView>
+      {/* DatePicker */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="spinner"
+          onChange={handleDateChange}
+          minimumDate={new Date()}
+        />
+      )}
 
-      {/* 하단 버튼 영역 */}
-      <View className="flex-row gap-x-3 border-t border-gray-200 bg-white px-4 py-4 pb-12">
-        <TouchableOpacity
-          onPress={handleOpenNavigation}
-          className="flex-1 rounded-lg bg-green-500 p-4"
-        >
-          <Text className="text-center text-xl font-semibold text-white">네비연동</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleTransportStart}
-          className="flex-1 rounded-lg bg-blue-500 p-4"
-        >
-          <Text className="text-center text-xl font-semibold text-white">운송 시작</Text>
-        </TouchableOpacity>
+      {/* TimePicker */}
+      {showTimePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="time"
+          display="spinner"
+          onChange={handleTimeChange}
+          is24Hour={false}
+        />
+      )}
+
+      {/* 하단 버튼 */}
+      <View className="bg-black px-4 pb-20 pt-4">
+        <Pressable onPress={handleTransportStart} className="w-full rounded-xl bg-purple-700 py-4">
+          <Text className="text-center text-xl font-semibold text-white">운행 시작</Text>
+        </Pressable>
       </View>
     </View>
   );
