@@ -224,7 +224,7 @@ export default function TaksongListScreen() {
       data={mockTaksongs}
       renderItem={renderItem}
       keyExtractor={item => item.id}
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
       className="flex-1 bg-black"
       showsVerticalScrollIndicator={false}
     />

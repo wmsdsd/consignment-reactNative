@@ -1,4 +1,4 @@
-// app/(protected)/(tabs)/home.js
+// app/(protected)/home.js
 import { View, Image } from 'react-native';
 
 export default function HomeScreen() {

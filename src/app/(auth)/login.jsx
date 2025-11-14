@@ -173,7 +173,7 @@ export default function LoginPage() {
 
                 <TouchableOpacity
                   className="mt-3 items-center rounded-lg border-2 border-gray-300 bg-white py-4"
-                  onPress={() => router.replace('/(protected)/(tabs)/home')}
+                  onPress={() => router.replace('/(protected)/home')}
                 >
                   <Text className="text-lg font-semibold text-gray-700">체험하기</Text>
                 </TouchableOpacity>

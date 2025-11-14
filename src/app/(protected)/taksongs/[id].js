@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Pressable, Alert, ScrollView, Image } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { checkAllPermissionsAsync } from '../../../lib/utils';
 
 // 상태 타입 정의
@@ -236,6 +237,7 @@ const mockTaksongs = [
 export default function TaksongDetailScreen() {
   const { id } = useLocalSearchParams();
   const taksong = mockTaksongs.find(item => item.id === id);
+  const insets = useSafeAreaInsets();
 
   // 배정 취소 핸들러
   const handleCancel = () => {
@@ -269,105 +271,93 @@ export default function TaksongDetailScreen() {
 
   if (!taksong) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <Text className="text-lg text-gray-600">탁송 정보를 찾을 수 없습니다.</Text>
-        <TouchableOpacity
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-lg text-gray-300">탁송 정보를 찾을 수 없습니다.</Text>
+        <Pressable
           onPress={() => router.back()}
-          className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
+          className="mt-4 rounded-lg bg-purple-700 px-6 py-3"
         >
           <Text className="font-semibold text-white">목록으로 돌아가기</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
 
-  const statusColors = getStatusColor(taksong.status);
+  // 주소에서 시/도만 추출하는 헬퍼 함수
+  const getCityName = address => {
+    const match = address.match(/^([가-힣]+(?:시|도|특별시|광역시))/);
+    return match ? match[1] : address;
+  };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1">
-        <View className="mx-4 my-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          {/* 상태 배지 */}
-          <View className="mb-6 flex-row items-center justify-between">
-            <View
-              className={`rounded-full border px-4 py-2 ${statusColors.bg} ${statusColors.border}`}
-            >
-              <Text className={`text-sm font-semibold ${statusColors.text}`}>{taksong.status}</Text>
-            </View>
-            {taksong.vehicleNumber && (
-              <View className="rounded-full bg-gray-100 px-4 py-2">
-                <Text className="text-sm font-medium text-gray-700">
-                  🚗 {taksong.vehicleNumber}
-                </Text>
-              </View>
-            )}
-          </View>
+    <View className="flex-1 bg-black">
+      <View className="flex-1 p-4">
+        <View className="flex-1">
+          {/* 카드 */}
+          <View className="w-full flex-1 items-center justify-center rounded-2xl bg-neutral-900 p-6">
+            {/* 차량 번호 */}
+            <Text className="text-center text-4xl font-bold text-white">
+              {taksong.vehicleNumber || '미배정'}
+            </Text>
 
-          {/* 출발지 */}
-          <View className="mb-4 flex-row items-start">
-            <View className="mr-4 mt-2 h-3 w-3 rounded-full bg-green-500" />
-            <View className="flex-1">
-              <Text className="mb-2 text-sm font-medium text-gray-500">출발지</Text>
-              <Text className="text-base font-semibold leading-6 text-gray-900">
-                {taksong.departure}
+            {/* 거리 및 시간 */}
+            <View className="mt-5 flex-row justify-center gap-4">
+              <Text className="text-xl text-gray-300">{taksong.distance}</Text>
+              <Text className="text-lg text-gray-600">|</Text>
+              <Text className="text-xl text-gray-300">{taksong.time}</Text>
+            </View>
+
+            {/* 출발 */}
+            <View className="mt-7 items-center">
+              <Text className="mb-2 rounded-md bg-green-600 px-3 py-1.5 text-sm text-white">
+                출발
+              </Text>
+              <Text className="text-3xl font-bold text-white">
+                {getCityName(taksong.departure)}
+              </Text>
+            </View>
+
+            {/* 화살표 */}
+            <View className="my-7 items-center">
+              <Image
+                source={require('../../../../assets/arrow.png')}
+                className="h-20 w-20"
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* 도착 */}
+            <View className="items-center">
+              <Text className="mb-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white">
+                도착
+              </Text>
+              <Text className="text-3xl font-bold text-white">
+                {getCityName(taksong.destination)}
               </Text>
             </View>
           </View>
 
-          {/* 도착지 */}
-          <View className="mb-6 flex-row items-start">
-            <View className="mr-4 mt-2 h-3 w-3 rounded-full bg-red-500" />
-            <View className="flex-1">
-              <Text className="mb-2 text-sm font-medium text-gray-500">도착지</Text>
-              <Text className="text-base font-semibold leading-6 text-gray-900">
-                {taksong.destination}
-              </Text>
-            </View>
-          </View>
-
-          {/* 구분선 */}
-          <View className="mb-6 border-t border-gray-200 pt-6">
-            <View className="space-y-4">
-              {/* 거리 */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-gray-500">거리</Text>
-                <Text className="text-lg font-semibold text-gray-900">{taksong.distance}</Text>
-              </View>
-
-              {/* 소요시간 */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-gray-500">소요시간</Text>
-                <Text className="text-lg font-semibold text-gray-900">{taksong.time}</Text>
-              </View>
-
-              {/* 요금 */}
-              <View className="flex-row items-center justify-between border-t border-gray-200 pt-4">
-                <Text className="text-base font-medium text-gray-700">요금</Text>
-                <Text className="text-2xl font-bold text-red-600">{taksong.price}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* 추가 정보 영역 */}
-          <View className="rounded-lg bg-gray-50 p-4">
-            <Text className="mb-2 text-xs font-medium text-gray-500">예약 번호</Text>
-            <Text className="text-sm font-semibold text-gray-900">#{taksong.id}</Text>
+          {/* 하단 요금 */}
+          <View className="mt-4 w-full flex-row items-center justify-between rounded-xl border border-purple-700 bg-black p-4">
+            <Text className="text-lg text-gray-300">탁송비</Text>
+            <Text className="text-2xl font-semibold text-white">{taksong.price}</Text>
           </View>
         </View>
-      </ScrollView>
+      </View>
 
-      {/* 하단 버튼 영역 */}
-      <View className="border-t border-gray-200 bg-white px-4 py-4 pb-12">
-        <View className="flex-row gap-x-3">
-          <TouchableOpacity
-            onPress={handleCancel}
-            className="w-[40%] rounded-lg border border-gray-300 bg-red-400 p-4 "
-          >
-            <Text className="text-center  text-xl font-semibold text-white">배정 취소</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleStart} className="flex-1 rounded-lg bg-blue-500 p-4">
-            <Text className="text-center text-xl font-semibold text-white">탁송 시작</Text>
-          </TouchableOpacity>
+      {/* Footer - 버튼들 */}
+      <View
+        className="border-t border-gray-800 bg-black px-4 py-4"
+        style={{ paddingBottom: Math.max(insets.bottom, 60) }}
+      >
+        <View className="w-full flex-row gap-3">
+          <Pressable onPress={handleCancel} className="w-1/4 rounded-xl bg-neutral-800 py-4">
+            <Text className="text-center text-lg text-white">취소</Text>
+          </Pressable>
+
+          <Pressable onPress={handleStart} className="flex-1 rounded-xl bg-purple-700 py-4">
+            <Text className="text-center text-lg font-semibold text-white">탁송 시작</Text>
+          </Pressable>
         </View>
       </View>
     </View>

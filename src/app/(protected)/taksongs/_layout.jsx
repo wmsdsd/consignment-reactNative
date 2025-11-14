@@ -27,6 +27,9 @@ export default function TaksongsLayout() {
           title: '탁송 상세',
           headerBackVisible: true,
           headerLeft: undefined, // Stack의 기본 뒤로가기 버튼 사용
+          headerStyle: { backgroundColor: '#000000' },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: { color: '#ffffff' },
         }}
       />
       <Stack.Screen

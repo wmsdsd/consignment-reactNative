@@ -1,7 +1,6 @@
 // app/(protected)/_layout.js
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { DrawerToggleButton } from '@react-navigation/drawer';
 
 export default function ProtectedLayout() {
   return (
@@ -9,7 +8,6 @@ export default function ProtectedLayout() {
       <Drawer
         screenOptions={{
           headerShown: true,
-          // headerLeft: () => <DrawerToggleButton tintColor="#ffffff" />,
           drawerType: 'front',
           drawerStyle: { width: 260, backgroundColor: '#1E1E1E' },
           drawerActiveTintColor: '#ffffff',
@@ -20,16 +18,20 @@ export default function ProtectedLayout() {
           contentStyle: { backgroundColor: '#000000' },
         }}
       >
-        {/* Drawer 안의 탭 그룹 */}
         <Drawer.Screen
-          name="(tabs)"
+          name="home"
           options={{
-            drawerLabel: '홈 탭',
+            drawerLabel: '홈',
             title: '홈',
           }}
         />
-
-        {/* Drawer 안의 개별 화면 */}
+        <Drawer.Screen
+          name="profile"
+          options={{
+            drawerLabel: '프로필',
+            title: '프로필',
+          }}
+        />
         <Drawer.Screen
           name="settings"
           options={{

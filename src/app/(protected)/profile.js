@@ -1,4 +1,4 @@
-// app/(protected)/(tabs)/profile.js
+// app/(protected)/profile.js
 import { View, Text } from 'react-native';
 
 export default function ProfileScreen() {
@@ -11,7 +11,7 @@ export default function ProfileScreen() {
         backgroundColor: '#000000',
       }}
     >
-      <Text>👤 프로필 탭</Text>
+      <Text>👤 프로필</Text>
     </View>
   );
 }
