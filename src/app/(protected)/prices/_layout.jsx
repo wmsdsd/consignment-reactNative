@@ -32,6 +32,17 @@ export default function PricesLayout() {
           headerTitleStyle: { color: '#ffffff' },
         }}
       />
+      <Stack.Screen
+        name="[id]/bill"
+        options={{
+          headerShown: true,
+          title: '요금 청구',
+          headerBackVisible: true,
+          headerStyle: { backgroundColor: '#000000' },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: { color: '#ffffff' },
+        }}
+      />
     </Stack>
   );
 }

@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// 가짜 요금 데이터
+// 가짜 요금 데이터 (상위 페이지와 동일)
 const mockPrices = [
   {
     id: '1',
@@ -179,16 +179,31 @@ const mockPrices = [
   },
 ];
 
-const vehicleTypeColor = {
-  일반: 'bg-blue-600',
-  중형: 'bg-green-600',
-  대형: 'bg-purple-600',
-};
-
-export default function PriceDetailScreen() {
+export default function BillingScreen() {
   const { id } = useLocalSearchParams();
   const price = mockPrices.find(item => item.id === id);
   const insets = useSafeAreaInsets();
+
+  // 영수증 첨부 핸들러
+  const handleAttachReceipt = () => {
+    // TODO: 영수증 첨부 기능 구현 (이미지 선택, 업로드 등)
+    Alert.alert('영수증 첨부', '영수증 첨부 기능이 곧 추가될 예정입니다.');
+  };
+
+  // 요금 청구 핸들러
+  const handleBilling = () => {
+    Alert.alert('요금 청구', '요금을 청구하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '확인',
+        onPress: () => {
+          // TODO: 요금 청구 API 호출
+          Alert.alert('완료', '요금 청구가 완료되었습니다.');
+          router.back();
+        },
+      },
+    ]);
+  };
 
   if (!price) {
     return (
@@ -201,76 +216,62 @@ export default function PriceDetailScreen() {
   return (
     <View className="flex-1 bg-black">
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 16 }}>
-        {/* 노선 정보 카드 */}
+        {/* 요금 정보 요약 */}
         <View className="mb-4 w-full rounded-2xl bg-neutral-900 p-6">
-          <View className="mb-4 flex-row items-center justify-between">
-            <View
-              className={`rounded-md px-3 py-1 ${vehicleTypeColor[price.vehicleType] || 'bg-gray-600'}`}
-            >
-              <Text className="text-xs font-semibold text-white">{price.vehicleType}</Text>
-            </View>
-            <Text className="text-3xl font-bold text-white">{price.basePrice}</Text>
-          </View>
-
+          <Text className="mb-4 text-xl font-bold text-white">요금 청구</Text>
           <Text className="mb-2 text-2xl font-bold text-white">{price.route}</Text>
           <Text className="mb-4 text-base text-gray-300">{price.description}</Text>
 
-          <View className="flex-row gap-4">
-            <Text className="text-lg text-gray-300">{price.distance}</Text>
-            <Text className="text-lg text-gray-600">|</Text>
-            <Text className="text-lg text-gray-300">{price.time}</Text>
-          </View>
-        </View>
-
-        {/* 요금 상세 내역 */}
-        <View className="mb-4 w-full rounded-2xl bg-neutral-900 p-6">
-          <Text className="mb-4 text-xl font-bold text-white">요금 상세 내역</Text>
-
-          <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-            <Text className="text-base text-gray-300">기본 요금</Text>
-            <Text className="text-base font-semibold text-white">{price.details.baseFare}</Text>
-          </View>
-
-          <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-            <Text className="text-base text-gray-300">거리 요금</Text>
-            <Text className="text-base font-semibold text-white">{price.details.distanceFare}</Text>
-          </View>
-
-          <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-            <Text className="text-base text-gray-300">시간 요금</Text>
-            <Text className="text-base font-semibold text-white">{price.details.timeFare}</Text>
-          </View>
-
-          <View className="mt-4 flex-row justify-between">
+          <View className="mt-4 flex-row justify-between border-t border-gray-700 pt-4">
             <Text className="text-xl font-bold text-white">총 요금</Text>
             <Text className="text-2xl font-bold text-white">{price.details.total}</Text>
           </View>
         </View>
 
-        {/* 추가 정보 */}
+        {/* 청구 정보 입력 영역 */}
         <View className="w-full rounded-2xl bg-neutral-900 p-6">
-          <Text className="mb-4 text-xl font-bold text-white">추가 정보</Text>
+          <Text className="mb-4 text-xl font-bold text-white">청구 정보</Text>
 
-          {price.additionalInfo.map((info, index) => (
-            <View key={index} className="mb-2 flex-row items-start">
-              <Text className="mr-2 text-purple-500">•</Text>
-              <Text className="flex-1 text-base text-gray-300">{info}</Text>
+          <View className="mb-4">
+            <Text className="mb-2 text-base text-gray-300">청구 대상</Text>
+            <View className="rounded-lg border border-gray-700 bg-neutral-800 p-4">
+              <Text className="text-base text-white">회사명 또는 개인명</Text>
             </View>
-          ))}
+          </View>
+
+          <View className="mb-4">
+            <Text className="mb-2 text-base text-gray-300">청구 메모</Text>
+            <View className="rounded-lg border border-gray-700 bg-neutral-800 p-4">
+              <Text className="text-base text-gray-400">메모를 입력하세요 (선택사항)</Text>
+            </View>
+          </View>
+
+          <View className="mb-4">
+            <Text className="mb-2 text-base text-gray-300">영수증</Text>
+            <View className="rounded-lg border border-gray-700 bg-neutral-800 p-4">
+              <Text className="text-base text-gray-400">영수증을 첨부하세요</Text>
+            </View>
+          </View>
         </View>
       </ScrollView>
 
-      {/* Footer - 요금 청구 버튼 */}
+      {/* Footer - 영수증 첨부 및 요금 청구 버튼 */}
       <View
         className="border-t border-gray-800 bg-black px-4 py-4"
         style={{ paddingBottom: Math.max(insets.bottom, 60) }}
       >
-        <Pressable
-          onPress={() => router.push(`/(protected)/prices/${id}/bill`)}
-          className="bg-secondary w-full rounded-xl py-4"
-        >
-          <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
-        </Pressable>
+        <View className="w-full flex-row gap-3">
+          <Pressable
+            onPress={handleAttachReceipt}
+            className="flex-1 rounded-xl border border-purple-700 bg-neutral-900 py-4"
+          >
+            <Text className="text-center text-lg font-semibold text-white">영수증 첨부</Text>
+          </Pressable>
+
+          <Pressable onPress={handleBilling} className="flex-1 rounded-xl bg-purple-700 py-4">
+            <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
