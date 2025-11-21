@@ -1,17 +1,54 @@
 // app/(protected)/_layout.js
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const CustomDrawerContent = props => {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View className="flex-1 bg-[#1E1E1E]">
+      {/* 유저 정보 헤더 */}
+      <View
+        className="border-b border-gray-700 bg-[#1E1E1E] px-4 pb-4"
+        style={{ paddingTop: insets.top + 16 }}
+      >
+        <View className="mb-2">
+          <Text className="text-2xl font-bold text-white">홍길동</Text>
+        </View>
+        <Text className="text-sm text-gray-400">010-1234-5678</Text>
+        <Text className="text-sm text-gray-400">driver@example.com</Text>
+      </View>
+
+      {/* Drawer 메뉴 리스트 */}
+      <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 8 }}>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+    </View>
+  );
+};
+
+CustomDrawerContent.displayName = 'CustomDrawerContent';
 
 export default function ProtectedLayout() {
   return (
     <GestureHandlerRootView className="flex-1 bg-black">
       <Drawer
+        drawerContent={props => <CustomDrawerContent {...props} />}
         screenOptions={{
           headerShown: true,
           drawerType: 'front',
           drawerStyle: { width: 260, backgroundColor: '#1E1E1E' },
           drawerActiveTintColor: '#ffffff',
           drawerInactiveTintColor: '#888888',
+          // drawerActiveBackgroundColor: 'transparent', // 선택된 아이템 배경색
+          drawerItemStyle: {
+            borderRadius: 8, // rounded 제거 (0으로 설정하면 사각형)
+            marginHorizontal: 8,
+            marginVertical: 2,
+          },
           headerStyle: { backgroundColor: '#000000' },
           headerTintColor: '#ffffff',
           headerTitleStyle: { color: '#ffffff' },
