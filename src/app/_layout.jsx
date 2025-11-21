@@ -11,6 +11,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const [isSplashHidden, setIsSplashHidden] = useState(false);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -22,6 +23,23 @@ export default function RootLayout() {
         },
       })
   );
+
+  useEffect(() => {
+    // 기본 스플래시 스크린을 즉시 숨기고 커스텀 스플래시 스크린 표시
+    async function hideNativeSplash() {
+      try {
+        // 최대한 빠르게 기본 스플래시 숨기기
+        await SplashScreen.hideAsync();
+      } catch (e) {
+        console.warn('네이티브 스플래시 스크린 숨기기 오류:', e);
+      } finally {
+        setIsSplashHidden(true);
+      }
+    }
+
+    // 즉시 실행 (다음 틱에서)
+    hideNativeSplash();
+  }, []);
 
   useEffect(() => {
     async function prepare() {
@@ -38,24 +56,19 @@ export default function RootLayout() {
       }
     }
 
-    prepare();
-  }, []);
-
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      // 앱이 준비되면 스플래시 스크린 숨김
-      await SplashScreen.hideAsync();
+    if (isSplashHidden) {
+      prepare();
     }
-  }, [appIsReady]);
+  }, [isSplashHidden]);
 
-  // 앱이 준비되지 않았을 때는 커스텀 스플래시 스크린 표시
-  if (!appIsReady) {
+  // 기본 스플래시가 숨겨지기 전이나 앱이 준비되지 않았을 때는 커스텀 스플래시 스크린 표시
+  if (!isSplashHidden || !appIsReady) {
     return <CustomSplashScreen />;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <View className="bg-primary flex-1" onLayout={onLayoutRootView}>
+      <View className="bg-primary flex-1">
         <Slot />
       </View>
     </QueryClientProvider>

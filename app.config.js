@@ -9,9 +9,8 @@ export default {
     userInterfaceStyle: 'light',
     newArchEnabled: true,
     splash: {
-      image: './assets/logo.png',
-      resizeMode: 'contain',
       backgroundColor: '#3400A2',
+      resizeMode: 'contain',
     },
     ios: {
       supportsTablet: true,
@@ -50,7 +49,7 @@ export default {
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#3400A2',
+          backgroundColor: '#2B00A6',
           image: './assets/logo.png',
           resizeMode: 'contain',
         },

@@ -10,13 +10,13 @@ export default function SplashScreen() {
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
     >
       {/* 로고 (가운데) */}
-      <Image source={require('@assets/logo.png')} className="h-40 w-40" resizeMode="contain" />
+      <Image source={require('@assets/logo.png')} className="h-28 w-28" resizeMode="contain" />
 
       {/* 아래 텍스트 */}
-      <View className="absolute bottom-10 w-full items-center">
+      <View className="absolute w-full items-center" style={{ bottom: insets.bottom }}>
         <Image
           source={require('@assets/logo_title.png')}
-          className="h-40 w-40"
+          className="h-32 w-32"
           resizeMode="contain"
         />
       </View>
