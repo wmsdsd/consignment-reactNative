@@ -47,6 +47,14 @@ export default function ProtectedLayout() {
             headerShown: false, // Stack이 자체 헤더를 관리하므로 Drawer 헤더 숨김
           }}
         />
+        <Drawer.Screen
+          name="prices"
+          options={{
+            drawerLabel: '요금 목록',
+            title: '요금 목록',
+            headerShown: false, // Stack이 자체 헤더를 관리하므로 Drawer 헤더 숨김
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );
