@@ -1,4 +1,7 @@
-const BASE_URL = 'http://192.168.0.15:4000/api';
+// const BASE_URL = 'http://192.168.0.15:4000/api';
+const BASE_URL = 'http://192.168.45.131:4000/api';    // minsu local
+//const BASE_URL = 'https://api.olgomobility.com/api';  // real
+//const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
 
 // 기본 fetch 함수
 const apiCall = async (endpoint, options = {}) => {
