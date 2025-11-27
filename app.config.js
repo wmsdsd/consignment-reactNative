@@ -1,7 +1,7 @@
 export default {
     expo: {
         name: 'olgo',
-        slug: 'olgo',
+        slug: 'olgo-mobility',
         scheme: 'olgo',
         version: '1.0.0',
         orientation: 'portrait',
@@ -14,7 +14,7 @@ export default {
         },
         ios: {
             supportsTablet: true,
-            bundleIdentifier: 'com.mozart25.olgo',
+            bundleIdentifier: 'com.kangja.olgo',
             infoPlist: {
                 NSLocationWhenInUseUsageDescription: '이 앱은 위치 기반 기능을 위해 위치 권한이 필요합니다.',
                 NSCameraUsageDescription: '이 앱은 사진/영상 촬영을 위해 카메라 접근 권한이 필요합니다.',
@@ -36,7 +36,7 @@ export default {
                 'READ_EXTERNAL_STORAGE',
                 'WRITE_EXTERNAL_STORAGE',
             ],
-            package: 'com.mozart25.olgo',
+            package: 'com.kangja.olgo',
         },
         web: {
             favicon: './assets/favicon.png',
@@ -79,9 +79,9 @@ export default {
         extra: {
             router: {},
             eas: {
-                projectId: '514ebb2a-ad0c-43d2-8686-b0e1de52ffa8',
+                projectId: 'f846f146-ae60-4064-a21d-ba75b82b7d8b',
             },
         },
-        owner: 'mozart25',
+        owner: 'chominsu',
     },
 };
