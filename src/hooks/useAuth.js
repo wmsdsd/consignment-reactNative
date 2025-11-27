@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import * as SecureStore from 'expo-secure-store'
-import { useDriverCheck, useDriverLogout } from './useApi'
+import { useDriverCheck, useDriverLogout, useDriverLogin } from './useApi'
 import { driverApi } from '@/lib/api'
 import { router } from 'expo-router'
 
@@ -68,17 +68,22 @@ export const AuthProvider = ({ children }) => {
     
     const login = async (credentials) => {
         try {
-            const response = await driverApi.login(credentials)
-            if (response?.data?.token) {
-                const token = response.data.token
-
-                await SecureStore.setItemAsync('authToken', token)
-
-                setIsAuthenticated(true)
-                setToken(token)
-                
-                return response
-            }
+            const loginMutation = useDriverLogin()
+            const data = await loginMutation.mutateAsync(credentials)
+            console.log("login data", data)
+            
+            
+            // const response = await driverApi.login(credentials)
+            // if (response?.data?.token) {
+            //     const token = response.data.token
+            //
+            //     await SecureStore.setItemAsync('authToken', token)
+            //
+            //     setIsAuthenticated(true)
+            //     setToken(token)
+            //
+            //     return response
+            // }
             
             throw new Error(response.message || '로그인 실패');
         } catch (error) {

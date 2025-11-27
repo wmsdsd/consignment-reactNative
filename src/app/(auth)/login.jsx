@@ -70,8 +70,16 @@ export default function LoginPage() {
         }
     };
     
+    const onFindPassword = () => {
+        console.log('on find password press')
+
+        router.push({
+            pathname: '/(auth)/password/idCheck'
+        })
+    }
+    
     return (
-        <View className="bg-primary flex-1">
+        <View className="bg-black flex-1">
             <KeyboardAvoidingView
                 className="flex-1"
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -118,8 +126,9 @@ export default function LoginPage() {
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <TextInput
-                                                className="mb-2 rounded-lg border border-gray-300 bg-gray-50 px-4 py-4 text-base"
-                                                placeholder="아이디"
+                                                className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                                placeholder="휴대폰번호/아이디"
+                                                placeholderTextColor={"#BBBBBB"}
                                                 value={value}
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
@@ -139,12 +148,16 @@ export default function LoginPage() {
                                         name="password"
                                         rules={{
                                             required: '비밀번호를 입력해주세요.',
-                                            minLength: { value: 1, message: '비밀번호는 최소 6자 이상이어야 합니다.' },
+                                            minLength: {
+                                                value: 1,
+                                                message: '비밀번호는 최소 6자 이상이어야 합니다.'
+                                            },
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <TextInput
-                                                className="mb-2 rounded-lg border border-gray-300 bg-gray-50 px-4 py-4 text-base"
+                                                className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
                                                 placeholder="비밀번호"
+                                                placeholderTextColor={"#BBBBBB"}
                                                 value={value}
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
@@ -161,7 +174,7 @@ export default function LoginPage() {
                                 
                                 <TouchableOpacity
                                     className={`mt-2 items-center rounded-lg py-4 ${
-                                        isSubmitting ? 'bg-gray-400' : 'bg-blue-500'
+                                        isSubmitting ? 'bg-gray-400' : 'bg-primary'
                                     }`}
                                     onPress={handleSubmit(onSubmit)}
                                     disabled={isSubmitting}
@@ -170,6 +183,14 @@ export default function LoginPage() {
                                         {isSubmitting ? '로그인 중...' : '로그인'}
                                     </Text>
                                 </TouchableOpacity>
+                                
+                                <View className="flex flex-row justify-center items-center my-4">
+                                    {/*<Text className="text-sm font-semibold text-white pr-4">회원가입</Text>*/}
+                                    {/*<View className={"h-4 w-[1px] bg-divide"}></View>*/}
+                                    <TouchableOpacity onPress={onFindPassword}>
+                                        <Text className="text-sm font-semibold text-white pl-4">비밀번호 찾기</Text>
+                                    </TouchableOpacity>
+                                </View>
                                 
                                 <TouchableOpacity
                                     className="mt-3 items-center rounded-lg border-2 border-gray-300 bg-white py-4"
