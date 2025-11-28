@@ -1,6 +1,8 @@
 import { View, Text } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
-export default function idCheckScreen() {
+export default function registerPage() {
+    
     return (
         <View
             style={{
@@ -10,14 +12,8 @@ export default function idCheckScreen() {
                 backgroundColor: '#000000',
             }}
         >
-            <Text>사용자 아이디를 입력해 주세요.</Text>
+            <Text>회원가입을 위해</Text>
+            <Text>정보를 입력해 주세요.</Text>
         </View>
     );
-}
-
-export const options = {
-    headerTitle: "",
-    headerStyle: {
-        backgroundColor: '#000000',
-    }
 }

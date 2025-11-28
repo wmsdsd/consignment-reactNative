@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 
-export default function changePasswordScreen() {
+export default function disputeScreen() {
     return (
         <View
             style={{
@@ -10,8 +10,7 @@ export default function changePasswordScreen() {
                 backgroundColor: '#000000',
             }}
         >
-            <Text>비밀번호를</Text>
-            <Text>변경해 주세요.</Text>
+            <Text>사고 처리</Text>
         </View>
-    );
+    )
 }

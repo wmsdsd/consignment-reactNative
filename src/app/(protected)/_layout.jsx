@@ -57,9 +57,8 @@ export default function ProtectedLayout() {
                     drawerStyle: { width: 260, backgroundColor: '#1E1E1E' },
                     drawerActiveTintColor: '#ffffff',
                     drawerInactiveTintColor: '#888888',
-                    // drawerActiveBackgroundColor: 'transparent', // 선택된 아이템 배경색
                     drawerItemStyle: {
-                        borderRadius: 8, // rounded 제거 (0으로 설정하면 사각형)
+                        borderRadius: 8,
                         marginHorizontal: 8,
                         marginVertical: 2,
                     },

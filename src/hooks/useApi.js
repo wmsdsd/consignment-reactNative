@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { driverApi, orderApi, orderLocationApi, orderPhotoApi, orderSettlementApi } from '@/lib/api';
 
-// Driver Hooks
+// Driver Hooks --------------------------------------------------------------------------------------------------------
 export const useDriverLogin = () => {
     return useMutation({
         mutationFn: driverApi.login,
-    });
-};
+    })
+}
 
 export const useDriverRefresh = () => {
     return useMutation({
@@ -21,15 +21,15 @@ export const useDriverRegister = () => {
 };
 
 export const useDriverLogout = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: driverApi.logout,
         onSuccess: () => {
-            queryClient.clear();
+            queryClient.clear()
         },
-    });
-};
+    })
+}
 
 export const useDriverCheck = (token) => {
     return useQuery({
@@ -47,34 +47,61 @@ export const useDriverProfile = () => {
 };
 
 export const useDriverUpdate = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: driverApi.update,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['driver'] });
+            queryClient.invalidateQueries({ queryKey: ['driver'] })
         },
-    });
-};
+    })
+}
 
-// Order Hooks
-export const useOrders = () => {
+export const useDriverSendAuthCode = () => {
+    return useMutation({
+        mutationFn: driverApi.authCode,
+    })
+}
+
+export const useDriverVerify = () => {
+    return useMutation({
+        mutationFn: async ({phone, code}) => {
+            const qs = new URLSearchParams({ phone, code })
+            return driverApi.verifyCode(qs)
+        },
+    })
+}
+
+export const useDriverChangePassword = () => {
+    return useMutation({
+        mutationFn: driverApi.changePassword,
+    })
+}
+
+// Driver Hooks End ----------------------------------------------------------------------------------------------------
+
+// Order Hooks ---------------------------------------------------------------------------------------------------------
+export const useOrder = (uid) => {
     return useQuery({
-        queryKey: ['orders'],
-        queryFn: orderApi.getOrders,
-    });
+        queryKey: ['order', uid],
+        queryFn: async ({ queryKey }) => {
+            const [, uid] = queryKey
+            const qs = new URLSearchParams({ uid })
+            return orderApi.getOrder(qs)
+        },
+    })
 };
 
 export const useOrderList = () => {
     return useQuery({
-        queryKey: ['orders', 'list'],
-        queryFn: orderApi.getOrderList,
-    });
-};
+        queryKey: ['order', 'list'],
+        queryFn: orderApi.getOrderList
+    })
+}
 
 export const useOrderHistory = () => {
     return useQuery({
-        queryKey: ['orders', 'history'],
+        queryKey: ['order.history'],
         queryFn: orderApi.getOrderHistory,
     });
 };
@@ -85,7 +112,7 @@ export const useOrderCancel = () => {
     return useMutation({
         mutationFn: orderApi.cancel,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            queryClient.invalidateQueries({ queryKey: ['order'] });
         },
     });
 };
@@ -96,12 +123,13 @@ export const useOrderStatusUpdate = () => {
     return useMutation({
         mutationFn: ({ orderId, status }) => orderApi.updateStatus(orderId, status),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            queryClient.invalidateQueries({ queryKey: ['order'] });
         },
     });
 };
+// Order Hooks End -----------------------------------------------------------------------------------------------------
 
-// OrderLocation Hooks
+// OrderLocation Hooks -------------------------------------------------------------------------------------------------
 export const useOrderLocationProcess = () => {
     return useQuery({
         queryKey: ['orderLocation', 'process'],

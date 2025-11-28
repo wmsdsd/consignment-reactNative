@@ -1,29 +1,46 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import { secondToTimeHangul, addCommaToNumber, mToKm} from '@/lib/utils';
+
+const statusText = {
+    "DRIVER_ASSIGN": "기사 배정",
+    "DRIVER_RECEIVE": "배정 완료",
+    "DRIVER_START": "출발지",
+    "DRIVER_MIDDLE": "경유지",
+    "DRIVER_END": "도착지",
+    "DRIVER_ROUND": "복귀(왕복)",
+    "DISPUTE": "분쟁중"
+}
 
 const statusColor = {
-    '예약 완료': 'bg-blue-600',
-    '예약 취소': 'bg-red-500',
-    '기사 배정': 'bg-green-600',
-    '예약 대기': 'bg-yellow-500',
-    '픽업 중': 'bg-purple-600',
-};
+    "DRIVER_ASSIGN": "bg-assign",
+    "DRIVER_RECEIVE": "bg-receive",
+    "DRIVER_START": "bg-receive",
+    "DRIVER_MIDDLE": "bg-receive",
+    "DRIVER_END": "bg-receive",
+    "DRIVER_ROUND": "bg-receive",
+    "DISPUTE": "bg-dispute",
+}
 
 export default function TaksongCard({
     id,
-    status = '예약 완료',
-    price = '990,000원',
+    status,
+    price= 0,
     carNumber = null,
-    distance = '238km',
-    duration = '2시간 30분',
-    start = '경기도 평택시 경기대로',
-    end = '경기도 하남시 미사대로',
+    distance = 0,
+    duration = 0,
+    start = null,
+    end = null,
+    isRound = false
 }) {
     const handlePress = () => {
-        if (id) {
-            router.push(`/(protected)/taksongs/${id}`);
+        if (status === "DISPUTE") {
+        
         }
-    };
+        else {
+            router.push(`/(protected)/taksongs/${id}`)
+        }
+    }
     
     return (
         <TouchableOpacity
@@ -33,11 +50,16 @@ export default function TaksongCard({
         >
             {/* 상단 Row */}
             <View className="mb-2 flex-row items-center justify-between">
-                <View className={`rounded-md px-3 py-1 ${statusColor[status] || 'bg-gray-600'}`}>
-                    <Text className="text-xs font-semibold text-white">{status}</Text>
+                <View className={"flex flex-row items-center"}>
+                    <View className={`rounded-md px-3 py-1 ${statusColor[status] || 'bg-gray-600'}`}>
+                        <Text className="text-xs font-semibold text-white">{statusText[status]}</Text>
+                    </View>
+                    {isRound && (
+                        <Text className="text-xs font-semibold text-white ml-4">(왕복)</Text>
+                    )}
                 </View>
                 
-                <Text className="text-xl font-bold text-white">{price}</Text>
+                <Text className="text-xl font-bold text-white">{addCommaToNumber(price)} 원</Text>
             </View>
             
             {/* 차량 번호 + 거리/시간 */}
@@ -47,7 +69,7 @@ export default function TaksongCard({
                 </Text>
                 
                 <Text className="text-sm text-gray-300">
-                    {distance} | {duration}
+                    {mToKm(distance)} | {secondToTimeHangul(duration)}
                 </Text>
             </View>
             

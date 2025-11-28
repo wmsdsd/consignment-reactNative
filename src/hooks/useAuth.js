@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(null)
 
-    const { data: checkData, isLoading: isChecking } = useDriverCheck(token)
+    const { data: checkData, isLoading: isChecking, refetch } = useDriverCheck(token)
     const logoutMutation = useDriverLogout()
     
     // 앱 시작 시 토큰 확인
@@ -50,8 +50,12 @@ export const AuthProvider = ({ children }) => {
     const checkAuthStatus = async () => {
         try {
             const token = await SecureStore.getItemAsync('authToken')
-            console.log('check auth token', token)
-            if (!token) {
+            console.log('checkAuthStatus: ', typeof token, token)
+            if (token) {
+                setToken(token)
+                await refetch()
+            }
+            else {
                 setIsAuthenticated(false)
                 setUser(null)
                 setToken(null)
@@ -68,24 +72,19 @@ export const AuthProvider = ({ children }) => {
     
     const login = async (credentials) => {
         try {
-            const loginMutation = useDriverLogin()
-            const data = await loginMutation.mutateAsync(credentials)
-            console.log("login data", data)
+            const response = await driverApi.login(credentials)
+            if (response?.data?.token) {
+                const token = response.data.token
+
+                await SecureStore.setItemAsync('authToken', token)
+
+                setIsAuthenticated(true)
+                setToken(token)
+
+                return response
+            }
             
-            
-            // const response = await driverApi.login(credentials)
-            // if (response?.data?.token) {
-            //     const token = response.data.token
-            //
-            //     await SecureStore.setItemAsync('authToken', token)
-            //
-            //     setIsAuthenticated(true)
-            //     setToken(token)
-            //
-            //     return response
-            // }
-            
-            throw new Error(response.message || '로그인 실패');
+            throw new Error(response.message || '로그인 실패')
         } catch (error) {
             throw error;
         }

@@ -6,6 +6,9 @@
 .bg-secondary { background-color: #D5D4F4; }
 .bg-default { background-color: #595961; }
 .bg-divide { background-color: #888; }
+.bg-assign { background-color: #00AD28; }
+.bg-receive { background-color: #0055FF; }
+.bg-dispute { background-color: #FF0200; }
 
 .bg-input { background-color: #ffffff26; color: white; }
 

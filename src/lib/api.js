@@ -1,6 +1,6 @@
 // const BASE_URL = 'http://192.168.0.15:4000/api';
 // const BASE_URL = 'http://192.168.45.131:4000/api';    // minsu local
-const BASE_URL = 'http://192.168.0.24:4000/api/mobile';    // minsu company
+const BASE_URL = 'http://192.168.0.5:4000/api/mobile';    // minsu company
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
 
@@ -9,6 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 // 기본 fetch 함수
 const apiCall = async (endpoint, options = {}) => {
     const token = await SecureStore.getItemAsync('authToken')
+    console.log('token', token)
     const url = `${BASE_URL}${endpoint}`;
     const config = {
         headers: {
@@ -55,11 +56,20 @@ export const driverApi = {
         method: 'POST',
         body: JSON.stringify(data),
     }),
-};
+    authCode: (data) => apiCall('/driver/authCode', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
+    verifyCode: (qs) => apiCall(`/driver/verify?${qs}`),
+    changePassword: (data) => apiCall('/driver/password', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    })
+}
 
 // Order API
 export const orderApi = {
-    getOrders: () => apiCall('/order'),
+    getOrder: (qs) => apiCall(`/order?${qs}`),
     
     getOrderList: () => apiCall('/order/list'),
     
@@ -92,7 +102,8 @@ export const orderPhotoApi = {
     getList: () => apiCall('/orderPhoto/list'),
     
     uploads: (formData) => apiCall('/orderPhoto/uploads', {
-        method: 'POST', headers: {
+        method: 'POST',
+        headers: {
             'Content-Type': 'multipart/form-data',
         }, body: formData,
     }),

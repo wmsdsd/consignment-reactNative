@@ -15,6 +15,7 @@ import {
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
+import KeyboardWrapper from '@/components/KeyboardWrapper'
 
 export default function LoginPage() {
     const { login } = useAuth()
@@ -63,146 +64,118 @@ export default function LoginPage() {
     const onSubmit = async data => {
         try {
             await login(data)
-            // 로그인 성공 시 홈으로 이동 (useAuth에서 자동으로 처리됨)
-            // router.replace('/(protected)/(tabs)/home');
         } catch (error) {
             Alert.alert('로그인 실패', error.message || '로그인에 실패했습니다.');
         }
     };
     
     const onFindPassword = () => {
-        console.log('on find password press')
-
         router.push({
-            pathname: '/(auth)/password/idCheck'
+            pathname: '/(auth)/verification',
+            params: {
+                text: "비밀번호 변경"
+            }
         })
     }
     
     return (
         <View className="bg-black flex-1">
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-            >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <Animated.View
-                        className="flex-1 px-5"
-                        style={{
-                            paddingBottom: Platform.OS === 'android' ? keyboardHeight : undefined,
-                        }}
-                    >
-                        <Animated.View
-                            className="flex-1 items-center justify-center px-5"
-                            style={{
-                                transform:
-                                    Platform.OS === 'ios'
-                                        ? [
-                                            {
-                                                translateY: keyboardHeight.interpolate({
-                                                    inputRange: [0, 300],
-                                                    outputRange: [0, -10],
-                                                    extrapolate: 'clamp',
-                                                }),
-                                            },
-                                        ]
-                                        : undefined,
-                            }}
-                        >
-                            <Image
-                                source={require('../../../assets/logo_main.png')}
-                                className="mb-8 h-48 w-48"
-                                resizeMode="contain"
-                            />
+            <KeyboardWrapper>
+                <Animated.View className="flex-1 px-5">
+                    <Animated.View className="flex-1 items-center justify-center px-5">
+                        <Image
+                            source={require('../../../assets/logo_main.png')}
+                            className="mb-8 h-48 w-48"
+                            resizeMode="contain"
+                        />
+                        
+                        <View className="w-full">
+                            <View className="mb-4">
+                                <Controller
+                                    control={control}
+                                    name="id"
+                                    rules={{
+                                        required: '아이디를 입력해주세요.',
+                                        minLength: { value: 2, message: '아이디는 최소 2자 이상이어야 합니다.' },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                            placeholder="아이디"
+                                            placeholderTextColor={"#BBBBBB"}
+                                            value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                        />
+                                    )}
+                                />
+                                {errors.id && (
+                                    <Text className="mb-2 text-sm text-red-500">{errors.id.message}</Text>
+                                )}
+                            </View>
                             
-                            <View className="w-full">
-                                <View className="mb-4">
-                                    <Controller
-                                        control={control}
-                                        name="id"
-                                        rules={{
-                                            required: '아이디를 입력해주세요.',
-                                            minLength: { value: 2, message: '아이디는 최소 2자 이상이어야 합니다.' },
-                                        }}
-                                        render={({ field: { onChange, onBlur, value } }) => (
-                                            <TextInput
-                                                className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
-                                                placeholder="휴대폰번호/아이디"
-                                                placeholderTextColor={"#BBBBBB"}
-                                                value={value}
-                                                onChangeText={onChange}
-                                                onBlur={onBlur}
-                                                autoCapitalize="none"
-                                                autoCorrect={false}
-                                            />
-                                        )}
-                                    />
-                                    {errors.id && (
-                                        <Text className="mb-2 text-sm text-red-500">{errors.id.message}</Text>
+                            <View className="mb-6">
+                                <Controller
+                                    control={control}
+                                    name="password"
+                                    rules={{
+                                        required: '비밀번호를 입력해주세요.',
+                                        minLength: {
+                                            value: 1,
+                                            message: '비밀번호는 최소 1자 이상이어야 합니다.'
+                                        },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                            placeholder="비밀번호"
+                                            placeholderTextColor={"#BBBBBB"}
+                                            value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            secureTextEntry
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                        />
                                     )}
-                                </View>
-                                
-                                <View className="mb-6">
-                                    <Controller
-                                        control={control}
-                                        name="password"
-                                        rules={{
-                                            required: '비밀번호를 입력해주세요.',
-                                            minLength: {
-                                                value: 1,
-                                                message: '비밀번호는 최소 6자 이상이어야 합니다.'
-                                            },
-                                        }}
-                                        render={({ field: { onChange, onBlur, value } }) => (
-                                            <TextInput
-                                                className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
-                                                placeholder="비밀번호"
-                                                placeholderTextColor={"#BBBBBB"}
-                                                value={value}
-                                                onChangeText={onChange}
-                                                onBlur={onBlur}
-                                                secureTextEntry
-                                                autoCapitalize="none"
-                                                autoCorrect={false}
-                                            />
-                                        )}
-                                    />
-                                    {errors.password && (
-                                        <Text className="mb-2 text-sm text-red-500">{errors.password.message}</Text>
-                                    )}
-                                </View>
-                                
-                                <TouchableOpacity
-                                    className={`mt-2 items-center rounded-lg py-4 ${
-                                        isSubmitting ? 'bg-gray-400' : 'bg-primary'
-                                    }`}
-                                    onPress={handleSubmit(onSubmit)}
-                                    disabled={isSubmitting}
-                                >
-                                    <Text className="text-lg font-semibold text-white">
-                                        {isSubmitting ? '로그인 중...' : '로그인'}
-                                    </Text>
-                                </TouchableOpacity>
-                                
-                                <View className="flex flex-row justify-center items-center my-4">
-                                    {/*<Text className="text-sm font-semibold text-white pr-4">회원가입</Text>*/}
-                                    {/*<View className={"h-4 w-[1px] bg-divide"}></View>*/}
-                                    <TouchableOpacity onPress={onFindPassword}>
-                                        <Text className="text-sm font-semibold text-white pl-4">비밀번호 찾기</Text>
-                                    </TouchableOpacity>
-                                </View>
-                                
-                                <TouchableOpacity
-                                    className="mt-3 items-center rounded-lg border-2 border-gray-300 bg-white py-4"
-                                    onPress={() => router.replace('/(protected)/home')}
-                                >
-                                    <Text className="text-lg font-semibold text-gray-700">체험하기</Text>
+                                />
+                                {errors.password && (
+                                    <Text className="mb-2 text-sm text-red-500">{errors.password.message}</Text>
+                                )}
+                            </View>
+                            
+                            <TouchableOpacity
+                                className={`mt-2 items-center rounded-lg py-4 ${
+                                    isSubmitting ? 'bg-gray-400' : 'bg-primary'
+                                }`}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isSubmitting}
+                            >
+                                <Text className="text-lg font-semibold text-white">
+                                    {isSubmitting ? '로그인 중...' : '로그인'}
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            <View className="flex flex-row justify-center items-center my-4">
+                                {/*<Text className="text-sm font-semibold text-white pr-4">회원가입</Text>*/}
+                                {/*<View className={"h-4 w-[1px] bg-divide"}></View>*/}
+                                <TouchableOpacity onPress={onFindPassword}>
+                                    <Text className="text-sm font-semibold text-white pl-4">비밀번호 찾기</Text>
                                 </TouchableOpacity>
                             </View>
-                        </Animated.View>
+                            
+                            <TouchableOpacity
+                                className="mt-3 items-center rounded-lg border-2 border-gray-300 bg-white py-4"
+                                onPress={() => router.replace('/(protected)/home')}
+                            >
+                                <Text className="text-lg font-semibold text-gray-700">체험하기</Text>
+                            </TouchableOpacity>
+                        </View>
                     </Animated.View>
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
+                </Animated.View>
+            </KeyboardWrapper>
         </View>
     );
 }
