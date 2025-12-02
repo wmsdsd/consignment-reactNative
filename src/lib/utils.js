@@ -97,5 +97,5 @@ export const getAddress = (orderLocation) => {
 export const getAddressShort = (orderLocation) => {
     return orderLocation?.roadAddressShort
         || orderLocation?.jibunAddressShort
-        || "없음"
+        || getAddress(orderLocation)
 }

@@ -34,11 +34,33 @@ export default function TaksongCard({
     isRound = false
 }) {
     const handlePress = () => {
-        if (status === "DISPUTE") {
-        
-        }
-        else {
-            router.push(`/(protected)/taksongs/${id}`)
+        /**
+         *             "BOOKING_WAIT": "예약 대기",
+         *             "BOOKING_COMPLETE": "예약 완료",
+         *             "BOOKING_CANCEL": "예약 취소",
+         *             "DRIVER_ASSIGN": "기사 배정",
+         *             "DRIVER_RECEIVE": "배정 완료",
+         *             "DRIVER_START": "출발지",
+         *             "DRIVER_MIDDLE": "경유지",
+         *             "DRIVER_END": "도착지",
+         *             "DRIVER_ROUND": "복귀(왕복)",
+         *             "DELIVERY_COMPLETE": "탁송 완료",
+         *             "DISPUTE": "분쟁중"
+         */
+
+        switch (status) {
+            case "DRIVER_ASSIGN":   // 기사 배정
+                router.push(`/(protected)/taksongs/${id}`)
+                break
+            case "DRIVER_RECEIVE":  // 배정 완료
+            case "DRIVER_START":    // 출발지
+            case "DRIVER_MIDDLE":   // 경유지
+            case "DRIVER_END":      // 도착지
+            case "DRIVER_ROUND":    // 왕복지
+                router.push(`/(protected)/taksongs/${id}/confirm`);
+                break
+            case "DISPUTE":         // 분쟁중
+                break
         }
     }
     

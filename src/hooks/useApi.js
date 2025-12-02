@@ -130,12 +130,16 @@ export const useOrderStatusUpdate = () => {
 // Order Hooks End -----------------------------------------------------------------------------------------------------
 
 // OrderLocation Hooks -------------------------------------------------------------------------------------------------
-export const useOrderLocationProcess = () => {
+export const useOrderLocationProcess = (uid) => {
     return useQuery({
-        queryKey: ['orderLocation', 'process'],
-        queryFn: orderLocationApi.getProcess,
-    });
-};
+        queryKey: ['orderLocation.process', uid],
+        queryFn: async ({ queryKey }) => {
+            const [, uid] = queryKey
+            const qs = new URLSearchParams({ uid })
+            return orderLocationApi.getProcess(qs)
+        },
+    })
+}
 
 export const useOrderLocationStart = () => {
     const queryClient = useQueryClient();

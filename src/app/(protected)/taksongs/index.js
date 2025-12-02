@@ -10,12 +10,12 @@ export default function TaksongListScreen() {
         const orderLocations = item.orderLocations
         const startLocation = orderLocations.find(e => e.type === "START")
         const endLocation = orderLocations.find(e => e.type === "END")
-        
+
         return (
             <TaksongCard
                 id={item.uid}
                 status={item.status}
-                price={item.price}
+                price={item.deliveryPrice}
                 carNumber={item.carNumber}
                 distance={item.distance}
                 duration={item.time}
@@ -35,7 +35,7 @@ export default function TaksongListScreen() {
             ? (<ActivityIndicator size="large" color="#0000ff" />)
             : (
                 <FlatList
-                    data={data.data || []}
+                    data={data || []}
                     renderItem={renderItem}
                     keyExtractor={item => item.uid}
                     contentContainerStyle={{ padding: 16, paddingBottom: 60 }}

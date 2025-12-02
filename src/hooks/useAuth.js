@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }) => {
     
     // 서버에서 인증 상태 확인
     useEffect(() => {
-        if (checkData?.data?.driver) {
-            const driver = checkData.data.driver
+        if (checkData?.driver) {
+            const driver = checkData.driver
             setUser(driver)
             
             router.replace('/(protected)/taksongs')
@@ -46,9 +46,9 @@ export const AuthProvider = ({ children }) => {
     
     const login = async (credentials) => {
         try {
-            const response = await driverApi.login(credentials)
-            if (response?.data?.token) {
-                const token = response.data.token
+            const res = await driverApi.login(credentials)
+            if (res?.token) {
+                const token = res.token
 
                 await SecureStore.setItemAsync('authToken', token)
                 
