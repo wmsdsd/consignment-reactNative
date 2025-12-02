@@ -7,7 +7,9 @@ import { mToKm, addCommaToNumber, secondToTimeHangul, getAddressShort } from '@/
 
 export default function TaksongDetailScreen() {
     const { id } = useLocalSearchParams()
+    console.log("id", id)
     const { data: taksong } = useOrder(id)
+    console.log("data", taksong)
     const insets = useSafeAreaInsets()
     
     // 배정 취소 핸들러
@@ -82,7 +84,7 @@ export default function TaksongDetailScreen() {
                         </View>
                         
                         {/* 위치 정보 */}
-                        {taksong.orderLocations.map(location => (
+                        {taksong?.orderLocations && taksong.orderLocations.map(location => (
                             <View>
                                 <View className="mt-7 items-center">
                                     <Text className="mb-2 rounded-md bg-green-600 px-3 py-1.5 text-sm text-white">

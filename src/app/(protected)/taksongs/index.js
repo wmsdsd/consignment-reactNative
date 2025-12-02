@@ -4,7 +4,7 @@ import { useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils';
 
 export default function TaksongListScreen() {
-    const { data, isLoading } = useOrderList()
+    const { data, isLoading, refetch } = useOrderList()
     
     const renderItem = ({ item }) => {
         const orderLocations = item.orderLocations
@@ -42,6 +42,8 @@ export default function TaksongListScreen() {
                     className="flex-1 bg-black"
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={renderEmptyList}
+                    refreshing={isLoading}
+                    onRefresh={refetch}
                 />
             )
     )

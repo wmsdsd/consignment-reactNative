@@ -31,13 +31,13 @@ export const useDriverLogout = () => {
     })
 }
 
-export const useDriverCheck = (token) => {
+export const useDriverCheck = (enabled) => {
     return useQuery({
-        queryKey: ['driver', 'check', token],
+        queryKey: ['driver', 'check'],
         queryFn: driverApi.check,
-        enabled: !!token
-    });
-};
+        enabled: enabled
+    })
+}
 
 export const useDriverProfile = () => {
     return useQuery({

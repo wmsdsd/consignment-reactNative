@@ -1,74 +1,48 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import * as SecureStore from 'expo-secure-store'
-import { useDriverCheck, useDriverLogout, useDriverLogin } from './useApi'
+import { useDriverCheck, useDriverLogout } from './useApi'
 import { driverApi } from '@/lib/api'
 import { router } from 'expo-router'
 
 const AuthContext = createContext(null)
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
+    const context = useContext(AuthContext)
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
-    return context;
-};
+    return context
+}
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [user, setUser] = useState(null)
-    const [token, setToken] = useState(null)
 
-    const { data: checkData, isLoading: isChecking, refetch } = useDriverCheck(token)
+    const { data: checkData, isLoading: isChecking } = useDriverCheck(isAuthenticated)
     const logoutMutation = useDriverLogout()
     
     // 앱 시작 시 토큰 확인
     useEffect(() => {
-        checkAuthStatus()
+        (async () => {
+            const token = await SecureStore.getItemAsync('authToken')
+            if (token) {
+                setIsAuthenticated(true)
+            }
+        })()
     }, [])
     
     // 서버에서 인증 상태 확인
     useEffect(() => {
         if (checkData?.data?.driver) {
             const driver = checkData.data.driver
-
-            setIsAuthenticated(true)
             setUser(driver)
             
             router.replace('/(protected)/taksongs')
         }
-        else {
-            setIsAuthenticated(false)
-            setUser(null)
-            SecureStore.deleteItemAsync('authToken')
-        }
         
         setIsLoading(false)
     }, [checkData])
-    
-    const checkAuthStatus = async () => {
-        try {
-            const token = await SecureStore.getItemAsync('authToken')
-            console.log('checkAuthStatus: ', typeof token, token)
-            if (token) {
-                setToken(token)
-                await refetch()
-            }
-            else {
-                setIsAuthenticated(false)
-                setUser(null)
-                setToken(null)
-            }
-            
-            setIsLoading(false)
-        } catch (error) {
-            console.error('Auth check error:', error);
-            setIsAuthenticated(false);
-            setUser(null);
-            setIsLoading(false);
-        }
-    };
     
     const login = async (credentials) => {
         try {
@@ -77,10 +51,9 @@ export const AuthProvider = ({ children }) => {
                 const token = response.data.token
 
                 await SecureStore.setItemAsync('authToken', token)
-
+                
                 setIsAuthenticated(true)
-                setToken(token)
-
+                
                 return response
             }
             

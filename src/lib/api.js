@@ -1,6 +1,6 @@
 // const BASE_URL = 'http://192.168.0.15:4000/api';
 // const BASE_URL = 'http://192.168.45.131:4000/api';    // minsu local
-const BASE_URL = 'http://192.168.0.5:4000/api/mobile';    // minsu company
+const BASE_URL = 'http://192.168.0.22:4000/api/mobile';    // minsu company
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
 
@@ -9,8 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 // 기본 fetch 함수
 const apiCall = async (endpoint, options = {}) => {
     const token = await SecureStore.getItemAsync('authToken')
-    console.log('token', token)
-    const url = `${BASE_URL}${endpoint}`;
+    const url = `${BASE_URL}${endpoint}`
     const config = {
         headers: {
             'Content-Type': 'application/json',
@@ -18,22 +17,22 @@ const apiCall = async (endpoint, options = {}) => {
             ...options.headers,
         },
         ...options,
-    };
+    }
     
     try {
-        const response = await fetch(url, config);
-        const data = await response.json();
+        const response = await fetch(url, config)
+        const data = await response.json()
         
         if (!response.ok) {
-            throw new Error(data.message || 'API 호출 실패');
+            throw new Error(data.message || 'API 호출 실패')
         }
         
-        return data;
+        return data
     } catch (error) {
-        console.error('API Error:', error);
-        throw error;
+        console.error('API Error:', error)
+        throw error
     }
-};
+}
 
 // Driver API
 export const driverApi = {
