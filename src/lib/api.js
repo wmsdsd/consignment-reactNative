@@ -1,7 +1,7 @@
 // const BASE_URL = 'http://192.168.0.15:4000/api';
-const BASE_URL = 'http://192.168.45.108:4000/api/mobile';    // minsu local
+// const BASE_URL = 'http://192.168.45.108:4000/api/mobile';    // minsu local
 
-// const BASE_URL = 'http://192.168.0.22:4000/api/mobile';    // minsu company
+const BASE_URL = 'http://192.168.0.43:4000/api/mobile';    // minsu company
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
@@ -131,3 +131,15 @@ export const orderSettlementApi = {
         method: 'POST', body: JSON.stringify({ settlementId }),
     }),
 };
+
+// driverMove API
+export const driverMoveApi = {
+    save: (data) => apiCall('/driverMove', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
+    background: (data) => apiCall('/driverMove/background', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
+}

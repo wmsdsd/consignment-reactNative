@@ -5,7 +5,7 @@ export default {
         scheme: 'olgo',
         version: '1.0.0',
         orientation: 'portrait',
-        icon: './assets/logo.png',
+        icon: './assets/logo/logo.png',
         userInterfaceStyle: 'light',
         newArchEnabled: true,
         splash: {
@@ -48,7 +48,7 @@ export default {
                 'expo-splash-screen',
                 {
                     backgroundColor: '#2B00A6',
-                    image: './assets/logo.png',
+                    image: './assets/logo/logo.png',
                     resizeMode: 'contain',
                 },
             ],

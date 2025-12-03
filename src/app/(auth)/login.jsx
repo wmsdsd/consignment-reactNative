@@ -84,7 +84,7 @@ export default function LoginPage() {
                 <Animated.View className="flex-1 px-5">
                     <Animated.View className="flex-1 items-center justify-center px-5">
                         <Image
-                            source={require('../../../assets/logo_main.png')}
+                            source={require('@assets/logo/logo_main.png')}
                             className="mb-8 h-48 w-48"
                             resizeMode="contain"
                         />

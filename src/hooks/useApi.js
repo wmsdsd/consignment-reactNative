@@ -1,5 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { driverApi, orderApi, orderLocationApi, orderPhotoApi, orderSettlementApi } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    driverApi,
+    driverMoveApi,
+    orderApi,
+    orderLocationApi,
+    orderPhotoApi,
+    orderSettlementApi
+} from '@/lib/api'
 
 // Driver Hooks --------------------------------------------------------------------------------------------------------
 export const useDriverLogin = () => {
@@ -142,15 +149,15 @@ export const useOrderLocationProcess = (uid) => {
 }
 
 export const useOrderLocationStart = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: orderLocationApi.start,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderLocation'] });
+            queryClient.invalidateQueries({ queryKey: ['orderLocation'] })
         },
-    });
-};
+    })
+}
 
 export const useOrderLocationEnd = () => {
     const queryClient = useQueryClient();
@@ -163,7 +170,7 @@ export const useOrderLocationEnd = () => {
     });
 };
 
-// OrderPhoto Hooks
+// OrderPhoto Hooks ----------------------------------------------------------------------------------------------------
 export const useOrderPhotoList = () => {
     return useQuery({
         queryKey: ['orderPhoto', 'list'],
@@ -192,8 +199,9 @@ export const useOrderPhotoRemove = () => {
         },
     });
 };
+// OrderPhoto Hooks End ------------------------------------------------------------------------------------------------
 
-// OrderSettlement Hooks
+// OrderSettlement Hooks -----------------------------------------------------------------------------------------------
 export const useOrderSettlement = () => {
     return useQuery({
         queryKey: ['orderSettlement'],
@@ -231,12 +239,24 @@ export const useOrderSettlementUpdate = () => {
 };
 
 export const useOrderSettlementRemove = () => {
-    const queryClient = useQueryClient();
-    
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: orderSettlementApi.remove,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] });
+            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] })
         },
-    });
-};
+    })
+}
+// OrderSettlement Hooks End -------------------------------------------------------------------------------------------
+
+// DriverMove Hooks ----------------------------------------------------------------------------------------------------
+export const useDriverMove = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: driverMoveApi.save,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['driverMove'] })
+        }
+    })
+}
+// DriverMove Hooks End ------------------------------------------------------------------------------------------------

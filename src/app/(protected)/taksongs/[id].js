@@ -85,6 +85,12 @@ export default function TaksongDetailScreen() {
                             <Text className="text-xl text-gray-300">{mToKm(data.distance)}</Text>
                             <Text className="text-lg text-gray-600">|</Text>
                             <Text className="text-xl text-gray-300">{secondToTimeHangul(data.time)}</Text>
+                            { data.isRound && (
+                                <>
+                                    <Text className="text-lg text-gray-600">|</Text>
+                                    <Text className="text-xl text-gray-300">왕복</Text>
+                                </>
+                            )}
                         </View>
                         
                         {/* 위치 정보 */}

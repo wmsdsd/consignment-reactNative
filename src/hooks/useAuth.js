@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 import { useDriverCheck, useDriverLogout } from './useApi'
 import { driverApi } from '@/lib/api'
 import { router } from 'expo-router'
+import { stopBackgroundLocation } from '@/lib/backgroundLocation'
 
 const AuthContext = createContext(null)
 
@@ -37,8 +38,6 @@ export const AuthProvider = ({ children }) => {
         if (checkData?.driver) {
             const driver = checkData.driver
             setUser(driver)
-            
-            router.replace('/(protected)/taksongs')
         }
         
         setIsLoading(false)
@@ -54,10 +53,12 @@ export const AuthProvider = ({ children }) => {
                 
                 setIsAuthenticated(true)
                 
-                return response
+                router.replace('/(protected)/taksongs')
+                
+                return res
             }
             
-            throw new Error(response.message || '로그인 실패')
+            throw new Error(res.message || '로그인 실패')
         } catch (error) {
             throw error;
         }
@@ -66,6 +67,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await logoutMutation.mutateAsync()
+            await stopBackgroundLocation()
         }
         catch (error) {
             console.error('Logout error:', error)
