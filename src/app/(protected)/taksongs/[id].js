@@ -37,7 +37,7 @@ export default function TaksongDetailScreen() {
     // 탁송 시작 핸들러 - 예약 확인 페이지로 이동
     
     const handleStart = async () => {
-        const result = await checkAllPermissionsAsync();
+        const result = await checkAllPermissionsAsync()
 
         if (result?.allGranted) {
             // ✅ 모든 권한 허용 → 다음 화면으로 이동

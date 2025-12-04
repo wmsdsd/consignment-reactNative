@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
-import { secondToTimeHangul, addCommaToNumber, mToKm} from '@/lib/utils';
+import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { router } from 'expo-router'
+import { secondToTimeHangul, addCommaToNumber, mToKm, checkAllPermissionsAsync } from '@/lib/utils'
 
 const statusText = {
     "DRIVER_ASSIGN": "기사 배정",
@@ -33,7 +33,7 @@ export default function TaksongCard({
     end = null,
     isRound = false
 }) {
-    const handlePress = () => {
+    const handlePress = async () => {
         /**
          *             "BOOKING_WAIT": "예약 대기",
          *             "BOOKING_COMPLETE": "예약 완료",
@@ -57,7 +57,13 @@ export default function TaksongCard({
             case "DRIVER_MIDDLE":   // 경유지
             case "DRIVER_END":      // 도착지
             case "DRIVER_ROUND":    // 왕복지
-                router.push(`/(protected)/taksongs/${id}/confirm`);
+                const permission = await checkAllPermissionsAsync()
+                if (permission?.allGranted) {
+                    router.push(`/(protected)/taksongs/${id}/confirm`)
+                }
+                else {
+                    Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.')
+                }
                 break
             case "DISPUTE":         // 분쟁중
                 break
