@@ -5,11 +5,12 @@ import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from '../components/SplashScreen';
 import { AuthProvider } from '@/hooks/useAuth';
+import { startBackgroundLocation } from '@/lib/backgroundLocation'
 
-import '../../global.css';
+import '../../global.css'
 
 // 스플래시 스크린이 자동으로 숨겨지지 않도록 설정
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(false);
@@ -31,17 +32,23 @@ export default function RootLayout() {
         async function hideNativeSplash() {
             try {
                 // 최대한 빠르게 기본 스플래시 숨기기
-                await SplashScreen.hideAsync();
+                await SplashScreen.hideAsync()
             } catch (e) {
-                console.warn('네이티브 스플래시 스크린 숨기기 오류:', e);
+                console.warn('네이티브 스플래시 스크린 숨기기 오류:', e)
             } finally {
-                setIsSplashHidden(true);
+                setIsSplashHidden(true)
             }
         }
-        
-        // 즉시 실행 (다음 틱에서)
-        hideNativeSplash();
-    }, []);
+
+
+        (async () => {
+            // 즉시 실행 (다음 틱에서)
+            await hideNativeSplash()
+
+            // 앱 실행 시 자동으로 백그라운드 위치 시작
+            // await startBackgroundLocation()
+        })()
+    }, [])
     
     useEffect(() => {
         async function prepare() {

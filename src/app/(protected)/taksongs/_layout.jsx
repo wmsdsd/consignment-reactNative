@@ -49,24 +49,22 @@ export default function TaksongsLayout() {
                 name="[id]/prepare"
                 options={{
                     headerShown: true,
-                    title: '차량 도착',
+                    title: '사진 촬영 안내',
                     headerBackVisible: true,
+                    headerStyle: { backgroundColor: '#000000' },
+                    headerTintColor: '#ffffff',
+                    headerTitleStyle: { color: '#ffffff' },
                 }}
             />
             <Stack.Screen
-                name="[id]/prepare/camera-guide"
-                options={{
-                    headerShown: true,
-                    title: '촬영 안내',
-                    headerBackVisible: true,
-                }}
-            />
-            <Stack.Screen
-                name="[id]/prepare/camera"
+                name="[id]/camera"
                 options={{
                     headerShown: true,
                     title: '사진 촬영',
                     headerBackVisible: true,
+                    headerStyle: { backgroundColor: '#000000' },
+                    headerTintColor: '#ffffff',
+                    headerTitleStyle: { color: '#ffffff' },
                 }}
             />
         </Stack>

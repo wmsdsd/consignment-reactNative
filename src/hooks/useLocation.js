@@ -7,9 +7,14 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
     const driverMoveMutation = useDriverMove()
     
     useEffect(() => {
+        console.log('foreground location call')
         let interval = null
         
         const fetchAndSend = async () => {
+            console.log('fetch and send', orderUid, orderLocationUid)
+
+            if (!orderUid || !orderLocationUid) return
+
             try {
                 const loc = await Location.getCurrentPositionAsync({
                     accuracy: Location.Accuracy.BestForNavigation,
@@ -31,14 +36,13 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
         };
         
         // 1회 실행
-        (async () => {
-            await fetchAndSend()
-        })()
-        
+        fetchAndSend()
+
         // 30초마다 실행
         interval = setInterval(fetchAndSend, timeout)
         
         return () => {
+            console.log('clear interval')
             clearInterval(interval)
         }
     }, [])

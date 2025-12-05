@@ -74,9 +74,9 @@ export default function TaksongDetailScreen() {
             <View className="flex-1 p-4">
                 <View className="flex-1">
                     {/* 카드 */}
-                    <View className="w-full flex-1 items-center justify-center rounded-2xl bg-neutral-900 p-6">
+                    <View className="w-full flex-1 items-center justify-center rounded-2xl bg-block p-6">
                         {/* 차량 번호 */}
-                        <Text className="text-center text-4xl font-bold text-white">
+                        <Text className="text-center text-4xl font-bold text-white bg-box w-full rounded-2xl p-[15px]">
                             {data.carNumber || '미배정'}
                         </Text>
                         

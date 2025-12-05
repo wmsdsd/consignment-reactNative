@@ -7,7 +7,6 @@ import { formatPhone } from '@/lib/utils'
 import IconButton from '@/components/IconButton'
 import moment from 'moment'
 import { useForegroundLocation } from '@/hooks/useLocation'
-import { startBackgroundLocation } from '@/lib/backgroundLocation'
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
@@ -15,7 +14,12 @@ export default function ConfirmScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation , refetch: refetchOrderLocation } = useOrderLocationProcess(id)
-    
+
+    useForegroundLocation({
+        orderUid: order?.uid,
+        orderLocationUid: orderLocation?.uid
+    })
+
     const isWait = useMemo(() => {
         return orderLocation?.status === 'WAIT'
     }, [orderLocation?.status])
@@ -183,20 +187,7 @@ export default function ConfirmScreen() {
         })
         
     }, [])
-    
-    useEffect(() => {
-        if (order?.uid && orderLocation?.uid) {
-            useForegroundLocation({
-                orderUid: order.uid,
-                orderLocationUid: orderLocation.uid
-            })
-        }
-        
-        (async () => {
-            await startBackgroundLocation()
-        })()
-    }, [order?.uid, orderLocation?.uid])
-    
+
     if (!order || !orderLocation) {
         return (
             <View className="flex-1 items-center justify-center bg-black">
@@ -276,7 +267,7 @@ export default function ConfirmScreen() {
                         <Pressable
                             onPress={() => setShowDatePicker(true)}
                             disabled={!isWait}
-                            className="flex-1 rounded-xl bg-white px-4 py-3"
+                            className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
                         >
                             <Text className="text-base font-medium text-black">{formatDate(selectedDate)} ▼</Text>
                         </Pressable>
@@ -284,7 +275,7 @@ export default function ConfirmScreen() {
                         <Pressable
                             onPress={() => setShowTimePicker(true)}
                             disabled={!isWait}
-                            className="flex-1 rounded-xl bg-white px-4 py-3"
+                            className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
                         >
                             <Text className="text-base font-medium text-black">{formatTime(selectedDate)} ▼</Text>
                         </Pressable>
