@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import { router } from 'expo-router'
-import { secondToTimeHangul, addCommaToNumber, mToKm, checkAllPermissionsAsync } from '@/lib/utils'
+import { secondToTimeHangul, addCommaToNumber, mToKm } from '@/lib/utils'
+import {checkAllPermissionsAsync} from "@/lib/permissions"
 
 const statusText = {
     "DRIVER_ASSIGN": "기사 배정",

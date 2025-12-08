@@ -171,38 +171,44 @@ export const useOrderLocationEnd = () => {
 };
 
 // OrderPhoto Hooks ----------------------------------------------------------------------------------------------------
-export const useOrderPhotoList = (orderUid, orderLocationUid) => {
+export const useOrderPhotoList = (orderUid, orderLocationUid, enabled = true) => {
     return useQuery({
         queryKey: ['orderPhoto.list', orderUid, orderLocationUid],
         queryFn: async ({ queryKey }) => {
             const [, orderUid, orderLocationUid] = queryKey
-            const qs = new URLSearchParams({ orderUid, orderLocationUid })
+            console.log("orderUid, orderLocation uid", orderUid, orderLocationUid)
+            const qs = new URLSearchParams({
+                orderUid: orderUid,
+                orderLocationUid: orderLocationUid
+            })
+            console.log(qs)
             return orderPhotoApi.getList(qs)
         },
+        enabled: enabled,
     });
 };
 
 export const useOrderPhotoUpload = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: orderPhotoApi.uploads,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderPhoto'] });
+            queryClient.invalidateQueries({ queryKey: ['orderPhoto.uploads'] });
         },
-    });
-};
+    })
+}
 
 export const useOrderPhotoRemove = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: orderPhotoApi.remove,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderPhoto'] });
+            queryClient.invalidateQueries({ queryKey: ['orderPhoto.remove'] })
         },
-    });
-};
+    })
+}
 // OrderPhoto Hooks End ------------------------------------------------------------------------------------------------
 
 // OrderSettlement Hooks -----------------------------------------------------------------------------------------------

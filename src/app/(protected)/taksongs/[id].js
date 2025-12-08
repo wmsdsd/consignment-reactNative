@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Alert, ScrollView, Image } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { checkAllPermissionsAsync } from '@/lib/utils'
+import { checkAllPermissionsAsync } from '@/lib/permissions'
 import {useOrder, useOrderCancel, useOrderStatusUpdate} from '@/hooks/useApi'
 import { mToKm, addCommaToNumber, secondToTimeHangul, getAddressShort } from '@/lib/utils'
 

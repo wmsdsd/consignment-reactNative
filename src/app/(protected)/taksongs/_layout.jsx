@@ -78,6 +78,17 @@ export default function TaksongsLayout() {
                     headerTitleStyle: { color: '#ffffff' },
                 }}
             />
+            <Stack.Screen
+                name="[id]/complete"
+                options={{
+                    headerShown: true,
+                    title: '탁송 완료',
+                    headerBackVisible: true,
+                    headerStyle: { backgroundColor: '#000000' },
+                    headerTintColor: '#ffffff',
+                    headerTitleStyle: { color: '#ffffff' },
+                }}
+            />
         </Stack>
     );
 }
