@@ -39,6 +39,7 @@ export default {
                 'WRITE_EXTERNAL_STORAGE',
             ],
             package: 'com.kangja.olgo',
+            usesCleartextTraffic: true,
         },
         web: {
             favicon: './assets/favicon.png',

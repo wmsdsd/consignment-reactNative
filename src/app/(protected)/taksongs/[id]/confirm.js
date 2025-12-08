@@ -88,7 +88,9 @@ export default function ConfirmScreen() {
     
     // 도착 및 사진 촬영
     const handleMoveToPrepare = () => {
-        router.push(`/(protected)/taksongs/${id}/prepare`)
+        router.push({
+            pathname: `/(protected)/taksongs/${id}/prepare`
+        })
     }
     
     // 네비게이션 앱 열기 핸들러

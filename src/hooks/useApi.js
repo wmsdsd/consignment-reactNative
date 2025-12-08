@@ -171,10 +171,14 @@ export const useOrderLocationEnd = () => {
 };
 
 // OrderPhoto Hooks ----------------------------------------------------------------------------------------------------
-export const useOrderPhotoList = () => {
+export const useOrderPhotoList = (orderUid, orderLocationUid) => {
     return useQuery({
-        queryKey: ['orderPhoto', 'list'],
-        queryFn: orderPhotoApi.getList,
+        queryKey: ['orderPhoto.list', orderUid, orderLocationUid],
+        queryFn: async ({ queryKey }) => {
+            const [, orderUid, orderLocationUid] = queryKey
+            const qs = new URLSearchParams({ orderUid, orderLocationUid })
+            return orderPhotoApi.getList(qs)
+        },
     });
 };
 

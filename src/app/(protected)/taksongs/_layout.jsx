@@ -60,6 +60,17 @@ export default function TaksongsLayout() {
                 name="[id]/camera"
                 options={{
                     headerShown: true,
+                    title: '차량번호 확인',
+                    headerBackVisible: true,
+                    headerStyle: { backgroundColor: '#000000' },
+                    headerTintColor: '#ffffff',
+                    headerTitleStyle: { color: '#ffffff' },
+                }}
+            />
+            <Stack.Screen
+                name="[id]/photos"
+                options={{
+                    headerShown: true,
                     title: '사진 촬영',
                     headerBackVisible: true,
                     headerStyle: { backgroundColor: '#000000' },

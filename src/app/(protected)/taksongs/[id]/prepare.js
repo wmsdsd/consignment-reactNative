@@ -9,10 +9,7 @@ export default function PrepareScreen() {
     // 촬영시작 핸들러 - 촬영 안내 페이지로 이동
     const handleCameraStart = () => {
         router.push({
-            pathname: `/(protected)/taksongs/${id}/camera`,
-            params: {
-                type: "check"
-            }
+            pathname: `/(protected)/taksongs/${id}/camera`
         })
     }
     
