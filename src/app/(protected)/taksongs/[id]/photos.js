@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert, Image, FlatList } from 'react-native';
+import {View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid} from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router'
 import React, {useEffect, useState} from 'react';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/hooks/useApi'
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
+import {isAndroid} from "@/lib/platform"
 
 const tabs = [
     {
@@ -84,7 +85,7 @@ export default function CameraScreen() {
         return blob.size <= MAX_FILE_SIZE
     }
 
-    const addPhoto = async () => {
+    const onHandleTakePicture = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync()
         if (status !== "granted") {
             alert("카메라 권한이 필요합니다!")
@@ -102,7 +103,7 @@ export default function CameraScreen() {
 
             if (!isUnder) {
                 Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
-                await addPhoto()
+                await onHandleTakePicture()
             }
             else {
                 const file = await uriToFileObject(uri)
@@ -130,15 +131,14 @@ export default function CameraScreen() {
                         body: file.blob
                     })
 
-                    console.log('uploadS3', uploadS3)
-
+                    const list = photoList[tab.key].filter(e => e !== null)
                     setPhotoList({
                         ...photoList,
-                        [tab.key]: [orderPhoto, ...photoList[tab.key]],
+                        [tab.key]: [orderPhoto, ...list],
                     })
 
                     if (photoList[tab.key].length < tab.max) {
-                        await addPhoto()
+                        await onHandleTakePicture()
                     }
                 }
                 else {
@@ -146,7 +146,6 @@ export default function CameraScreen() {
                 }
             }
         }
-
     }
 
     const removePhoto = (key, uid) => {
@@ -166,10 +165,18 @@ export default function CameraScreen() {
                             keys: [key]
                         }
                         await removeMutation.mutateAsync(sendData)
+
+                        const list = photoList[tab.key].filter((p) => p.uid !== uid)
+                        if (list.length === 0) list.push(null)
+
                         setPhotoList({
                             ...photoList,
-                            [tab.key]: photoList[tab.key].filter((p) => p.uid !== uid),
+                            [tab.key]: list,
                         })
+
+                        if (isAndroid) {
+                            ToastAndroid.show("삭제 되었습니다.", ToastAndroid.SHORT)
+                        }
                     },
                 },
             ]
@@ -177,8 +184,6 @@ export default function CameraScreen() {
     }
 
     const renderSlot = ({ item }) => {
-        console.log('item', item)
-        const tabName = tab.key
         return (
             <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
                 {item ? (
@@ -190,7 +195,7 @@ export default function CameraScreen() {
                         />
                         <TouchableOpacity
                             className={"absolute top-[-10px] right-[-10px] rounded-lg w-6 h-6 items-center justify-center"}
-                            onPress={() => removePhoto(tabName, item.uid)}
+                            onPress={() => removePhoto(item.key, item.uid)}
                         >
                             <Image source={require("@assets/icon/ic_close.png")} className={"w-4 h-4"} />
                         </TouchableOpacity>
@@ -253,7 +258,7 @@ export default function CameraScreen() {
         console.log(orderLocation)
 
         if (orderLocation) {
-            router.push(`/(protected)/taksongs/${id}/confirm`)
+            router.replace(`/(protected)/taksongs/${id}/confirm`)
         }
         else {
             const res = await updateOrderStatusMutation.mutateAsync({
@@ -261,7 +266,7 @@ export default function CameraScreen() {
                 status: "DELIVERY_COMPLETE"
             })
             if (res) {
-                router.push(`/(protected)/taksongs/${id}/complete`)
+                router.replace(`/(protected)/taksongs/${id}/complete`)
             }
         }
     }
@@ -272,14 +277,17 @@ export default function CameraScreen() {
 
     useEffect(() => {
         if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
+            console.log(">>>>>>> orderPhotos", orderPhotos)
             for (const orderPhoto of orderPhotos) {
                 if (orderPhoto.position) {
+                    console.log('add orderPhoto', orderPhoto)
                     const list = photoList[orderPhoto.position]
                     if (list.find(e => e?.uid === orderPhoto.uid)) break
 
+                    const removeNullList = list.filter(e => e !== null)
                     setPhotoList({
                         ...photoList,
-                        [orderPhoto.position]: [orderPhoto, ...photoList[orderPhoto.position]],
+                        [orderPhoto.position]: [orderPhoto, ...removeNullList],
                     })
                 }
             }
@@ -306,7 +314,7 @@ export default function CameraScreen() {
             {/* Big Camera Area */}
             <View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>
                 <Image source={tab.sampleImage} className={"absolute opacity-60"} />
-                <TouchableOpacity className={"justify-center items-center"} onPress={addPhoto}>
+                <TouchableOpacity className={"justify-center items-center"} onPress={onHandleTakePicture}>
                     <Image
                         source={require('@assets/icon/ic_photo.png')}
                         className="mb-8 h-28 w-28"
@@ -327,7 +335,7 @@ export default function CameraScreen() {
             {/* Bottom Button */}
             <TouchableOpacity
                 className={"mt-4 mx-5 bg-primary rounded-xl py-4 mb-16 items-center"}
-                onPress={handleComplete}
+                onPress={handleEndOrderLocation}
             >
                 <Text className={"color-white text-base font-semibold"}>촬영 완료</Text>
             </TouchableOpacity>

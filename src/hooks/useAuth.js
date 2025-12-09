@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await logoutMutation.mutateAsync()
-            await stopBackgroundLocation()
+            //await stopBackgroundLocation()
         }
         catch (error) {
             console.error('Logout error:', error)

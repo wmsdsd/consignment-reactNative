@@ -1,11 +1,13 @@
 // const BASE_URL = 'http://192.168.0.15:4000/api';
+
 const BASE_URL = 'http://192.168.45.108:4000/api/mobile';    // minsu local
 // const BASE_URL = 'http://192.168.0.48:4000/api/mobile';    // minsu company
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
 
-import * as SecureStore from 'expo-secure-store';
+import {router} from "expo-router"
+import * as SecureStore from 'expo-secure-store'
 
 // 기본 fetch 함수
 const apiCall = async (endpoint, options = {}) => {
@@ -26,7 +28,15 @@ const apiCall = async (endpoint, options = {}) => {
         
         if (!response.ok) {
             console.log("error data", data)
-            throw new Error(data.message || 'API 호출 실패')
+            const result = data?.result
+
+            // 비인가
+            if (result?.code === 401) {
+                await SecureStore.deleteItemAsync('authToken')
+                router.replace("/(auth)/login")
+            }
+
+            throw new Error(data?.result?.message || 'API 호출 실패')
         }
         
         return data.data

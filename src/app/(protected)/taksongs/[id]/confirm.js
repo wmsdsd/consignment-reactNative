@@ -1,6 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, Pressable, Alert, Platform, Linking } from 'react-native'
+import { View, Text, Animated, TouchableOpacity, Pressable, Alert, Platform, Linking } from 'react-native'
 import { useLocalSearchParams, router, useNavigation } from 'expo-router'
-import { useEffect, useMemo, useState } from 'react'
+import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useOrder, useOrderLocationProcess, useOrderLocationStart } from '@/hooks/useApi'
 import { formatPhone } from '@/lib/utils'
@@ -10,7 +10,7 @@ import { useForegroundLocation } from '@/hooks/useLocation'
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
-    
+
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation , refetch: refetchOrderLocation } = useOrderLocationProcess(id)
@@ -176,7 +176,7 @@ export default function ConfirmScreen() {
             Alert.alert('오류', '연락처가 존재하지 않습니다.')
         }
     }
-    
+
     useEffect(() => {
         const arrivedAt = orderLocation?.arrivedAt
         if (arrivedAt) {
@@ -187,7 +187,6 @@ export default function ConfirmScreen() {
         navigation.setOptions({
             title: orderLocation?.typeName || '차량 이동'
         })
-        
     }, [])
 
     if (!order || !orderLocation) {
@@ -221,50 +220,50 @@ export default function ConfirmScreen() {
                 {/*        <Text className="font-semibold text-white">{order.info || '-'}</Text>*/}
                 {/*    </View>*/}
                 {/*</View>*/}
-                
+
                 {/*<View className="my-5 h-[1px] bg-gray-700" />*/}
-                
+
                 {/* 이동 정보 */}
                 <View className="flex-1 mt-6">
                     <Text className="mb-3 text-lg font-semibold text-white">이동 정보</Text>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">이름</Text>
                         <Text className="font-semibold text-white">{orderLocation.name}</Text>
                     </View>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">차량번호</Text>
                         <Text className="font-semibold text-white">{orderLocation.carNumber || '-'}</Text>
                     </View>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">연락처</Text>
                         <Text className="font-semibold text-white">{formatPhone(orderLocation.phone)}</Text>
                     </View>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">도로명 주소</Text>
                         <Text className="flex-1 font-semibold text-white">{orderLocation.roadAddress || '없음'}</Text>
                     </View>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">지번 주소</Text>
                         <Text className="flex-1 font-semibold text-white">{orderLocation.jibunAddress || '없음'}</Text>
                     </View>
-                    
+
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">상태</Text>
                         <Text className="font-semibold text-white">{orderLocation.statusName}</Text>
                     </View>
                 </View>
-                
+
                 <View className="my-5 h-[1px] bg-gray-700" />
-                
+
                 {/* 도착예정일시 */}
                 <View className="mb-6">
                     <Text className="mb-4 text-lg font-semibold text-white">도착예정일시</Text>
-                    
+
                     <View className="flex-row gap-3">
                         <Pressable
                             onPress={() => setShowDatePicker(true)}
@@ -273,7 +272,7 @@ export default function ConfirmScreen() {
                         >
                             <Text className="text-base font-medium text-black">{formatDate(selectedDate)} ▼</Text>
                         </Pressable>
-                        
+
                         <Pressable
                             onPress={() => setShowTimePicker(true)}
                             disabled={!isWait}
@@ -284,7 +283,7 @@ export default function ConfirmScreen() {
                     </View>
                 </View>
             </View>
-            
+
             {/* DatePicker */}
             {showDatePicker && (
                 <DateTimePicker
@@ -295,7 +294,7 @@ export default function ConfirmScreen() {
                     minimumDate={new Date()}
                 />
             )}
-            
+
             {/* TimePicker */}
             {showTimePicker && (
                 <DateTimePicker
@@ -306,7 +305,7 @@ export default function ConfirmScreen() {
                     is24Hour={false}
                 />
             )}
-            
+
             {/* 하단 버튼 */}
             <View className="bg-black px-4 pb-20 pt-4">
                 { !isWait && (
