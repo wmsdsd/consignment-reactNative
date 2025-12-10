@@ -1,8 +1,10 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useOrderLocationProcess } from '@/hooks/useApi'
+
+const plateUrl = "https://plate.olgomobility.com/recognize/"
 
 export default function CustomCameraScreen() {
     const { id} = useLocalSearchParams()
@@ -46,7 +48,7 @@ export default function CustomCameraScreen() {
             })
 
             try {
-                const res = await fetch("http://13.209.17.119:8000/recognize/", {
+                const res = await fetch(plateUrl, {
                     method: "POST",
                     body: formData,
                 })

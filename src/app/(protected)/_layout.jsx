@@ -6,11 +6,13 @@ import { View, Text, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/hooks/useAuth'
 import { formatPhone } from '@/lib/utils'
+import { useAppContext } from '@/app/context/AppContext'
+import { useEffect, useRef } from 'react';
 
 const CustomDrawerContent = props => {
     const insets = useSafeAreaInsets()
     const { user } = useAuth()
-    
+
     return (
         <View className="flex-1 bg-[#1E1E1E]">
             {/* 유저 정보 헤더 */}
@@ -44,9 +46,11 @@ const CustomDrawerContent = props => {
     );
 };
 
-CustomDrawerContent.displayName = 'CustomDrawerContent';
+CustomDrawerContent.displayName = 'CustomDrawerContent'
 
 export default function ProtectedLayout() {
+    const { menuConfig } = useAppContext()
+
     return (
         <GestureHandlerRootView className="flex-1 bg-black">
             <Drawer
@@ -62,6 +66,7 @@ export default function ProtectedLayout() {
                         marginHorizontal: 8,
                         marginVertical: 2,
                     },
+                    drawerPosition: menuConfig.direction,
                     headerStyle: { backgroundColor: '#000000' },
                     headerTintColor: '#ffffff',
                     headerTitleStyle: { color: '#ffffff' },
@@ -83,7 +88,10 @@ export default function ProtectedLayout() {
                         ),
                         drawerLabel: '탁송 목록',
                         title: '탁송 목록',
-                        headerShown: false, // Stack이 자체 헤더를 관리하므로 Drawer 헤더 숨김
+                        headerShown: false,
+                        drawerItemStyle: menuConfig.direction === 'right'
+                            ? { display: 'none' }
+                            : {},
                     }}
                 />
                 <Drawer.Screen
@@ -101,6 +109,9 @@ export default function ProtectedLayout() {
                         ),
                         drawerLabel: '프로필',
                         title: '프로필',
+                        drawerItemStyle: menuConfig.direction === 'right'
+                            ? { display: 'none' }
+                            : {},
                     }}
                 />
                 <Drawer.Screen
@@ -118,12 +129,31 @@ export default function ProtectedLayout() {
                         ),
                         drawerLabel: '설정',
                         title: '설정',
+                        drawerItemStyle: menuConfig.direction === 'right'
+                            ? { display: 'none' }
+                            : {},
                     }}
                 />
                 <Drawer.Screen
                     name="prices"
                     options={{
-                        drawerItemStyle: { display: 'none' },
+                        drawerLabel: '요금 청구',
+                        title: '요금 청구',
+                        headerShown: false,
+                        drawerItemStyle: menuConfig.direction === 'right'
+                            ? {}
+                            : { display: 'none' },
+                    }}
+                />
+                <Drawer.Screen
+                    name="accident"
+                    options={{
+                        drawerLabel: '사고 접수',
+                        title: '사고 접수',
+                        headerShown: false,
+                        drawerItemStyle: menuConfig.direction === 'right'
+                            ? {}
+                            : { display: 'none' },
                     }}
                 />
             </Drawer>

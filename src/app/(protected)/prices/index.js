@@ -1,5 +1,8 @@
-import { FlatList, View, Text, TouchableOpacity } from 'react-native';
+import { FlatList, View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { router } from 'expo-router';
+import { useAppContext } from '@/app/context/AppContext';
+import { useEffect, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 가짜 요금 데이터
 const mockPrices = [
@@ -103,7 +106,7 @@ const vehicleTypeColor = {
 
 function PriceCard({ item }) {
     const handlePress = () => {
-        router.push(`/(protected)/prices/${item.id}`);
+        router.push(`/(protected)/prices/${item.uid}`);
     };
     
     return (
@@ -144,16 +147,43 @@ function PriceCard({ item }) {
 }
 
 export default function PricesListScreen() {
-    const renderItem = ({ item }) => <PriceCard item={item} />;
+    const { menuConfig } = useAppContext()
+    const insets = useSafeAreaInsets()
+
+    const [id, setId] = useState(null)
+
+    useEffect(() => {
+        setId(menuConfig.orderUid)
+
+
+    }, [menuConfig.orderUid])
+
+    const renderItem = ({ item }) => <PriceCard item={item} />
+
+    const moveToBill = () => {
+        router.push(`/(protected)/prices/${item.uid}/bill`)
+    }
     
     return (
-        <FlatList
-            data={mockPrices}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
-            className="flex-1 bg-black"
-            showsVerticalScrollIndicator={false}
-        />
-    );
+        <View className={"flex-1 bg-black"}>
+            <View className={"flex-1"}>
+                <FlatList
+                    data={mockPrices}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+                    className="flex-1 bg-black"
+                    showsVerticalScrollIndicator={false}
+                />
+            </View>
+            <View
+                className={"border-t border-gray-800 bg-black p-4"}
+                style={{ paddingBottom: Math.max(insets.bottom, 60) }}
+            >
+                <Pressable onPress={moveToBill} className="flex-1 rounded-xl bg-btn py-4">
+                    <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
+                </Pressable>
+            </View>
+        </View>
+    )
 }

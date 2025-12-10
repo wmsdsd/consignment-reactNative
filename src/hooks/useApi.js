@@ -219,10 +219,15 @@ export const useOrderSettlement = () => {
     });
 };
 
-export const useOrderSettlementList = () => {
+export const useOrderSettlementList = (orderUid) => {
     return useQuery({
-        queryKey: ['orderSettlement', 'list'],
-        queryFn: orderSettlementApi.getList,
+        queryKey: ['orderSettlement.list', orderUid],
+        queryFn: async ({ queryKey }) => {
+            const [, orderUid] = queryKey
+            const qs = new URLSearchParams({ orderUid })
+            return orderSettlementApi.getList(qs)
+        },
+        enabled: !!orderUid
     });
 };
 

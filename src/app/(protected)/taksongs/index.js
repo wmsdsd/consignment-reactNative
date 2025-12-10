@@ -2,9 +2,13 @@ import { ActivityIndicator, FlatList, Text } from 'react-native';
 import TaksongCard from '../../../components/TaksongCard';
 import { useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils';
+import { useCallback, useEffect } from 'react';
+import { useAppContext } from '@/app/context/AppContext';
+import { useFocusEffect } from 'expo-router';
 
 export default function TaksongListScreen() {
     const { data, isLoading, refetch } = useOrderList()
+    const { setMenuConfig } = useAppContext()
     
     const renderItem = ({ item }) => {
         const orderLocations = item.orderLocations
@@ -29,7 +33,17 @@ export default function TaksongListScreen() {
     const renderEmptyList = () => {
         return <Text style={{ textAlign: 'center', marginTop: 20 }}>담당 탁송 내역이 없습니다.</Text>
     }
-    
+
+    useFocusEffect(
+        useCallback(() => {
+            console.log("use callback call")
+            setMenuConfig(prev => ({
+                ...prev,
+                direction: 'left',
+            }))
+        }, [])
+    )
+
     return (
         isLoading
             ? (<ActivityIndicator size="large" color="#0000ff" />)

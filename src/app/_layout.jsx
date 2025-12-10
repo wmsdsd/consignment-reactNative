@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from '../components/SplashScreen';
 import { AuthProvider } from '@/hooks/useAuth';
 import { startBackgroundLocation } from '@/lib/backgroundLocation'
+import { AppProvider } from '@/app/context/AppContext'
 
 import '../../global.css'
 
@@ -78,9 +79,11 @@ export default function RootLayout() {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
-                <View className="bg-primary flex-1">
-                    <Slot />
-                </View>
+                <AppProvider>
+                    <View className="bg-primary flex-1">
+                        <Slot />
+                    </View>
+                </AppProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

@@ -7,9 +7,11 @@ import { formatPhone } from '@/lib/utils'
 import IconButton from '@/components/IconButton'
 import moment from 'moment'
 import { useForegroundLocation } from '@/hooks/useLocation'
+import { useAppContext } from '@/app/context/AppContext';
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
+    const { setMenuConfig } = useAppContext()
 
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
@@ -187,6 +189,15 @@ export default function ConfirmScreen() {
         navigation.setOptions({
             title: orderLocation?.typeName || '차량 이동'
         })
+
+        console.log("confirm call order", order?.uid)
+
+        setMenuConfig(prev => ({
+            ...prev,
+            direction: 'right',
+            orderUid: order?.uid
+        }))
+
     }, [])
 
     if (!order || !orderLocation) {

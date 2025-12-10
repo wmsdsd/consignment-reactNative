@@ -1,7 +1,5 @@
-// const BASE_URL = 'http://192.168.0.15:4000/api';
-
-const BASE_URL = 'http://192.168.45.108:4000/api/mobile';    // minsu local
-// const BASE_URL = 'http://192.168.0.48:4000/api/mobile';    // minsu company
+// const BASE_URL = 'http://192.168.45.108:4000/api/mobile';    // minsu local
+const BASE_URL = 'http://192.168.0.24:4000/api/mobile';    // minsu company
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
@@ -122,7 +120,7 @@ export const orderPhotoApi = {
 // OrderSettlement API
 export const orderSettlementApi = {
     getSettlement: () => apiCall('/orderSettlement'),
-    getList: () => apiCall('/orderSettlement/list'),
+    getList: (qs) => apiCall(`/orderSettlement/list?${qs}`),
     save: (data) => apiCall('/orderSettlement/save', {
         method: 'POST', body: JSON.stringify(data),
     }),
