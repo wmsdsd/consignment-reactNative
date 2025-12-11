@@ -119,16 +119,19 @@ export const orderPhotoApi = {
 
 // OrderSettlement API
 export const orderSettlementApi = {
-    getSettlement: () => apiCall('/orderSettlement'),
+    getSettlement: (qs) => apiCall(`/orderSettlement?${qs}`),
     getList: (qs) => apiCall(`/orderSettlement/list?${qs}`),
     save: (data) => apiCall('/orderSettlement/save', {
-        method: 'POST', body: JSON.stringify(data),
+        method: 'POST',
+        body: JSON.stringify(data),
     }),
     update: (data) => apiCall('/orderSettlement/update', {
-        method: 'POST', body: JSON.stringify(data),
+        method: 'POST',
+        body: JSON.stringify(data),
     }),
-    remove: (settlementId) => apiCall('/orderSettlement/remove', {
-        method: 'POST', body: JSON.stringify({ settlementId }),
+    remove: (uid) => apiCall('/orderSettlement/remove', {
+        method: 'POST',
+        body: JSON.stringify({ uid }),
     }),
 };
 

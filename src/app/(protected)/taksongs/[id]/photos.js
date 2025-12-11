@@ -2,14 +2,18 @@ import {View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid} from
 import { useLocalSearchParams, router } from 'expo-router'
 import React, {useEffect, useState} from 'react';
 import {
-    useOrder, useOrderLocationEnd,
-    useOrderLocationProcess, useOrderPhotoList,
+    useOrder,
+    useOrderLocationEnd,
+    useOrderLocationProcess,
+    useOrderPhotoList,
     useOrderPhotoRemove,
-    useOrderPhotoUpload, useOrderStatusUpdate
+    useOrderPhotoUpload,
+    useOrderStatusUpdate
 } from '@/hooks/useApi'
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
 import {isAndroid} from "@/lib/platform"
+import { isFileUnder2MB } from '@/lib/utils';
 
 const tabs = [
     {
@@ -77,13 +81,6 @@ export default function CameraScreen() {
         RIGHT: [null],
         INSIDE: [null],
     })
-
-    const isFileUnder2MB = async (uri) => {
-        const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-        const blob = await fetch(uri).then(res => res.blob())
-
-        return blob.size <= MAX_FILE_SIZE
-    }
 
     const onHandleTakePicture = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync()
@@ -277,10 +274,8 @@ export default function CameraScreen() {
 
     useEffect(() => {
         if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
-            console.log(">>>>>>> orderPhotos", orderPhotos)
             for (const orderPhoto of orderPhotos) {
                 if (orderPhoto.position) {
-                    console.log('add orderPhoto', orderPhoto)
                     const list = photoList[orderPhoto.position]
                     if (list.find(e => e?.uid === orderPhoto.uid)) break
 

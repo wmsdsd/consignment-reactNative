@@ -76,13 +76,11 @@ export default function ConfirmScreen() {
     // 운행 시작
     const handleTransportStart = async () => {
         const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
-        const sendData = {
+        const res = await startMutation.mutateAsync({
             orderUid: id,
             orderLocationUid: orderLocation.uid,
             arrivedAt: arrivedAt,
-        }
-        
-        const res = await startMutation.mutateAsync(sendData)
+        })
         if (res) {
             await refetchOrderLocation()
         }
@@ -190,12 +188,11 @@ export default function ConfirmScreen() {
             title: orderLocation?.typeName || '차량 이동'
         })
 
-        console.log("confirm call order", order?.uid)
 
         setMenuConfig(prev => ({
             ...prev,
             direction: 'right',
-            orderUid: order?.uid
+            orderUid: id
         }))
 
     }, [])
@@ -217,24 +214,6 @@ export default function ConfirmScreen() {
     return (
         <View className="flex-1 bg-black">
             <View className="flex-1 px-4">
-                {/* 기본 정보 */}
-                {/*<View className="mt-6">*/}
-                {/*    <Text className="mb-3 text-lg font-semibold text-white">기본 정보</Text>*/}
-                {/*    */}
-                {/*    <View className="mb-3 flex-row">*/}
-                {/*        <Text className="w-28 text-gray-300">차량번호</Text>*/}
-                {/*        <Text className="font-semibold text-white">{orderLocation.carNumber}</Text>*/}
-                {/*    </View>*/}
-                {/*    */}
-                {/*    <View className="mb-3 flex-row">*/}
-                {/*        <Text className="w-28 text-gray-300">특이사항</Text>*/}
-                {/*        <Text className="font-semibold text-white">{order.info || '-'}</Text>*/}
-                {/*    </View>*/}
-                {/*</View>*/}
-
-                {/*<View className="my-5 h-[1px] bg-gray-700" />*/}
-
-                {/* 이동 정보 */}
                 <View className="flex-1 mt-6">
                     <Text className="mb-3 text-lg font-semibold text-white">이동 정보</Text>
 

@@ -31,12 +31,11 @@ export default function TaksongListScreen() {
     }
     
     const renderEmptyList = () => {
-        return <Text style={{ textAlign: 'center', marginTop: 20 }}>담당 탁송 내역이 없습니다.</Text>
+        return <Text style={{ textAlign: 'center', marginTop: 20, color: 'white' }}>담당 탁송 내역이 없습니다.</Text>
     }
 
     useFocusEffect(
         useCallback(() => {
-            console.log("use callback call")
             setMenuConfig(prev => ({
                 ...prev,
                 direction: 'left',

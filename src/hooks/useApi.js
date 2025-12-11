@@ -145,6 +145,7 @@ export const useOrderLocationProcess = (uid) => {
             const qs = new URLSearchParams({ uid })
             return orderLocationApi.getProcess(qs)
         },
+        enabled: !!uid
     })
 }
 
@@ -212,10 +213,14 @@ export const useOrderPhotoRemove = () => {
 // OrderPhoto Hooks End ------------------------------------------------------------------------------------------------
 
 // OrderSettlement Hooks -----------------------------------------------------------------------------------------------
-export const useOrderSettlement = () => {
+export const useOrderSettlement = (uid) => {
     return useQuery({
-        queryKey: ['orderSettlement'],
-        queryFn: orderSettlementApi.getSettlement,
+        queryKey: ['orderSettlement', uid],
+        queryFn: async ({ queryKey }) => {
+            const [, uid] = queryKey
+            const qs = new URLSearchParams({ uid })
+            return orderSettlementApi.getSettlement(qs)
+        },
     });
 };
 
@@ -232,15 +237,15 @@ export const useOrderSettlementList = (orderUid) => {
 };
 
 export const useOrderSettlementSave = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: orderSettlementApi.save,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] });
+            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] })
         },
-    });
-};
+    })
+}
 
 export const useOrderSettlementUpdate = () => {
     const queryClient = useQueryClient();

@@ -54,3 +54,10 @@ export const getAddressShort = (orderLocation) => {
         || orderLocation?.jibunAddressShort
         || getAddress(orderLocation)
 }
+
+export const isFileUnder2MB = async (uri) => {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+    const blob = await fetch(uri).then(res => res.blob())
+
+    return blob.size <= MAX_FILE_SIZE
+}

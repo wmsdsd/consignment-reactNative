@@ -1,113 +1,29 @@
-import { FlatList, View, Text, TouchableOpacity, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { FlatList, View, Text, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { useAppContext } from '@/app/context/AppContext';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { addCommaToNumber, mToKm, secondToTimeHangul } from '@/lib/utils';
+import { useOrderSettlementList } from '@/hooks/useApi';
 
-// 가짜 요금 데이터
-const mockPrices = [
-    {
-        id: '1',
-        route: '서울 ↔ 인천공항',
-        distance: '58km',
-        time: '1시간 56분',
-        basePrice: '65,000원',
-        vehicleType: '일반',
-        description: '서울 주요 지역에서 인천국제공항까지',
-    },
-    {
-        id: '2',
-        route: '서울 ↔ 김포공항',
-        distance: '28km',
-        time: '56분',
-        basePrice: '35,000원',
-        vehicleType: '일반',
-        description: '서울 주요 지역에서 김포국제공항까지',
-    },
-    {
-        id: '3',
-        route: '서울 시내',
-        distance: '12km',
-        time: '24분',
-        basePrice: '18,000원',
-        vehicleType: '일반',
-        description: '서울 시내 주요 지역 간 이동',
-    },
-    {
-        id: '4',
-        route: '서울 ↔ 경기',
-        distance: '35km',
-        time: '1시간 10분',
-        basePrice: '42,000원',
-        vehicleType: '일반',
-        description: '서울과 경기도 주요 지역 간 이동',
-    },
-    {
-        id: '5',
-        route: '서울 시내 (단거리)',
-        distance: '8km',
-        time: '16분',
-        basePrice: '12,000원',
-        vehicleType: '일반',
-        description: '서울 시내 단거리 이동',
-    },
-    {
-        id: '6',
-        route: '서울 ↔ 부산',
-        distance: '325km',
-        time: '10시간 50분',
-        basePrice: '280,000원',
-        vehicleType: '대형',
-        description: '서울에서 부산까지 장거리 이동',
-    },
-    {
-        id: '7',
-        route: '서울 ↔ 대전',
-        distance: '167km',
-        time: '2시간 30분',
-        basePrice: '150,000원',
-        vehicleType: '중형',
-        description: '서울에서 대전까지 중거리 이동',
-    },
-    {
-        id: '8',
-        route: '서울 ↔ 대구',
-        distance: '300km',
-        time: '4시간',
-        basePrice: '250,000원',
-        vehicleType: '대형',
-        description: '서울에서 대구까지 장거리 이동',
-    },
-    {
-        id: '9',
-        route: '서울 ↔ 광주',
-        distance: '267km',
-        time: '3시간 30분',
-        basePrice: '220,000원',
-        vehicleType: '대형',
-        description: '서울에서 광주까지 장거리 이동',
-    },
-    {
-        id: '10',
-        route: '서울 ↔ 수원',
-        distance: '45km',
-        time: '1시간 30분',
-        basePrice: '52,000원',
-        vehicleType: '일반',
-        description: '서울에서 수원까지 이동',
-    },
-];
-
-const vehicleTypeColor = {
-    일반: 'bg-blue-600',
-    중형: 'bg-green-600',
-    대형: 'bg-purple-600',
-};
+const typeColor = {
+    ORDER: "bg-blue-600",        // 탁송
+    ROUND: "bg-indigo-600",      // 왕복
+    CANCEL: "bg-red-600",        // 취소
+    STAY: "bg-yellow-600",       // 대기
+    WAYPOINT: "bg-teal-600",     // 경유
+    OIL: "bg-amber-600",         // 주유
+    TOLLGATE: "bg-slate-600",    // 통행료(톨비)
+    WASH: "bg-cyan-600",         // 세차
+    ETC: "bg-gray-600",          // 기타
+}
 
 function PriceCard({ item }) {
     const handlePress = () => {
-        router.push(`/(protected)/prices/${item.uid}`);
-    };
+        router.push(`/(protected)/prices/${item.uid}`)
+    }
+    const isStay = item.type === "STAY"
+    const isWay = item.type === "WAYPOINT"
     
     return (
         <TouchableOpacity
@@ -118,29 +34,28 @@ function PriceCard({ item }) {
             {/* 상단 Row */}
             <View className="mb-2 flex-row items-center justify-between">
                 <View
-                    className={`rounded-md px-3 py-1 ${vehicleTypeColor[item.vehicleType] || 'bg-gray-600'}`}
+                    className={`rounded-md px-3 py-1 ${typeColor[item.type] || 'bg-gray-600'}`}
                 >
-                    <Text className="text-xs font-semibold text-white">{item.vehicleType}</Text>
+                    <Text className="text-xs font-semibold text-white">{item.typeName}</Text>
                 </View>
-                
-                <Text className="text-xl font-bold text-white">{item.basePrice}</Text>
+                <Text className="text-xl font-bold text-white">{addCommaToNumber(item.price)}</Text>
             </View>
-            
-            {/* 노선명 */}
-            <View className="mb-2">
-                <Text className="text-lg font-semibold text-white">{item.route}</Text>
-            </View>
-            
-            {/* 거리/시간 */}
-            <View className="mb-2 flex-row items-center">
-                <Text className="text-sm text-gray-300">
-                    {item.distance} | {item.time}
-                </Text>
-            </View>
-            
+
+            {/*거리/시간 */}
+            { (isStay || isWay) && (
+                <View className="mb-2 flex-row items-center">
+                    { isStay && (
+                        <Text className="text-sm text-gray-300">대기시간: {secondToTimeHangul(item.waitTime)}</Text>
+                    )}
+                    {isWay && (
+                        <Text className="text-sm text-gray-300">거리: {mToKm(item.wayPointDistance)}</Text>
+                    )}
+                </View>
+            ) }
+
             {/* 설명 */}
             <View>
-                <Text className="text-sm text-gray-400">{item.description}</Text>
+                <Text className="text-sm text-gray-400">{item.comment || "없음"}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -151,38 +66,67 @@ export default function PricesListScreen() {
     const insets = useSafeAreaInsets()
 
     const [id, setId] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const { data: list, isLoading, refetch } = useOrderSettlementList(id)
 
     useEffect(() => {
         setId(menuConfig.orderUid)
-
-
     }, [menuConfig.orderUid])
+
+    useFocusEffect(
+        useCallback(() => {
+            (async () => {
+                await refetch()
+            })()
+        }, [])
+    )
 
     const renderItem = ({ item }) => <PriceCard item={item} />
 
     const moveToBill = () => {
-        router.push(`/(protected)/prices/${item.uid}/bill`)
+        if (loading) return
+
+        setLoading(true)
+        try {
+            router.push(`/(protected)/prices/${id}/bill`)
+        }
+        finally {
+            setLoading(false)
+        }
     }
-    
+
+    const renderEmptyList = () => {
+        return <Text style={{ textAlign: 'center', marginTop: 20, color: 'white' }}>요금 청구 내역이 없습니다.</Text>
+    }
+
     return (
         <View className={"flex-1 bg-black"}>
-            <View className={"flex-1"}>
-                <FlatList
-                    data={mockPrices}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
-                    className="flex-1 bg-black"
-                    showsVerticalScrollIndicator={false}
-                />
+            <View className={"flex-1 px-4"}>
+                {isLoading
+                ? (<ActivityIndicator size="large" color="#0000ff" />)
+                : (
+                    <FlatList
+                        data={list || []}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.uid}
+                        contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+                        className="flex-1 bg-black"
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={renderEmptyList}
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                    />
+                )}
             </View>
             <View
                 className={"border-t border-gray-800 bg-black p-4"}
                 style={{ paddingBottom: Math.max(insets.bottom, 60) }}
             >
-                <Pressable onPress={moveToBill} className="flex-1 rounded-xl bg-btn py-4">
-                    <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
-                </Pressable>
+                <View className={"w-full flex-row"}>
+                    <Pressable onPress={moveToBill} className="flex-1 rounded-xl bg-btn py-4">
+                        <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
+                    </Pressable>
+                </View>
             </View>
         </View>
     )

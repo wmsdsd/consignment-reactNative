@@ -25,6 +25,8 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
                     longitude: loc.coords.longitude,
                     orderUid: orderUid,
                     orderLocationUid: orderLocationUid,
+                    type: "MOVE",
+                    name: "탁송기사 이동 기록"
                 }
                 
                 console.log("📍 포어그라운드 위치:", payload)

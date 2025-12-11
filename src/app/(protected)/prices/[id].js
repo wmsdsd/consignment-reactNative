@@ -1,277 +1,461 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import {
+    View,
+    Text,
+    ScrollView,
+    Pressable,
+    Alert,
+    ToastAndroid,
+    Image,
+    TouchableOpacity,
+    Modal,
+    TextInput, FlatList,
+} from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+    useOrderLocationProcess,
+    useOrderPhotoRemove,
+    useOrderPhotoUpload,
+    useOrderSettlement,
+    useOrderSettlementRemove, useOrderSettlementUpdate,
+} from '@/hooks/useApi';
+import { TYPE_OPTIONS} from '@/data/codes';
+import { Controller, useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { isFileUnder2MB } from '@/lib/utils';
+import { uriToFileObject } from '@/lib/uriToFile';
+import { isAndroid } from '@/lib/platform';
 
-// 가짜 요금 데이터
-const mockPrices = [
-    {
-        id: '1',
-        route: '서울 ↔ 인천공항',
-        distance: '58km',
-        time: '1시간 56분',
-        basePrice: '65,000원',
-        vehicleType: '일반',
-        description: '서울 주요 지역에서 인천국제공항까지',
-        details: {
-            baseFare: '50,000원',
-            distanceFare: '10,000원',
-            timeFare: '5,000원',
-            total: '65,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '공항 할증: +10,000원', '고속도로 통행료 별도'],
-    },
-    {
-        id: '2',
-        route: '서울 ↔ 김포공항',
-        distance: '28km',
-        time: '56분',
-        basePrice: '35,000원',
-        vehicleType: '일반',
-        description: '서울 주요 지역에서 김포국제공항까지',
-        details: {
-            baseFare: '25,000원',
-            distanceFare: '5,000원',
-            timeFare: '5,000원',
-            total: '35,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '공항 할증: +10,000원', '고속도로 통행료 별도'],
-    },
-    {
-        id: '3',
-        route: '서울 시내',
-        distance: '12km',
-        time: '24분',
-        basePrice: '18,000원',
-        vehicleType: '일반',
-        description: '서울 시내 주요 지역 간 이동',
-        details: {
-            baseFare: '12,000원',
-            distanceFare: '3,000원',
-            timeFare: '3,000원',
-            total: '18,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '주말 할증: +10%'],
-    },
-    {
-        id: '4',
-        route: '서울 ↔ 경기',
-        distance: '35km',
-        time: '1시간 10분',
-        basePrice: '42,000원',
-        vehicleType: '일반',
-        description: '서울과 경기도 주요 지역 간 이동',
-        details: {
-            baseFare: '30,000원',
-            distanceFare: '7,000원',
-            timeFare: '5,000원',
-            total: '42,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '고속도로 통행료 별도'],
-    },
-    {
-        id: '5',
-        route: '서울 시내 (단거리)',
-        distance: '8km',
-        time: '16분',
-        basePrice: '12,000원',
-        vehicleType: '일반',
-        description: '서울 시내 단거리 이동',
-        details: {
-            baseFare: '8,000원',
-            distanceFare: '2,000원',
-            timeFare: '2,000원',
-            total: '12,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%'],
-    },
-    {
-        id: '6',
-        route: '서울 ↔ 부산',
-        distance: '325km',
-        time: '10시간 50분',
-        basePrice: '280,000원',
-        vehicleType: '대형',
-        description: '서울에서 부산까지 장거리 이동',
-        details: {
-            baseFare: '200,000원',
-            distanceFare: '50,000원',
-            timeFare: '30,000원',
-            total: '280,000원',
-        },
-        additionalInfo: [
-            '야간 할증 (22시~06시): +20%',
-            '장거리 할증: +30,000원',
-            '고속도로 통행료 별도',
-            '휴게시간 포함',
-        ],
-    },
-    {
-        id: '7',
-        route: '서울 ↔ 대전',
-        distance: '167km',
-        time: '2시간 30분',
-        basePrice: '150,000원',
-        vehicleType: '중형',
-        description: '서울에서 대전까지 중거리 이동',
-        details: {
-            baseFare: '100,000원',
-            distanceFare: '30,000원',
-            timeFare: '20,000원',
-            total: '150,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '고속도로 통행료 별도'],
-    },
-    {
-        id: '8',
-        route: '서울 ↔ 대구',
-        distance: '300km',
-        time: '4시간',
-        basePrice: '250,000원',
-        vehicleType: '대형',
-        description: '서울에서 대구까지 장거리 이동',
-        details: {
-            baseFare: '180,000원',
-            distanceFare: '45,000원',
-            timeFare: '25,000원',
-            total: '250,000원',
-        },
-        additionalInfo: [
-            '야간 할증 (22시~06시): +20%',
-            '장거리 할증: +30,000원',
-            '고속도로 통행료 별도',
-        ],
-    },
-    {
-        id: '9',
-        route: '서울 ↔ 광주',
-        distance: '267km',
-        time: '3시간 30분',
-        basePrice: '220,000원',
-        vehicleType: '대형',
-        description: '서울에서 광주까지 장거리 이동',
-        details: {
-            baseFare: '160,000원',
-            distanceFare: '40,000원',
-            timeFare: '20,000원',
-            total: '220,000원',
-        },
-        additionalInfo: [
-            '야간 할증 (22시~06시): +20%',
-            '장거리 할증: +30,000원',
-            '고속도로 통행료 별도',
-        ],
-    },
-    {
-        id: '10',
-        route: '서울 ↔ 수원',
-        distance: '45km',
-        time: '1시간 30분',
-        basePrice: '52,000원',
-        vehicleType: '일반',
-        description: '서울에서 수원까지 이동',
-        details: {
-            baseFare: '35,000원',
-            distanceFare: '10,000원',
-            timeFare: '7,000원',
-            total: '52,000원',
-        },
-        additionalInfo: ['야간 할증 (22시~06시): +20%', '고속도로 통행료 별도'],
-    },
-];
-
-const vehicleTypeColor = {
-    일반: 'bg-blue-600',
-    중형: 'bg-green-600',
-    대형: 'bg-purple-600',
-};
+const MAX_COUNT = 3
 
 export default function PriceDetailScreen() {
-    const { id } = useLocalSearchParams();
-    const price = mockPrices.find(item => item.id === id);
-    const insets = useSafeAreaInsets();
+    const { id } = useLocalSearchParams()
+    const { data: orderSettlement } = useOrderSettlement(id)
 
-    if (!price) {
+    const [orderUid, setOrderUid] = useState(null)
+    const { data: orderLocation } = useOrderLocationProcess(orderUid)
+
+    const [typeModalVisible, setTypeModalVisible] = useState(false)
+    const [photoList, setPhotoList] = useState([null])
+
+    const insets = useSafeAreaInsets()
+    const {
+        control,
+        watch,
+        handleSubmit,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm()
+    const type = watch("type")
+
+    // mutations
+    const removeMutation = useOrderPhotoRemove()
+    const uploadMutation = useOrderPhotoUpload()
+    const updateMutation = useOrderSettlementUpdate()
+    const deleteMutation = useOrderSettlementRemove()
+
+    useEffect(() => {
+        if (orderSettlement) {
+            reset({
+                ...orderSettlement,
+                price: String(orderSettlement.price ?? ""),
+                waitTime: String(orderSettlement.waitTime ?? ""),
+                wayPointDistance: String(orderSettlement.wayPointDistance ?? ""),
+            })
+            setOrderUid(orderSettlement.orderUid)
+
+            if (Array.isArray(orderSettlement.orderPhotos) && orderSettlement.orderPhotos.length > 0) {
+                setPhotoList(orderSettlement.orderPhotos)
+            }
+        }
+
+    }, [orderSettlement])
+
+    const handleTakePicture = async () => {
+        if (photoList.length === MAX_COUNT) {
+            Alert.alert(`최대 ${MAX_COUNT}장 까지 촬영이 가능합니다.`)
+            return
+        }
+
+        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        if (status !== "granted") {
+            Alert.alert("카메라 권한이 필요합니다!")
+            return
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: false,
+            quality: 0.8,
+        })
+
+        if (!result.canceled) {
+            const uri = result.assets[0].uri
+            const isUnder = await isFileUnder2MB(uri)
+
+            if (!isUnder) {
+                Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
+                await handleTakePicture()
+            }
+            else {
+                const file = await uriToFileObject(uri)
+                const orderPhotos = await uploadMutation.mutateAsync({
+                    orderUid: id,
+                    orderLocationUid: orderLocation.uid,
+                    type: orderLocation.type,
+                    position: "SETTLE",
+                    fileList: [
+                        {
+                            fileName: file.name,
+                            fileType: file.type
+                        }
+                    ]
+                })
+
+                if (Array.isArray(orderPhotos) && orderPhotos.length > 0) {
+                    const orderPhoto = orderPhotos[0]
+                    await fetch(orderPhoto.url, {
+                        method: "PUT",
+                        headers: {
+                            'Content-Type': file.type,
+                        },
+                        body: file.blob
+                    })
+
+                    const list = photoList.filter(e => e !== null)
+                    setPhotoList([...list, orderPhoto])
+                }
+                else {
+                    Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
+                }
+            }
+        }
+    }
+
+    const onSubmit = (data) => {
+        data.orderPhotos = photoList
+
+        Alert.alert(
+            '요금 수정',
+            '요금을 수정 하시겠습니까?', [
+                { text: '취소', style: 'cancel' },
+                {
+                    text: '확인',
+                    onPress: async () => {
+                        await updateMutation.mutateAsync(data)
+
+                        if (isAndroid) {
+                            ToastAndroid.show("수정 되었습니다.", ToastAndroid.SHORT)
+                        }
+
+                        router.back()
+                    },
+                },
+            ])
+    }
+
+    const removePhoto = (key, uid) => {
+        Alert.alert(
+            '삭제',
+            '이 사진을 삭제하시겠습니까?',
+            [
+                {
+                    text: '취소',
+                    style: 'cancel'
+                },
+                {
+                    text: '삭제',
+                    style: 'destructive',
+                    onPress: async () => {
+                        await removeMutation.mutateAsync({
+                            keys: [key]
+                        })
+                        const list = photoList.filter((orderPhoto) => orderPhoto.uid !== uid)
+                        if (list.length === 0) list.push(null)
+
+                        setPhotoList(list)
+
+                        if (isAndroid) {
+                            ToastAndroid.show("삭제 되었습니다.", ToastAndroid.SHORT)
+                        }
+                    },
+                },
+            ]
+        )
+    }
+
+    const handleDelete = () => {
+        Alert.alert(
+            '요금 청구 취소',
+            '청구 내역을 취소하시겠습니까?', [
+                { text: '취소', style: 'cancel' },
+                {
+                    text: '확인',
+                    onPress: async () => {
+                        await deleteMutation.mutateAsync(orderSettlement.uid)
+
+                        if (isAndroid) {
+                            ToastAndroid.show("취소 되었습니다.", ToastAndroid.SHORT)
+                        }
+
+                        router.back()
+                    },
+                },
+            ])
+    }
+
+    const renderImage = ({ item }) => {
+        const url = item
+            ? item.url
+                ? item.url.includes("?")
+                    ? item.url.split("?")[0]
+                    : item.url
+                : null
+            : null
+
+        return (
+            <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
+                {item ? (
+                    <View className={"border border-[#444] flex-1 rounded-2xl border-dashed"}>
+                        <Image
+                            className={"flex-1 rounded-lg"}
+                            source={{ uri: url }}
+                            resizeMode={"contain"}
+                        />
+                        <TouchableOpacity
+                            className={"absolute top-[-10px] right-[-10px] rounded-lg w-6 h-6 items-center justify-center"}
+                            onPress={() => removePhoto(item.key, item.uid)}
+                        >
+                            <Image source={require("@assets/icon/ic_close.png")} className={"w-4 h-4"} />
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <TouchableOpacity className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}>
+                        <Image source={require("@assets/images/sample/sample_thumbnail.png")} className={"w-8 h-8"} />
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
+
+    if (!orderSettlement) {
         return (
             <View className="flex-1 items-center justify-center bg-black">
                 <Text className="text-lg text-gray-300">요금 정보를 찾을 수 없습니다.</Text>
+                <Pressable
+                    onPress={() => router.back()}
+                    className="mt-4 rounded-lg bg-purple-700 px-6 py-3"
+                >
+                    <Text className="font-semibold text-white">목록으로 돌아가기</Text>
+                </Pressable>
             </View>
-        );
+        )
     }
 
     return (
-        <View className="flex-1 bg-black">
-            <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 16 }}>
-                {/* 노선 정보 카드 */}
-                <View className="mb-4 w-full rounded-2xl bg-neutral-900 p-6">
-                    <View className="mb-4 flex-row items-center justify-between">
-                        <View
-                            className={`rounded-md px-3 py-1 ${vehicleTypeColor[price.vehicleType] || 'bg-gray-600'}`}
+        <View className="flex-1 bg-black p-4">
+            <ScrollView>
+                <View className="flex-1 w-full rounded-2xl bg-neutral-900 p-6">
+                    <Text className="mb-4 text-xl font-bold text-white">청구 정보</Text>
+
+                    {/*요금 청구 종류*/}
+                    <Controller
+                        name={"type"}
+                        control={control}
+                        rules={{
+                            required: "필수 선택 항목입니다."
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <View className={"mb-4"}>
+                                {/*select box*/}
+                                <Text className="mb-2 text-base text-gray-300">요금 종류</Text>
+                                <TouchableOpacity
+                                    className={"mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"}
+                                    onPress={() => setTypeModalVisible(true)}
+                                >
+                                    <Text className={value ? "color-white" : "color-[#aaa]"}>
+                                        {value ? TYPE_OPTIONS.find(e => e.value === value)?.label : "선택해주세요."}
+                                    </Text>
+                                </TouchableOpacity>
+                                {errors.type && (
+                                    <Text className="mb-2 text-sm text-red-500">{errors.type.message}</Text>
+                                )}
+
+                                {/*Modal*/}
+                                <Modal
+                                    visible={typeModalVisible}
+                                    transparent
+                                    animationType={"fade"}
+                                >
+                                    <View className={"flex-1 justify-center items-center bg-[rgba(0,0,0,0.3)]"}>
+                                        <View className={"bg-block w-[250px] p-2 rounded-lg"}>
+                                            { TYPE_OPTIONS.map((item) => (
+                                                <TouchableOpacity
+                                                    className={"p-4 border-b border-gray-700"}
+                                                    key={item.value}
+                                                    onPress={() => {
+                                                        onChange(item.value)
+                                                        setTypeModalVisible(false)
+                                                    }}
+                                                >
+                                                    <Text className={"color-white"}>{item.label}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                            <TouchableOpacity
+                                                className={"mt-2 p-3 bg-neutral-800 rounded-lg items-center"}
+                                                onPress={() => setTypeModalVisible(false)}
+                                            >
+                                                <Text className={"color-white"}>취소</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </Modal>
+                            </View>
+                        )}
+                    />
+
+                    <View className="mb-4">
+                        <Text className="mb-2 text-base text-gray-300">금액</Text>
+                        <Controller
+                            name="price"
+                            control={control}
+                            rules={{
+                                required: '금액을 입력해 주세요.'
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <TextInput
+                                    className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                    placeholder="금액"
+                                    placeholderTextColor={"#BBBBBB"}
+                                    value={value}
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    keyboardType={"numeric"}
+                                />
+                            )}
+                        />
+                        {errors.price && (
+                            <Text className="mb-2 text-sm text-red-500">{errors.price.message}</Text>
+                        )}
+                    </View>
+
+                    {type === "STAY" && (
+                        <View className="mb-4">
+                            <Text className="mb-2 text-base text-gray-300">대기 시간 (분)</Text>
+                            <Controller
+                                control={control}
+                                name="waitTime"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                        placeholder="분 단위로 입력해 주세요."
+                                        placeholderTextColor={"#BBBBBB"}
+                                        value={value}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        keyboardType={"numeric"}
+                                    />
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    {type === "WAYPOINT" && (
+                        <View className="mb-4">
+                            <Text className="mb-2 text-base text-gray-300">추가 거리</Text>
+                            <Controller
+                                control={control}
+                                name="wayPointDistance"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                        placeholder="미터(m) 단위로 입력해 주세요."
+                                        placeholderTextColor={"#BBBBBB"}
+                                        value={value}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        keyboardType={"numeric"}
+                                    />
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    <View className="mb-4">
+                        <Text className="mb-2 text-base text-gray-300">비고</Text>
+                        <Controller
+                            control={control}
+                            name="comment"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <TextInput
+                                    className="mb-2 rounded-lg border border-color-input bg-input px-4 py-4 text-base"
+                                    placeholder="추가 정보를 입력해 주세요."
+                                    placeholderTextColor={"#BBBBBB"}
+                                    value={value}
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            )}
+                        />
+                    </View>
+
+                    <View className="mb-4">
+                        <Text className="text-base text-gray-300">사진 정보</Text>
+                        <FlatList
+                            data={photoList}
+                            renderItem={renderImage}
+                            keyExtractor={(_, index) => index.toString()}
+                            numColumns={3}
+                            className={"px-2 mt-2"}
+                            scrollEnabled={false}
+                        />
+                    </View>
+
+                    <View className={"mb-4 flex-row"}>
+                        <Pressable
+                            onPress={handleSubmit(handleDelete)}
+                            disabled={isSubmitting}
+                            className="flex-1 rounded-xl bg-dispute py-4"
                         >
-                            <Text className="text-xs font-semibold text-white">{price.vehicleType}</Text>
-                        </View>
-                        <Text className="text-3xl font-bold text-white">{price.basePrice}</Text>
+                            <Text className="text-center text-lg font-semibold text-white">청구 취소</Text>
+                        </Pressable>
                     </View>
-
-                    <Text className="mb-2 text-2xl font-bold text-white">{price.route}</Text>
-                    <Text className="mb-4 text-base text-gray-300">{price.description}</Text>
-
-                    <View className="flex-row gap-4">
-                        <Text className="text-lg text-gray-300">{price.distance}</Text>
-                        <Text className="text-lg text-gray-600">|</Text>
-                        <Text className="text-lg text-gray-300">{price.time}</Text>
-                    </View>
-                </View>
-
-                {/* 요금 상세 내역 */}
-                <View className="mb-4 w-full rounded-2xl bg-neutral-900 p-6">
-                    <Text className="mb-4 text-xl font-bold text-white">요금 상세 내역</Text>
-
-                    <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-                        <Text className="text-base text-gray-300">기본 요금</Text>
-                        <Text className="text-base font-semibold text-white">{price.details.baseFare}</Text>
-                    </View>
-
-                    <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-                        <Text className="text-base text-gray-300">거리 요금</Text>
-                        <Text className="text-base font-semibold text-white">{price.details.distanceFare}</Text>
-                    </View>
-
-                    <View className="mb-3 flex-row justify-between border-b border-gray-700 pb-3">
-                        <Text className="text-base text-gray-300">시간 요금</Text>
-                        <Text className="text-base font-semibold text-white">{price.details.timeFare}</Text>
-                    </View>
-
-                    <View className="mt-4 flex-row justify-between">
-                        <Text className="text-xl font-bold text-white">총 요금</Text>
-                        <Text className="text-2xl font-bold text-white">{price.details.total}</Text>
-                    </View>
-                </View>
-
-                {/* 추가 정보 */}
-                <View className="w-full rounded-2xl bg-neutral-900 p-6">
-                    <Text className="mb-4 text-xl font-bold text-white">추가 정보</Text>
-
-                    {price.additionalInfo.map((info, index) => (
-                        <View key={index} className="mb-2 flex-row items-start">
-                            <Text className="mr-2 text-purple-500">•</Text>
-                            <Text className="flex-1 text-base text-gray-300">{info}</Text>
-                        </View>
-                    ))}
                 </View>
             </ScrollView>
 
-            {/* Footer - 요금 청구 버튼 */}
+            {/* Footer - 영수증 첨부 및 요금 청구 버튼 */}
             <View
                 className="border-t border-gray-800 bg-black px-4 py-4"
                 style={{ paddingBottom: Math.max(insets.bottom, 60) }}
             >
-                <Pressable
-                    onPress={() => router.push(`/(protected)/prices/${id}/bill`)}
-                    className="bg-secondary w-full rounded-xl py-4"
-                >
-                    <Text className="text-center text-lg font-semibold text-white">요금 청구</Text>
-                </Pressable>
+                <View className="w-full flex-row gap-3">
+                    <Pressable
+                        onPress={handleTakePicture}
+                        disabled={isSubmitting}
+                        className="flex-1 rounded-xl bg-neutral-800 py-4"
+                    >
+                        <Text className="text-center text-lg font-semibold text-white">사진 첨부</Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={handleSubmit(onSubmit)}
+                        disabled={isSubmitting}
+                        className="flex-1 rounded-xl bg-btn py-4"
+                    >
+                        <Text className="text-center text-lg font-semibold text-white">
+                            { isSubmitting ? "수정 중..." :  "수정"}
+                        </Text>
+                    </Pressable>
+                </View>
             </View>
         </View>
-    );
+    )
 }
