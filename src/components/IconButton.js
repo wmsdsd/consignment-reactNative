@@ -7,6 +7,7 @@ export default function IconButton({
     const icons = {
         location: require('@assets/icon/ic_location.png'),
         call: require('@assets/icon/ic_call.png'),
+        camera: require('@assets/icon/ic_camera.png'),
     }
     
     return (

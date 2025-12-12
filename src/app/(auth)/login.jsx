@@ -159,8 +159,6 @@ export default function LoginPage() {
                             </TouchableOpacity>
                             
                             <View className="flex flex-row justify-center items-center my-4">
-                                {/*<Text className="text-sm font-semibold text-white pr-4">회원가입</Text>*/}
-                                {/*<View className={"h-4 w-[1px] bg-divide"}></View>*/}
                                 <TouchableOpacity onPress={onFindPassword}>
                                     <Text className="text-sm font-semibold text-white pl-4">비밀번호 찾기</Text>
                                 </TouchableOpacity>

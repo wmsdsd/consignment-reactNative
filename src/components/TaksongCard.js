@@ -67,6 +67,7 @@ export default function TaksongCard({
                 }
                 break
             case "DISPUTE":         // 분쟁중
+                router.push(`/(protected)/accident/${id}/update`)
                 break
         }
     }

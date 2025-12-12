@@ -3,7 +3,7 @@ import { useLocalSearchParams, router, useNavigation } from 'expo-router'
 import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useOrder, useOrderLocationProcess, useOrderLocationStart } from '@/hooks/useApi'
-import { formatPhone } from '@/lib/utils'
+import { formatDate, formatPhone, formatTime } from '@/lib/utils';
 import IconButton from '@/components/IconButton'
 import moment from 'moment'
 import { useForegroundLocation } from '@/hooks/useLocation'
@@ -32,25 +32,7 @@ export default function ConfirmScreen() {
     const [showTimePicker, setShowTimePicker] = useState(false)
     
     const startMutation = useOrderLocationStart()
-    
-    // 날짜 포맷팅 함수
-    const formatDate = date => {
-        const year = date.getFullYear()
-        const month = date.getMonth() + 1
-        const day = date.getDate()
-        return `${year}년 ${month}월 ${day}일`
-    }
-    
-    // 시간 포맷팅 함수
-    const formatTime = date => {
-        const hours = date.getHours()
-        const minutes = date.getMinutes()
-        const ampm = hours >= 12 ? '오후' : '오전'
-        const displayHours = hours % 12 || 12
-        const displayMinutes = minutes.toString().padStart(2, '0')
-        return `${ampm} ${displayHours}:${displayMinutes}`
-    }
-    
+
     // 날짜 선택 핸들러
     const handleDateChange = (event, date) => {
         setShowDatePicker(false)

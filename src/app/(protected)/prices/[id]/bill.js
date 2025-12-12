@@ -89,7 +89,7 @@ export default function BillingScreen() {
                 const orderPhotos = await uploadMutation.mutateAsync({
                     orderUid: id,
                     orderLocationUid: orderLocation.uid,
-                    type: orderLocation.type,
+                    type: "SETTLE",
                     position: "SETTLE",
                     fileList: [
                         {
@@ -99,7 +99,6 @@ export default function BillingScreen() {
                     ]
                 })
 
-                console.log("orderPhotos", orderPhotos)
                 if (Array.isArray(orderPhotos) && orderPhotos.length > 0) {
                     const orderPhoto = orderPhotos[0]
                     await fetch(orderPhoto.url, {

@@ -1,4 +1,5 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import CustomBackButton from '@/components/CustomBackButton';
 
 export default function AccidentLayout() {
     return (
@@ -9,24 +10,26 @@ export default function AccidentLayout() {
             }}
         >
             <Stack.Screen
-                name={"receive"}
+                name={"index"}
                 options={{
                     headerShown: true,
                     title: '사고 접수',
-                    headerBackVisible: true,
-                    headerLeft: undefined,
+                    headerLeft: () => <CustomBackButton onPress={() => {
+                        router.back()
+                    }} />,
                     headerStyle: { backgroundColor: '#000000' },
                     headerTintColor: '#ffffff',
                     headerTitleStyle: { color: '#ffffff' },
                 }}
             />
             <Stack.Screen
-                name={"complete"}
+                name={"[id]/update"}
                 options={{
                     headerShown: true,
                     title: "사고 처리",
-                    headerBackVisible: true,
-                    headerLeft: undefined,
+                    headerLeft: () => <CustomBackButton onPress={() => {
+                        router.back()
+                    }} />,
                     headerStyle: { backgroundColor: '#000000' },
                     headerTintColor: '#ffffff',
                     headerTitleStyle: { color: '#ffffff' },

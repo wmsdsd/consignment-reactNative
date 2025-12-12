@@ -5,7 +5,8 @@ import {
     orderApi,
     orderLocationApi,
     orderPhotoApi,
-    orderSettlementApi
+    orderSettlementApi,
+    orderAccidentApi,
 } from '@/lib/api'
 
 // Driver Hooks --------------------------------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ export const useOrderList = () => {
 
 export const useOrderHistory = () => {
     return useQuery({
-        queryKey: ['order.history'],
+        queryKey: ['order', 'history'],
         queryFn: orderApi.getOrderHistory,
     });
 };
@@ -125,23 +126,23 @@ export const useOrderCancel = () => {
 };
 
 export const useOrderStatusUpdate = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
     
     return useMutation({
         mutationFn: ({ orderId, status }) => orderApi.updateStatus(orderId, status),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['order'] });
+            queryClient.invalidateQueries({ queryKey: ['order'] })
         },
-    });
-};
+    })
+}
 // Order Hooks End -----------------------------------------------------------------------------------------------------
 
 // OrderLocation Hooks -------------------------------------------------------------------------------------------------
 export const useOrderLocationProcess = (uid) => {
     return useQuery({
-        queryKey: ['orderLocation.process', uid],
+        queryKey: ['orderLocation', 'process', uid],
         queryFn: async ({ queryKey }) => {
-            const [, uid] = queryKey
+            const [,, uid] = queryKey
             const qs = new URLSearchParams({ uid })
             return orderLocationApi.getProcess(qs)
         },
@@ -166,7 +167,7 @@ export const useOrderLocationEnd = () => {
     return useMutation({
         mutationFn: orderLocationApi.end,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderLocation'] });
+            queryClient.invalidateQueries({ queryKey: ['orderLocation'] })
         },
     });
 };
@@ -174,15 +175,13 @@ export const useOrderLocationEnd = () => {
 // OrderPhoto Hooks ----------------------------------------------------------------------------------------------------
 export const useOrderPhotoList = (orderUid, orderLocationUid, enabled = true) => {
     return useQuery({
-        queryKey: ['orderPhoto.list', orderUid, orderLocationUid],
+        queryKey: ['orderPhoto', "list", orderUid, orderLocationUid],
         queryFn: async ({ queryKey }) => {
-            const [, orderUid, orderLocationUid] = queryKey
-            console.log("orderUid, orderLocation uid", orderUid, orderLocationUid)
+            const [,, orderUid, orderLocationUid] = queryKey
             const qs = new URLSearchParams({
                 orderUid: orderUid,
                 orderLocationUid: orderLocationUid
             })
-            console.log(qs)
             return orderPhotoApi.getList(qs)
         },
         enabled: enabled,
@@ -195,7 +194,7 @@ export const useOrderPhotoUpload = () => {
     return useMutation({
         mutationFn: orderPhotoApi.uploads,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderPhoto.uploads'] });
+            queryClient.invalidateQueries({ queryKey: ['orderPhoto'] })
         },
     })
 }
@@ -206,7 +205,7 @@ export const useOrderPhotoRemove = () => {
     return useMutation({
         mutationFn: orderPhotoApi.remove,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderPhoto.remove'] })
+            queryClient.invalidateQueries({ queryKey: ['orderPhoto'] })
         },
     })
 }
@@ -226,15 +225,15 @@ export const useOrderSettlement = (uid) => {
 
 export const useOrderSettlementList = (orderUid) => {
     return useQuery({
-        queryKey: ['orderSettlement.list', orderUid],
+        queryKey: ['orderSettlement', 'list', orderUid],
         queryFn: async ({ queryKey }) => {
-            const [, orderUid] = queryKey
+            const [,, orderUid] = queryKey
             const qs = new URLSearchParams({ orderUid })
             return orderSettlementApi.getList(qs)
         },
         enabled: !!orderUid
-    });
-};
+    })
+}
 
 export const useOrderSettlementSave = () => {
     const queryClient = useQueryClient()
@@ -248,15 +247,14 @@ export const useOrderSettlementSave = () => {
 }
 
 export const useOrderSettlementUpdate = () => {
-    const queryClient = useQueryClient();
-    
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: orderSettlementApi.update,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] });
+            queryClient.invalidateQueries({ queryKey: ['orderSettlement'] })
         },
-    });
-};
+    })
+}
 
 export const useOrderSettlementRemove = () => {
     const queryClient = useQueryClient()
@@ -280,3 +278,38 @@ export const useDriverMove = () => {
     })
 }
 // DriverMove Hooks End ------------------------------------------------------------------------------------------------
+
+// OrderAccident Hooks Start -------------------------------------------------------------------------------------------
+export const useOrderAccident = (uid) => {
+    return useQuery({
+        queryKey: ['orderAccident', uid],
+        queryFn: async ({ queryKey }) => {
+            const [, uid] = queryKey
+            const qs = new URLSearchParams({ orderUid: uid })
+            return orderAccidentApi.get(qs)
+        },
+        enabled: !!uid
+    })
+}
+
+export const useOrderAccidentReceive = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: orderAccidentApi.receive,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['order', 'orderAccident'] })
+        }
+    })
+}
+
+export const useOrderAccidentUpdate = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: orderAccidentApi.update,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orderAccident'] })
+        }
+    })
+}
+
+// OrderAccident Hooks End ---------------------------------------------------------------------------------------------

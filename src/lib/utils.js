@@ -61,3 +61,37 @@ export const isFileUnder2MB = async (uri) => {
 
     return blob.size <= MAX_FILE_SIZE
 }
+
+export const formatDate = date => {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    return `${year}년 ${month}월 ${day}일`
+}
+
+// 시간 포맷팅 함수
+export const formatTime = date => {
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const ampm = hours >= 12 ? '오후' : '오전'
+    const displayHours = hours % 12 || 12
+    const displayMinutes = minutes.toString().padStart(2, '0')
+    return `${ampm} ${displayHours}:${displayMinutes}`
+}
+
+export const formatDatetime = date => {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const second = date.getSeconds()
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${second}`
+}
+
+export const dateFormatter = (date, format = "YYYY-MM-DD HH:mm:ss") => {
+    if (!date) return null
+
+    return moment(date).format(format)
+}
