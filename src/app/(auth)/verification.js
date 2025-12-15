@@ -6,7 +6,7 @@ import { useDriverSendAuthCode, useDriverVerify } from '@/hooks/useApi';
 import { secondToTime } from '@/lib/utils';
 
 export default function verificationPage() {
-    const { text } = useLocalSearchParams()
+    const { text, type } = useLocalSearchParams()
     
     const authCodeMutation = useDriverSendAuthCode()
     const verifyMutation = useDriverVerify()
@@ -58,13 +58,24 @@ export default function verificationPage() {
         try {
             await verifyMutation.mutateAsync(data)
             onClearTimeInterval()
+
+            if (type === 'password') {
+                router.replace({
+                    pathname: '/(auth)/changePassword',
+                    params: {
+                        phone: data.phone
+                    }
+                })
+            }
+            if (type === 'register') {
+                router.replace({
+                    pathname: '/(auth)/register',
+                    params: {
+                        phone: data.phone
+                    }
+                })
+            }
             
-            router.replace({
-                pathname: '/(auth)/changePassword',
-                params: {
-                    phone: data.phone
-                }
-            })
         }
         catch (error) {
             console.log("error: ", error)

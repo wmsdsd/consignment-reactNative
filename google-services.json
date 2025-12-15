@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "719123231382",
+    "project_id": "olgo-mobile",
+    "storage_bucket": "olgo-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719123231382:android:7f3d3e43a897cd145508b7",
+        "android_client_info": {
+          "package_name": "com.kangja.olgo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeLHokeJT3Q1ow8lTPIkdK4Grb2tApxWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

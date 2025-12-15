@@ -4,9 +4,10 @@ import { useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils';
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/app/context/AppContext';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 export default function TaksongListScreen() {
+    const { id } = useLocalSearchParams()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     
@@ -42,6 +43,12 @@ export default function TaksongListScreen() {
             }))
         }, [])
     )
+
+    useEffect(() => {
+        if (id) {
+            router.push(`/(protected)/taksongs/${id}`)
+        }
+    }, [])
 
     return (
         isLoading

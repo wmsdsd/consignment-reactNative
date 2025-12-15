@@ -40,6 +40,7 @@ export default {
             ],
             package: 'com.kangja.olgo',
             usesCleartextTraffic: true,
+            googleServicesFile: "./google-services.json",
         },
         web: {
             favicon: './assets/favicon.png',
@@ -47,6 +48,7 @@ export default {
         plugins: [
             'expo-router',
             'expo-secure-store',
+            "expo-notifications",
             [
                 'expo-splash-screen',
                 {

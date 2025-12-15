@@ -73,7 +73,18 @@ export default function LoginPage() {
         router.push({
             pathname: '/(auth)/verification',
             params: {
-                text: "비밀번호 변경"
+                text: "비밀번호 변경",
+                type: "password"
+            }
+        })
+    }
+
+    const onHandleRegister = () => {
+        router.push({
+            pathname: '/(auth)/verification',
+            params: {
+                text: "회원가입",
+                type: "register"
             }
         })
     }

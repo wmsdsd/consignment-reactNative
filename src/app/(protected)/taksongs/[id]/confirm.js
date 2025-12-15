@@ -2,11 +2,11 @@ import { View, Text, Animated, TouchableOpacity, Pressable, Alert, Platform, Lin
 import { useLocalSearchParams, router, useNavigation } from 'expo-router'
 import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { useOrder, useOrderLocationProcess, useOrderLocationStart } from '@/hooks/useApi'
+import { useDriverMove, useOrder, useOrderLocationProcess, useOrderLocationStart } from '@/hooks/useApi';
 import { formatDate, formatPhone, formatTime } from '@/lib/utils';
 import IconButton from '@/components/IconButton'
 import moment from 'moment'
-import { useForegroundLocation } from '@/hooks/useLocation'
+import { useForegroundLocation, getLocation } from '@/hooks/useLocation'
 import { useAppContext } from '@/app/context/AppContext';
 
 export default function ConfirmScreen() {
@@ -32,6 +32,7 @@ export default function ConfirmScreen() {
     const [showTimePicker, setShowTimePicker] = useState(false)
     
     const startMutation = useOrderLocationStart()
+    const driverMoveMutation = useDriverMove()
 
     // 날짜 선택 핸들러
     const handleDateChange = (event, date) => {
@@ -65,6 +66,18 @@ export default function ConfirmScreen() {
         })
         if (res) {
             await refetchOrderLocation()
+
+            const coords = await getLocation()
+            if (coords) {
+                await driverMoveMutation.mutateAsync({
+                    name: `[${orderLocation.typeName}] 탁송 기사 출발`,
+                    type: "HISTORY",
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                    orderUid: id,
+                    orderLocationUid: orderLocation.uid,
+                })
+            }
         }
     }
     

@@ -2,18 +2,20 @@ import {View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid} from
 import { useLocalSearchParams, router } from 'expo-router'
 import React, {useEffect, useState} from 'react';
 import {
+    useDriverMove,
     useOrder,
     useOrderLocationEnd,
     useOrderLocationProcess,
     useOrderPhotoList,
     useOrderPhotoRemove,
     useOrderPhotoUpload,
-    useOrderStatusUpdate
-} from '@/hooks/useApi'
+    useOrderStatusUpdate,
+} from '@/hooks/useApi';
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
 import {isAndroid} from "@/lib/platform"
 import { isFileUnder2MB } from '@/lib/utils';
+import { getLocation } from '@/hooks/useLocation';
 
 const tabs = [
     {
@@ -61,7 +63,7 @@ const tabs = [
 ]
 
 export default function CameraScreen() {
-    const { id, orderLocationUid } = useLocalSearchParams()
+    const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
@@ -72,6 +74,7 @@ export default function CameraScreen() {
     const removeMutation = useOrderPhotoRemove()
     const endMutation = useOrderLocationEnd()
     const updateOrderStatusMutation = useOrderStatusUpdate()
+    const driverMoveMutation = useDriverMove()
 
     const [tab, setTab] = useState(tabs[0])
     const [photoList, setPhotoList] = useState({
@@ -255,6 +258,18 @@ export default function CameraScreen() {
         console.log(orderLocation)
 
         if (orderLocation) {
+            const coords = await getLocation()
+            if (coords) {
+                await driverMoveMutation.mutateAsync({
+                    name: `[${orderLocation.typeName}] 탁송 기사 도착`,
+                    type: "HISTORY",
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                    orderUid: id,
+                    orderLocationUid: orderLocation.uid,
+                })
+            }
+
             router.replace(`/(protected)/taksongs/${id}/confirm`)
         }
         else {
@@ -263,6 +278,18 @@ export default function CameraScreen() {
                 status: "DELIVERY_COMPLETE"
             })
             if (res) {
+                const coords = await getLocation()
+                if (coords) {
+                    await driverMoveMutation.mutateAsync({
+                        name: `탁송 완료`,
+                        type: "HISTORY",
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        orderUid: id,
+                        orderLocationUid: orderLocation.uid,
+                    })
+                }
+
                 router.replace(`/(protected)/taksongs/${id}/complete`)
             }
         }
