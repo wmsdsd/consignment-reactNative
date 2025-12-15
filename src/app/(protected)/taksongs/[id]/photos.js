@@ -68,14 +68,6 @@ export default function CameraScreen() {
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
     const [ready, setReady] = React.useState(false)
-    const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
-
-    const uploadMutation = useOrderPhotoUpload()
-    const removeMutation = useOrderPhotoRemove()
-    const endMutation = useOrderLocationEnd()
-    const updateOrderStatusMutation = useOrderStatusUpdate()
-    const driverMoveMutation = useDriverMove()
-
     const [tab, setTab] = useState(tabs[0])
     const [photoList, setPhotoList] = useState({
         FRONT: [null],
@@ -84,6 +76,15 @@ export default function CameraScreen() {
         RIGHT: [null],
         INSIDE: [null],
     })
+
+    const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
+
+    const uploadMutation = useOrderPhotoUpload()
+    const removeMutation = useOrderPhotoRemove()
+    const endMutation = useOrderLocationEnd()
+    const updateOrderStatusMutation = useOrderStatusUpdate()
+    const driverMoveMutation = useDriverMove()
+
 
     const onHandleTakePicture = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync()
@@ -254,10 +255,9 @@ export default function CameraScreen() {
     }
 
     const moveToNextProcess = async () => {
-        await refetchOrderLocation()
-        console.log(orderLocation)
+        const { data } = await refetchOrderLocation()
 
-        if (orderLocation) {
+        if (data) {
             const coords = await getLocation()
             if (coords) {
                 await driverMoveMutation.mutateAsync({
@@ -297,6 +297,15 @@ export default function CameraScreen() {
 
     useEffect(() => {
         setReady(!!order?.uid && !!orderLocation?.uid)
+        setTab(tabs[0])
+        setPhotoList({
+            FRONT: [null],
+            LEFT: [null],
+            BACK: [null],
+            RIGHT: [null],
+            INSIDE: [null],
+        })
+
     }, [])
 
     useEffect(() => {

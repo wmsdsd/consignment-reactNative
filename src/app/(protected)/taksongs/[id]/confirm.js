@@ -197,7 +197,9 @@ export default function ConfirmScreen() {
             <View className="flex-1 items-center justify-center bg-black">
                 <Text className="text-lg text-white">탁송 정보를 찾을 수 없습니다.</Text>
                 <TouchableOpacity
-                    onPress={() => router.back()}
+                    onPress={() => {
+                        router.replace("/(protected)/taksongs")
+                    }}
                     className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
                 >
                     <Text className="font-semibold text-white">목록으로 돌아가기</Text>

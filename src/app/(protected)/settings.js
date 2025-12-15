@@ -10,16 +10,16 @@ export default function SettingsScreen() {
     return (
         <View className="bg-black flex flex-1 p-8">
             <View>
-                <Text>알림 목록 이동</Text>
+                <Text className={"color-white"}>알림 목록 이동</Text>
             </View>
             <View>
-                <Text>위치 정보 동의 여부</Text>
+                <Text className={"color-white"}>위치 정보 동의 여부</Text>
             </View>
             <View>
-                <Text>카메라 동의 여부</Text>
+                <Text className={"color-white"}>카메라 동의 여부</Text>
             </View>
             <View>
-                <Text>푸시 알림 동의 여부</Text>
+                <Text className={"color-white"}>푸시 알림 동의 여부</Text>
             </View>
             <TouchableOpacity
                 className="items-center rounded-lg bg-default p-4"

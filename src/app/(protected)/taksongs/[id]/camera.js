@@ -70,7 +70,7 @@ export default function CustomCameraScreen() {
             }
             catch (e) {
                 console.log('fetch error', e)
-                Alert.alert("알림", "차량 번호가 인식되지 않습니다.")
+                Alert.alert("알림", "사진 정보가 올바르지 않습니다.")
             }
         }
     }
