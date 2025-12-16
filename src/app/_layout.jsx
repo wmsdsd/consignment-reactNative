@@ -6,7 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from '../components/SplashScreen';
 import { AuthProvider } from '@/hooks/useAuth';
 import { startBackgroundLocation } from '@/lib/backgroundLocation'
-import { AppProvider } from '@/app/context/AppContext'
+import { AppProvider } from '@/context/AppContext'
 
 import '../../global.css'
 

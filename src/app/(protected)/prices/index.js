@@ -1,6 +1,6 @@
 import { FlatList, View, Text, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useAppContext } from '@/app/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addCommaToNumber, mToKm, secondToTimeHangul } from '@/lib/utils';

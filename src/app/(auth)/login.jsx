@@ -29,38 +29,7 @@ export default function LoginPage() {
             password: '',
         },
     })
-    
-    const [keyboardHeight] = useState(new Animated.Value(0));
-    
-    useEffect(() => {
-        const keyboardWillShowListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-            event => {
-                Animated.timing(keyboardHeight, {
-                    duration: Platform.OS === 'ios' ? 250 : 200,
-                    toValue: event.endCoordinates.height,
-                    useNativeDriver: false,
-                }).start();
-            },
-        );
-        
-        const keyboardWillHideListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-            () => {
-                Animated.timing(keyboardHeight, {
-                    duration: Platform.OS === 'ios' ? 250 : 200,
-                    toValue: 0,
-                    useNativeDriver: false,
-                }).start();
-            },
-        );
-        
-        return () => {
-            keyboardWillShowListener.remove();
-            keyboardWillHideListener.remove();
-        };
-    }, []);
-    
+
     const onSubmit = async data => {
         try {
             await login(data)

@@ -1,4 +1,4 @@
-import { useAppContext } from '@/app/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -19,7 +19,7 @@ import { isAndroid } from '@/lib/platform';
 import { router } from 'expo-router';
 import { formatDate, formatDatetime, formatTime } from '@/lib/utils';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import KeyboardWrapper from '@/components/KeyboardWrapper';
+import KeyboardWrapper from '@/components/KeyboardWrapper'
 
 export default function AccidentReceiveScreen() {
     const { menuConfig } = useAppContext()
@@ -29,7 +29,6 @@ export default function AccidentReceiveScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showTimePicker, setShowTimePicker] = useState(false)
     const [selectedDate, setSelectedDate] = useState(new Date())
-    const [keyboardHeight] = useState(new Animated.Value(0))
 
     const { data: orderLocation } = useOrderLocationProcess(orderUid)
 
@@ -103,33 +102,6 @@ export default function AccidentReceiveScreen() {
 
     useEffect(() => {
         reset()
-
-        const keyboardWillShowListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-            event => {
-                Animated.timing(keyboardHeight, {
-                    duration: Platform.OS === 'ios' ? 250 : 200,
-                    toValue: event.endCoordinates.height,
-                    useNativeDriver: false,
-                }).start()
-            },
-        )
-
-        const keyboardWillHideListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-            () => {
-                Animated.timing(keyboardHeight, {
-                    duration: Platform.OS === 'ios' ? 250 : 200,
-                    toValue: 0,
-                    useNativeDriver: false,
-                }).start()
-            },
-        )
-
-        return () => {
-            keyboardWillShowListener.remove()
-            keyboardWillHideListener.remove()
-        }
     }, [])
 
     return (

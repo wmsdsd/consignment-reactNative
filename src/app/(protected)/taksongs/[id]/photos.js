@@ -1,13 +1,12 @@
 import {View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid} from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router'
-import React, {useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     useDriverMove,
     useOrder,
     useOrderLocationEnd,
     useOrderLocationProcess,
     useOrderPhotoList,
-    useOrderPhotoRemove,
     useOrderPhotoUpload,
     useOrderStatusUpdate,
 } from '@/hooks/useApi';
@@ -16,6 +15,8 @@ import { uriToFileObject } from "@/lib/uriToFile"
 import {isAndroid} from "@/lib/platform"
 import { isFileUnder2MB } from '@/lib/utils';
 import { getLocation } from '@/hooks/useLocation';
+import { useRemovePhoto } from '@/hooks/useRemovePhoto';
+import ImageThumbnail from '@/components/ImageThumbnail';
 
 const tabs = [
     {
@@ -80,7 +81,6 @@ export default function CameraScreen() {
     const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
 
     const uploadMutation = useOrderPhotoUpload()
-    const removeMutation = useOrderPhotoRemove()
     const endMutation = useOrderLocationEnd()
     const updateOrderStatusMutation = useOrderStatusUpdate()
     const driverMoveMutation = useDriverMove()
@@ -149,66 +149,22 @@ export default function CameraScreen() {
         }
     }
 
-    const removePhoto = (key, uid) => {
-        Alert.alert(
-            '삭제',
-            '이 사진을 삭제하시겠습니까?',
-            [
-                {
-                    text: '취소',
-                    style: 'cancel'
-                },
-                {
-                    text: '삭제',
-                    style: 'destructive',
-                    onPress: async () => {
-                        const sendData = {
-                            keys: [key]
-                        }
-                        await removeMutation.mutateAsync(sendData)
-
-                        const list = photoList[tab.key].filter((p) => p.uid !== uid)
-                        if (list.length === 0) list.push(null)
-
-                        setPhotoList({
-                            ...photoList,
-                            [tab.key]: list,
-                        })
-
-                        if (isAndroid) {
-                            ToastAndroid.show("삭제 되었습니다.", ToastAndroid.SHORT)
-                        }
-                    },
-                },
-            ]
-        )
+    const updatePhotoList = (list) => {
+        setPhotoList({
+            ...photoList,
+            [tab.key]: list,
+        })
     }
 
-    const renderSlot = ({ item }) => {
-        return (
-            <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
-                {item ? (
-                    <View className={"border border-[#444] flex-1 rounded-2xl border-dashed"}>
-                        <Image
-                            className={"flex-1 rounded-lg"}
-                            source={{ uri: item.url }}
-                            resizeMode={"contain"}
-                        />
-                        <TouchableOpacity
-                            className={"absolute top-[-10px] right-[-10px] rounded-lg w-6 h-6 items-center justify-center"}
-                            onPress={() => removePhoto(item.key, item.uid)}
-                        >
-                            <Image source={require("@assets/icon/ic_close.png")} className={"w-4 h-4"} />
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <TouchableOpacity className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}>
-                        <Image source={require("@assets/images/sample/sample_thumbnail.png")} className={"w-8 h-8"} />
-                    </TouchableOpacity>
-                )}
-            </View>
-        )
-    }
+    const { removePhoto } = useRemovePhoto({
+        photoList: photoList[tab.key],
+        setPhotoList: updatePhotoList
+    })
+
+    const renderSlot = useCallback(({ item }) => (
+        <ImageThumbnail item={item} onRemove={removePhoto} />
+    ), [removePhoto])
+
 
     // 촬영 완료 핸들러
     const handleComplete = async () => {

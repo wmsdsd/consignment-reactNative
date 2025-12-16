@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.45.131:4000/api/mobile';
+const BASE_URL = 'http://192.168.0.24:4000/api/mobile';
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage

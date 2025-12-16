@@ -14,18 +14,19 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     useOrderLocationProcess,
-    useOrderPhotoRemove,
     useOrderPhotoUpload,
     useOrderSettlement,
     useOrderSettlementRemove, useOrderSettlementUpdate,
 } from '@/hooks/useApi';
 import { TYPE_OPTIONS} from '@/data/codes';
 import { Controller, useForm } from 'react-hook-form';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { isFileUnder2MB } from '@/lib/utils';
 import { uriToFileObject } from '@/lib/uriToFile';
 import { isAndroid } from '@/lib/platform';
+import { useRemovePhoto } from '@/hooks/useRemovePhoto';
+import ImageThumbnail from '@/components/ImageThumbnail';
 
 const MAX_COUNT = 3
 
@@ -50,7 +51,6 @@ export default function PriceDetailScreen() {
     const type = watch("type")
 
     // mutations
-    const removeMutation = useOrderPhotoRemove()
     const uploadMutation = useOrderPhotoUpload()
     const updateMutation = useOrderSettlementUpdate()
     const deleteMutation = useOrderSettlementRemove()
@@ -154,35 +154,6 @@ export default function PriceDetailScreen() {
             ])
     }
 
-    const removePhoto = (key, uid) => {
-        Alert.alert(
-            '삭제',
-            '이 사진을 삭제하시겠습니까?',
-            [
-                {
-                    text: '취소',
-                    style: 'cancel'
-                },
-                {
-                    text: '삭제',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await removeMutation.mutateAsync({
-                            keys: [key]
-                        })
-                        const list = photoList.filter((orderPhoto) => orderPhoto.uid !== uid)
-                        if (list.length === 0) list.push(null)
-
-                        setPhotoList(list)
-
-                        if (isAndroid) {
-                            ToastAndroid.show("삭제 되었습니다.", ToastAndroid.SHORT)
-                        }
-                    },
-                },
-            ]
-        )
-    }
 
     const handleDelete = () => {
         Alert.alert(
@@ -204,39 +175,15 @@ export default function PriceDetailScreen() {
             ])
     }
 
-    const renderImage = ({ item }) => {
-        const url = item
-            ? item.url
-                ? item.url.includes("?")
-                    ? item.url.split("?")[0]
-                    : item.url
-                : null
-            : null
+    const { removePhoto } = useRemovePhoto({
+        photoList,
+        setPhotoList
+    })
 
-        return (
-            <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
-                {item ? (
-                    <View className={"border border-[#444] flex-1 rounded-2xl border-dashed"}>
-                        <Image
-                            className={"flex-1 rounded-lg"}
-                            source={{ uri: url }}
-                            resizeMode={"contain"}
-                        />
-                        <TouchableOpacity
-                            className={"absolute top-[-10px] right-[-10px] rounded-lg w-6 h-6 items-center justify-center"}
-                            onPress={() => removePhoto(item.key, item.uid)}
-                        >
-                            <Image source={require("@assets/icon/ic_close.png")} className={"w-4 h-4"} />
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <TouchableOpacity className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}>
-                        <Image source={require("@assets/images/sample/sample_thumbnail.png")} className={"w-8 h-8"} />
-                    </TouchableOpacity>
-                )}
-            </View>
-        )
-    }
+    const renderImage = useCallback(({ item }) => (
+        <ImageThumbnail item={item} onRemove={removePhoto} />
+    ), [removePhoto])
+
 
     if (!orderSettlement) {
         return (

@@ -6,7 +6,7 @@ import { View, Text, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/hooks/useAuth'
 import { formatPhone } from '@/lib/utils'
-import { useAppContext } from '@/app/context/AppContext'
+import { useAppContext } from '@/context/AppContext'
 import { useEffect, useRef } from 'react';
 
 const CustomDrawerContent = props => {

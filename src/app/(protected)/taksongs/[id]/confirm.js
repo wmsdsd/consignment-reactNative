@@ -7,7 +7,7 @@ import { formatDate, formatPhone, formatTime } from '@/lib/utils';
 import IconButton from '@/components/IconButton'
 import moment from 'moment'
 import { useForegroundLocation, getLocation } from '@/hooks/useLocation'
-import { useAppContext } from '@/app/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()

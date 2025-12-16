@@ -8,33 +8,33 @@ import {
 } from 'react-native';
 
 export default function KeyboardWrapper({ children }) {
-    const [keyboardHeight] = useState(new Animated.Value(0));
+    const [keyboardHeight] = useState(new Animated.Value(0))
     
     useEffect(() => {
-        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
         
         const keyboardWillShowListener = Keyboard.addListener(showEvent, event => {
             Animated.timing(keyboardHeight, {
                 duration: Platform.OS === 'ios' ? 250 : 200,
                 toValue: event.endCoordinates.height,
                 useNativeDriver: false,
-            }).start();
-        });
+            }).start()
+        })
         
         const keyboardWillHideListener = Keyboard.addListener(hideEvent, () => {
             Animated.timing(keyboardHeight, {
                 duration: Platform.OS === 'ios' ? 250 : 200,
                 toValue: 0,
                 useNativeDriver: false,
-            }).start();
-        });
+            }).start()
+        })
         
         return () => {
-            keyboardWillShowListener.remove();
-            keyboardWillHideListener.remove();
+            keyboardWillShowListener.remove()
+            keyboardWillHideListener.remove()
         };
-    }, []);
+    }, [])
     
     return (
         <KeyboardAvoidingView
@@ -64,5 +64,5 @@ export default function KeyboardWrapper({ children }) {
                 </Animated.View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
-    );
+    )
 }
