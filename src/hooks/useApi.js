@@ -47,10 +47,15 @@ export const useDriverCheck = (enabled) => {
     })
 }
 
-export const useDriverProfile = () => {
+export const useDriverProfile = (uid) => {
     return useQuery({
-        queryKey: ['driver', 'profile'],
-        queryFn: driverApi.getProfile,
+        queryKey: ['driver', 'profile', uid],
+        queryFn: async ({ queryKey }) => {
+            const [,, uid] = queryKey
+            const qs = new URLSearchParams({ uid })
+            return driverApi.getProfile(qs)
+        },
+        enabled: !!uid
     });
 };
 
@@ -156,7 +161,7 @@ export const useOrderLocationStart = () => {
     return useMutation({
         mutationFn: orderLocationApi.start,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orderLocation'] })
+            queryClient.invalidateQueries({ queryKey: ['order', 'orderLocation'] })
         },
     })
 }

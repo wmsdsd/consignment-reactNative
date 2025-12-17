@@ -17,6 +17,7 @@ import { isFileUnder2MB } from '@/lib/utils';
 import { getLocation } from '@/hooks/useLocation';
 import { useRemovePhoto } from '@/hooks/useRemovePhoto';
 import ImageThumbnail from '@/components/ImageThumbnail';
+import useGlobalLoading from "@/hooks/useGlobalLoading";
 
 const tabs = [
     {
@@ -67,6 +68,7 @@ export default function CameraScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
+    const isLoading = useGlobalLoading()
 
     const [ready, setReady] = React.useState(false)
     const [tab, setTab] = useState(tabs[0])
@@ -84,7 +86,6 @@ export default function CameraScreen() {
     const endMutation = useOrderLocationEnd()
     const updateOrderStatusMutation = useOrderStatusUpdate()
     const driverMoveMutation = useDriverMove()
-
 
     const onHandleTakePicture = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync()
@@ -212,6 +213,7 @@ export default function CameraScreen() {
 
     const moveToNextProcess = async () => {
         const { data } = await refetchOrderLocation()
+        console.log("refresh orderLocation", data)
 
         if (data) {
             const coords = await getLocation()
@@ -230,7 +232,7 @@ export default function CameraScreen() {
         }
         else {
             const res = await updateOrderStatusMutation.mutateAsync({
-                uid: order.uid,
+                orderId: order.uid,
                 status: "DELIVERY_COMPLETE"
             })
             if (res) {
@@ -321,17 +323,21 @@ export default function CameraScreen() {
 
             {/* Bottom Button */}
             <TouchableOpacity
-                className={"mt-4 mx-5 bg-primary rounded-xl py-4 mb-16 items-center"}
+                className={`mt-4 mx-5 bg-primary rounded-xl py-4 mb-16 items-center
+                    ${ isLoading && "bg-gray-400"}
+                `}
                 onPress={handleEndOrderLocation}
-                disabled={endMutation.isPending}
+                disabled={isLoading}
             >
-                {endMutation.isPending ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text className="color-white text-base font-semibold">
-                        촬영 완료
-                    </Text>
-                )}
+                {
+                    isLoading
+                        ? (<ActivityIndicator color="#fff" />)
+                        : (
+                            <Text className="color-white text-base font-semibold">
+                                촬영 완료
+                            </Text>
+                        )
+                }
             </TouchableOpacity>
         </View>
     )

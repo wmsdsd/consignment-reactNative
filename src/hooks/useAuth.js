@@ -80,11 +80,14 @@ export const AuthProvider = ({ children }) => {
             router.replace("/(auth)/login")
         }
     }
+
+
     
     const value = {
         isAuthenticated,
         isLoading: isLoading || isChecking,
         user,
+        setUser,
         login,
         logout,
     };

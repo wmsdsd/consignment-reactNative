@@ -1,38 +1,84 @@
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useOrder, useOrderStatusUpdate } from '@/hooks/useApi';
-import { useCallback } from 'react';
-
+import {useDriverMove, useOrder, useOrderStatusUpdate} from '@/hooks/useApi';
+import {useMemo} from 'react';
+import {addCommaToNumber} from "@/lib/utils";
+import {getLocation} from "@/hooks/useLocation";
 
 export default function CompleteScreen() {
     const { id } = useLocalSearchParams()
     const insets = useSafeAreaInsets()
-    const { data } = useOrder(id)
+
+    const { data: order } = useOrder(id)
+
+    const updateOrderStatusMutation = useOrderStatusUpdate()
+    const driverMoveMutation = useDriverMove()
+
+    const settlementPrice = useMemo(() => {
+        if (order && Array.isArray(order?.orderSettlements)) {
+            const list = order.orderSettlements.filter(e => e.category === "ADD")
+            return list.reduce((acc, cur) => {
+                const price = cur.price
+                return acc + price
+            }, 0)
+        }
+        else {
+            return 0
+        }
+    }, [order?.orderSettlements])
 
     const onHandleComplete = async () => {
+        if (order?.status === "DRIVER_END") {
+            const res = await updateOrderStatusMutation.mutateAsync({
+                orderId: order.uid,
+                status: "DELIVERY_COMPLETE"
+            })
+            if (res) {
+                const coords = await getLocation()
+                if (coords) {
+                    const orderLocation = order?.orderLocations?.find(e => e.type === "END")
+                    await driverMoveMutation.mutateAsync({
+                        name: `탁송 완료`,
+                        type: "HISTORY",
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        orderUid: id,
+                        orderLocationUid: orderLocation?.uid,
+                    })
+                }
+
+                moveToList()
+            }
+        }
+        else {
+            moveToList()
+        }
+    }
+
+    const moveToList = () => {
         router.replace(`/(protected)/taksongs`)
     }
 
     return (
         <View className={"flex-1 bg-black"}>
-            <View className={"flex-1 p-4"}>
+            <View className={"flex-1 p-2"}>
                 <View className={"flex-1 p-4"}>
-                    <View className={""}>
+                    <View className={"border border-color rounded-lg flex justify-center items-center p-8"}>
                         <View className={""}>
-                            <Text>탁송 금액</Text>
+                            <Text className={"font-color-sub font-bold text-xl mb-5"}>탁송 금액</Text>
                         </View>
                         <View className={""}>
-                            <Text>40000원</Text>
+                            <Text className={"font-color font-semibold text-6xl"}>{addCommaToNumber(order?.driverPrice)}원</Text>
                         </View>
                     </View>
                 </View>
-                <View className={""}>
+                <View className={"flex justify-center items-center"}>
                     <View>
-                        <Text>청구 금액</Text>
+                        <Text className={"font-color-label text-xl mb-2.5"}>청구 금액</Text>
                     </View>
                     <View>
-                        <Text>20000원</Text>
+                        <Text className={"font-color text-4xl font-semibold"}>{addCommaToNumber(settlementPrice)}원</Text>
                     </View>
                 </View>
             </View>
@@ -41,8 +87,14 @@ export default function CompleteScreen() {
                 style={{ paddingBottom: Math.max(insets.bottom, 60) }}
             >
                 <View>
-                    <Pressable onPress={onHandleComplete} className="w-full rounded-xl bg-btn py-4">
-                        <Text className="text-center text-xl font-semibold text-white">탁송 완료</Text>
+                    <Pressable
+                        onPress={onHandleComplete}
+                        className="w-full rounded-xl bg-btn py-4"
+                        disabled={updateOrderStatusMutation.isPending || driverMoveMutation.isPending}
+                    >
+                        <Text className="text-center text-xl font-semibold text-white">
+                            { updateOrderStatusMutation.isPending || driverMoveMutation.isPending ? "데이터 전송 중" : "탁송 완료" }
+                        </Text>
                     </Pressable>
                 </View>
             </View>

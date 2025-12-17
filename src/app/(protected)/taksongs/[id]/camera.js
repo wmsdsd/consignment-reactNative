@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { useRef } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useOrderLocationProcess } from '@/hooks/useApi'
+import useGlobalLoading from "@/hooks/useGlobalLoading";
 
 const plateUrl = "https://plate.olgomobility.com/recognize/"
 
@@ -12,6 +13,7 @@ export default function CustomCameraScreen() {
 
     const [permission, requestPermission] = useCameraPermissions()
     const cameraRef = useRef(null)
+    const isLoading = useGlobalLoading()
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -101,7 +103,10 @@ export default function CustomCameraScreen() {
                 {/* 촬영 버튼 */}
                 <TouchableOpacity
                     onPress={onSuccess}
-                    className="mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white"
+                    className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white
+                        ${ isLoading && "bg-gray-400"}
+                    `}
+                    disabled={isLoading}
                 >
                     <View className="h-12 w-12 rounded-full bg-primary" />
                 </TouchableOpacity>
@@ -125,6 +130,7 @@ export default function CustomCameraScreen() {
                 }}
             >
             </View>
+
         </View>
     );
 }

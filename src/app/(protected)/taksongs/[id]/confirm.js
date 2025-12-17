@@ -8,13 +8,13 @@ import IconButton from '@/components/IconButton'
 import moment from 'moment'
 import { useForegroundLocation, getLocation } from '@/hooks/useLocation'
 import { useAppContext } from '@/context/AppContext';
+import useGlobalLoading from "@/hooks/useGlobalLoading";
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
     const { setMenuConfig } = useAppContext()
 
     const { id } = useLocalSearchParams()
-    console.log("confirm id", id)
     const { data: order } = useOrder(id)
     const { data: orderLocation , refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
@@ -26,6 +26,7 @@ export default function ConfirmScreen() {
     const isWait = useMemo(() => {
         return orderLocation?.status === 'WAIT'
     }, [orderLocation?.status])
+    const isLoading = useGlobalLoading()
     
     // 날짜와 시간 상태 관리
     const [selectedDate, setSelectedDate] = useState(new Date())
@@ -195,11 +196,6 @@ export default function ConfirmScreen() {
 
 
     if (!order || !orderLocation) {
-
-        console.log("order?.stauts === \"DRIVER_END\"", order?.stauts === "DRIVER_END")
-        console.log("Array.isArray(order?.orderLocations)", Array.isArray(order?.orderLocations))
-        console.log("order?.orderLocations.every(e => e.status === \"COMPLETE\")", order?.orderLocations.every(e => e.status === "COMPLETE"))
-
         if (
             order?.status === "DRIVER_END"
             && Array.isArray(order?.orderLocations)
@@ -244,6 +240,11 @@ export default function ConfirmScreen() {
                     <View className="mb-3 flex-row">
                         <Text className="w-28 text-gray-300">연락처</Text>
                         <Text className="font-semibold text-white">{formatPhone(orderLocation.phone)}</Text>
+                    </View>
+
+                    <View className="mb-3 flex-row">
+                        <Text className="w-28 text-gray-300">장소</Text>
+                        <Text className="flex-1 font-semibold text-white">{orderLocation.typeName || '없음'}</Text>
                     </View>
 
                     <View className="mb-3 flex-row">
@@ -326,8 +327,14 @@ export default function ConfirmScreen() {
                     </View>
                 )}
                 { isWait && (
-                    <Pressable onPress={handleTransportStart} className="w-full rounded-xl bg-btn py-4">
-                        <Text className="text-center text-xl font-semibold text-white">운행 시작</Text>
+                    <Pressable
+                        onPress={handleTransportStart}
+                        className={`w-full rounded-xl bg-btn py-4 ${ isLoading && "bg-gray-400"}`}
+                        disabled={isLoading}
+                    >
+                        <Text className="text-center text-xl font-semibold text-white">
+                            { isLoading ? "운행 준비 중..." : "운행 시작"}
+                        </Text>
                     </Pressable>
                 )}
             </View>
