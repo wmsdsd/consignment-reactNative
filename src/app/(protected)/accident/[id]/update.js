@@ -144,7 +144,8 @@ export default function AccidentUpdateScreen() {
             ])
     }
 
-    const handleComplete = () => {
+    const submitComplete = handleSubmit(onSubmit)
+    const handleComplete = async () => {
         if (accidentType === "NONE") {
             if (isAndroid) {
                 ToastAndroid.show("사고 종류를 선택해 주세요.", ToastAndroid.SHORT)
@@ -155,7 +156,7 @@ export default function AccidentUpdateScreen() {
 
 
         setValue('category', "COMPLETE")
-        handleSubmit(onSubmit)
+        await submitComplete()
     }
 
     const handleDateChange = (event, date) => {
@@ -204,7 +205,6 @@ export default function AccidentUpdateScreen() {
         setPhotoList([null])
 
         if (orderAccident) {
-            console.log("order accident", orderAccident)
             reset({
                 ...orderAccident,
                 selfPayment: String(orderAccident.selfPayment ?? ""),
@@ -446,7 +446,7 @@ export default function AccidentUpdateScreen() {
                                     </View>
                                 </View>
                                 <View className="mb-4">
-                                    <Text className="mb-2 text-base text-gray-300">수리 시작일시</Text>
+                                    <Text className="mb-2 text-base text-gray-300">수리 종료일시</Text>
                                     <View className="flex-row gap-3">
                                         <Pressable
                                             onPress={() => {

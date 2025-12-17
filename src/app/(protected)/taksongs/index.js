@@ -41,6 +41,7 @@ export default function TaksongListScreen() {
                 ...prev,
                 direction: 'left',
             }))
+            refetch()
         }, [])
     )
 

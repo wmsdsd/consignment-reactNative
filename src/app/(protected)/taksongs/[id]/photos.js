@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -323,8 +323,15 @@ export default function CameraScreen() {
             <TouchableOpacity
                 className={"mt-4 mx-5 bg-primary rounded-xl py-4 mb-16 items-center"}
                 onPress={handleEndOrderLocation}
+                disabled={endMutation.isPending}
             >
-                <Text className={"color-white text-base font-semibold"}>촬영 완료</Text>
+                {endMutation.isPending ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text className="color-white text-base font-semibold">
+                        촬영 완료
+                    </Text>
+                )}
             </TouchableOpacity>
         </View>
     )

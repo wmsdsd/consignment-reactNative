@@ -19,13 +19,21 @@ export default function CompleteScreen() {
             <View className={"flex-1 p-4"}>
                 <View className={"flex-1 p-4"}>
                     <View className={""}>
-                        <View className={""}>탁송 금액</View>
-                        <View className={""}>40000원</View>
+                        <View className={""}>
+                            <Text>탁송 금액</Text>
+                        </View>
+                        <View className={""}>
+                            <Text>40000원</Text>
+                        </View>
                     </View>
                 </View>
                 <View className={""}>
-                    <View>청구 금액</View>
-                    <View>20000원</View>
+                    <View>
+                        <Text>청구 금액</Text>
+                    </View>
+                    <View>
+                        <Text>20000원</Text>
+                    </View>
                 </View>
             </View>
             <View

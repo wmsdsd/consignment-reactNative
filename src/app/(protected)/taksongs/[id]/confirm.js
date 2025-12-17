@@ -1,5 +1,5 @@
 import { View, Text, Animated, TouchableOpacity, Pressable, Alert, Platform, Linking } from 'react-native'
-import { useLocalSearchParams, router, useNavigation } from 'expo-router'
+import { useLocalSearchParams, router, useNavigation, Redirect } from 'expo-router';
 import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useDriverMove, useOrder, useOrderLocationProcess, useOrderLocationStart } from '@/hooks/useApi';
@@ -14,6 +14,7 @@ export default function ConfirmScreen() {
     const { setMenuConfig } = useAppContext()
 
     const { id } = useLocalSearchParams()
+    console.log("confirm id", id)
     const { data: order } = useOrder(id)
     const { data: orderLocation , refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
@@ -192,20 +193,36 @@ export default function ConfirmScreen() {
 
     }, [])
 
+
     if (!order || !orderLocation) {
-        return (
-            <View className="flex-1 items-center justify-center bg-black">
-                <Text className="text-lg text-white">탁송 정보를 찾을 수 없습니다.</Text>
-                <TouchableOpacity
-                    onPress={() => {
-                        router.replace("/(protected)/taksongs")
-                    }}
-                    className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
-                >
-                    <Text className="font-semibold text-white">목록으로 돌아가기</Text>
-                </TouchableOpacity>
-            </View>
-        )
+
+        console.log("order?.stauts === \"DRIVER_END\"", order?.stauts === "DRIVER_END")
+        console.log("Array.isArray(order?.orderLocations)", Array.isArray(order?.orderLocations))
+        console.log("order?.orderLocations.every(e => e.status === \"COMPLETE\")", order?.orderLocations.every(e => e.status === "COMPLETE"))
+
+        if (
+            order?.status === "DRIVER_END"
+            && Array.isArray(order?.orderLocations)
+            && order?.orderLocations.every(e => e.status === "COMPLETE")
+        ) {
+            const completeHref = `/(protected)/taksongs/${id}/complete`
+            return <Redirect href={completeHref} />
+        }
+        else {
+            return (
+                <View className="flex-1 items-center justify-center bg-black">
+                    <Text className="text-lg text-white">탁송 정보를 찾을 수 없습니다.</Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                            router.replace("/(protected)/taksongs")
+                        }}
+                        className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
+                    >
+                        <Text className="font-semibold text-white">목록으로 돌아가기</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
     }
     
     return (

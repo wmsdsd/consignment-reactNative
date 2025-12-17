@@ -48,7 +48,7 @@ export default function TaksongCard({
          *             "DELIVERY_COMPLETE": "탁송 완료",
          *             "DISPUTE": "분쟁중"
          */
-
+        console.log("id", id)
         switch (status) {
             case "DRIVER_ASSIGN":   // 기사 배정
                 router.push(`/(protected)/taksongs/${id}`)
