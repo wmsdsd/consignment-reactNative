@@ -5,8 +5,7 @@ import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SettingsScreen() {
-    const { logout } = useAuth()
-    
+
     return (
         <View className="bg-black flex flex-1 p-8">
             <View>
@@ -21,12 +20,6 @@ export default function SettingsScreen() {
             <View>
                 <Text className={"color-white"}>푸시 알림 동의 여부</Text>
             </View>
-            <TouchableOpacity
-                className="items-center rounded-lg bg-default p-4"
-                onPress={logout}
-            >
-                <Text className="text-lg font-semibold text-white">로그아웃</Text>
-            </TouchableOpacity>
         </View>
     );
 }

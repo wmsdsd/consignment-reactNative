@@ -68,8 +68,9 @@ export default function CameraScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
-    const isLoading = useGlobalLoading()
 
+    const [isLoading, setIsLoading] = useState(false)
+    const [isTakingPicture, setIsTakingPicture] = useState(false)
     const [ready, setReady] = React.useState(false)
     const [tab, setTab] = useState(tabs[0])
     const [photoList, setPhotoList] = useState({
@@ -93,6 +94,8 @@ export default function CameraScreen() {
             alert("카메라 권한이 필요합니다!")
             return
         }
+
+        setIsTakingPicture(true)
 
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: false,
@@ -125,7 +128,7 @@ export default function CameraScreen() {
                 const list = await uploadMutation.mutateAsync(sendData)
                 if (Array.isArray(list) && list.length > 0) {
                     const orderPhoto = list[0]
-                    const uploadS3 = await fetch(orderPhoto.url, {
+                    await fetch(orderPhoto.url, {
                         method: "PUT",
                         headers: {
                             'Content-Type': file.type,
@@ -148,6 +151,8 @@ export default function CameraScreen() {
                 }
             }
         }
+
+        setIsTakingPicture(false)
     }
 
     const updatePhotoList = (list) => {
@@ -202,12 +207,22 @@ export default function CameraScreen() {
     }
 
     const handleEndOrderLocation = async () => {
-        const res = await endMutation.mutateAsync({
-            orderUid: order.uid,
-            orderLocationUid: orderLocation.uid
-        })
-        if (res) {
-            await moveToNextProcess()
+        setIsLoading(true)
+        try {
+            const res = await endMutation.mutateAsync({
+                orderUid: order.uid,
+                orderLocationUid: orderLocation.uid
+            })
+            if (res) {
+                await moveToNextProcess()
+            }
+        }
+        catch (e) {
+            console.log("handleEndOrderLocation Error:", e)
+            ToastAndroid.show("프로세스 처리중 문제가 발생했습니다. 통신 상태를 확인 후 다시 시도해주세요.", ToastAndroid.SHORT)
+        }
+        finally {
+            setIsLoading(false)
         }
     }
 
@@ -303,11 +318,15 @@ export default function CameraScreen() {
             {/* Big Camera Area */}
             <View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>
                 <Image source={tab.sampleImage} className={"absolute opacity-60"} />
-                <TouchableOpacity className={"justify-center items-center"} onPress={onHandleTakePicture}>
-                    <Image
-                        source={require('@assets/icon/ic_photo.png')}
-                        className="mb-8 h-28 w-28"
-                    />
+                <TouchableOpacity
+                    className={"justify-center items-center"}
+                    onPress={onHandleTakePicture}
+                    disabled={isTakingPicture}
+                >
+                    { isTakingPicture
+                        ? (<ActivityIndicator color={"fff"} /> )
+                        : (<Image source={require('@assets/icon/ic_photo.png')} className="mb-8 h-28 w-28" />)
+                    }
                 </TouchableOpacity>
                 <Text className={"color-white absolute bottom-4"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
             </View>
@@ -323,8 +342,8 @@ export default function CameraScreen() {
 
             {/* Bottom Button */}
             <TouchableOpacity
-                className={`mt-4 mx-5 bg-primary rounded-xl py-4 mb-16 items-center
-                    ${ isLoading && "bg-gray-400"}
+                className={`mt-4 mx-5 rounded-xl py-4 mb-16 items-center
+                    ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                 `}
                 onPress={handleEndOrderLocation}
                 disabled={isLoading}

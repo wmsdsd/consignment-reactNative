@@ -1,17 +1,26 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useOrder } from '@/hooks/useApi';
+import { useEffect } from 'react';
+import { useActionLock } from '@/hooks/useActionLock';
 
 export default function PrepareScreen() {
     const { id } = useLocalSearchParams()
-    const { data: order } = useOrder(id)
+    const { data: order, refetch } = useOrder(id)
+    const { runOnce } = useActionLock()
     
     // 촬영시작 핸들러 - 촬영 안내 페이지로 이동
     const handleCameraStart = () => {
-        router.push({
-            pathname: `/(protected)/taksongs/${id}/camera`
+        runOnce(() => {
+            router.push({
+                pathname: `/(protected)/taksongs/${id}/camera`
+            })
         })
     }
+
+    useEffect(() => {
+        refetch()
+    }, [])
     
     if (!order) {
         return (

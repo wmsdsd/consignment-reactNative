@@ -1,9 +1,9 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import { View, TouchableOpacity, Text, Alert } from 'react-native'
-import { useRef } from 'react'
+import { View, TouchableOpacity, Text, Alert, ActivityIndicator } from 'react-native';
+import { useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router'
 import { useOrderLocationProcess } from '@/hooks/useApi'
-import useGlobalLoading from "@/hooks/useGlobalLoading";
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const plateUrl = "https://plate.olgomobility.com/recognize/"
 
@@ -12,8 +12,8 @@ export default function CustomCameraScreen() {
     const { data: orderLocation } = useOrderLocationProcess(id)
 
     const [permission, requestPermission] = useCameraPermissions()
+    const [isLoading, setIsLoading] = useState(false)
     const cameraRef = useRef(null)
-    const isLoading = useGlobalLoading()
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -30,23 +30,30 @@ export default function CustomCameraScreen() {
     const takePicture = async () => {
         if (!cameraRef.current) return
 
+        setIsLoading(true)
+
         const result = await cameraRef.current.takePictureAsync({
-            quality: 0.8,
+            quality: 0.5,
             base64: false,
             exif: false,
+            skipProcessing: true
         })
 
         if (result && result.uri) {
-            const uri = result.uri
-            const ext = result.uri.split('.').pop() || 'jpg'
+            const image = await ImageManipulator.manipulateAsync(
+                result.uri,
+                [{ resize: { width: 1024 } }],
+                {
+                    compress: 0.6,
+                    format: ImageManipulator.SaveFormat.JPEG
+                }
+            )
             const formData = new FormData()
 
             formData.append('image', {
-                uri: uri,
-                name: `carPlate.${ext}`,
-                type: ext === 'jpg' || ext === 'jpeg'
-                    ? 'image/jpeg'
-                    : `image/${ext}`,
+                uri: image.uri,
+                name: 'carPlate.jpg',
+                type: 'image/jpeg'
             })
 
             try {
@@ -55,19 +62,26 @@ export default function CustomCameraScreen() {
                     body: formData,
                 })
 
-                const data = await res.json()
-                const status = data?.status
-                if (status === 200 && data?.plates?.length > 0) {
-                    const carNumber = data.plates[0]
-                    if (orderLocation.carNumber !== carNumber) {
-                        Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data?.plates?.length > 0) {
+                        const carNumber = data.plates[0]
+                        console.log("carNumber", carNumber)
+                        if (orderLocation.carNumber !== carNumber) {
+                            Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
+                        }
+                        else {
+                            onSuccess()
+                        }
                     }
                     else {
-                        onSuccess()
+                        Alert.alert("알림", "번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.")
                     }
                 }
                 else {
-                    Alert.alert("알림", "번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.")
+                    const text = await res.text()
+                    console.error('server error:', res.status, text);
+                    Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
                 }
             }
             catch (e) {
@@ -75,6 +89,8 @@ export default function CustomCameraScreen() {
                 Alert.alert("알림", "사진 정보가 올바르지 않습니다.")
             }
         }
+
+        setIsLoading(false)
     }
 
     const onSuccess = () => {
@@ -83,14 +99,77 @@ export default function CustomCameraScreen() {
         })
     }
 
+    const PLATE_WIDTH = 250
+    const PLATE_HEIGHT = 150
+    const bgColor = 'rgba(0,0,0,0.6)'
+
     return (
-        <View style={{ flex: 1, backgroundColor: '#000' }}>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: '#000'
+            }}
+        >
             {/* ----- 카메라 화면 ----- */}
             <CameraView
                 ref={cameraRef}
                 style={{ flex: 1 }}
                 facing="back"
             />
+
+            {/* ====== 어두운 오버레이 ====== */}
+            <View
+                pointerEvents="none"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                }}
+            >
+                {/* 위 */}
+                <View
+                    style={{
+                        height: '50%',
+                        backgroundColor: bgColor,
+                        marginTop: -PLATE_HEIGHT / 2,
+                    }}
+                />
+
+                {/* 가운데 (좌/우) */}
+                <View style={{ flexDirection: 'row' }}>
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: bgColor,
+                        }}
+                    />
+
+                    {/* 투명 영역 */}
+                    <View
+                        style={{
+                            width: PLATE_WIDTH,
+                            height: PLATE_HEIGHT,
+                        }}
+                    />
+
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: bgColor,
+                        }}
+                    />
+                </View>
+
+                {/* 아래 */}
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: bgColor,
+                    }}
+                />
+            </View>
 
             {/* ----- 커스텀 촬영 버튼 UI ----- */}
             <View
@@ -102,13 +181,16 @@ export default function CustomCameraScreen() {
             >
                 {/* 촬영 버튼 */}
                 <TouchableOpacity
-                    onPress={onSuccess}
-                    className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white
-                        ${ isLoading && "bg-gray-400"}
+                    onPress={takePicture}
+                    className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white 
+                        ${ isLoading ? "bg-gray-400" : 'bg-white'}
                     `}
                     disabled={isLoading}
                 >
-                    <View className="h-12 w-12 rounded-full bg-primary" />
+                    { isLoading
+                        ? (<ActivityIndicator color={"fff"} />)
+                        : (<View className="h-12 w-12 rounded-full bg-primary" />)
+                    }
                 </TouchableOpacity>
             </View>
 
@@ -116,16 +198,16 @@ export default function CustomCameraScreen() {
             <View
                 style={{
                     position: 'absolute',
-                    width: 250,
-                    height: 150,
+                    width: PLATE_WIDTH,
+                    height: PLATE_HEIGHT,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     borderColor: '#d30000',
                     top: '50%',
                     left: '50%',
                     transform: [
-                        { translateX: -125 }, // width의 절반
-                        { translateY: -150 }, // height의 절반
+                        { translateX: -PLATE_WIDTH / 2 }, // width의 절반
+                        { translateY: -PLATE_HEIGHT / 2 }, // height의 절반
                     ],
                 }}
             >

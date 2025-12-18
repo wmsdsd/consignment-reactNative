@@ -5,12 +5,17 @@ import {useDriverMove, useOrder, useOrderStatusUpdate} from '@/hooks/useApi';
 import {useMemo} from 'react';
 import {addCommaToNumber} from "@/lib/utils";
 import {getLocation} from "@/hooks/useLocation";
+import useGlobalLoading from '@/hooks/useGlobalLoading';
 
 export default function CompleteScreen() {
     const { id } = useLocalSearchParams()
     const insets = useSafeAreaInsets()
 
     const { data: order } = useOrder(id)
+
+    const isLoading = useGlobalLoading({
+        mutating: { mutationKey: ['order', 'driverMove'] }
+    })
 
     const updateOrderStatusMutation = useOrderStatusUpdate()
     const driverMoveMutation = useDriverMove()
@@ -89,11 +94,11 @@ export default function CompleteScreen() {
                 <View>
                     <Pressable
                         onPress={onHandleComplete}
-                        className="w-full rounded-xl bg-btn py-4"
-                        disabled={updateOrderStatusMutation.isPending || driverMoveMutation.isPending}
+                        className={`w-full rounded-xl py-4 ${isLoading ? 'bg-gray-400' : 'bg-btn'}`}
+                        disabled={isLoading}
                     >
                         <Text className="text-center text-xl font-semibold text-white">
-                            { updateOrderStatusMutation.isPending || driverMoveMutation.isPending ? "데이터 전송 중" : "탁송 완료" }
+                            { isLoading ? "데이터 전송 중" : "탁송 완료" }
                         </Text>
                     </Pressable>
                 </View>

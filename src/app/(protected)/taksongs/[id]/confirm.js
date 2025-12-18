@@ -1,4 +1,4 @@
-import { View, Text, Animated, TouchableOpacity, Pressable, Alert, Platform, Linking } from 'react-native'
+import { View, Text, Animated, TouchableOpacity, Pressable, Alert, Platform, Linking, ScrollView } from 'react-native';
 import { useLocalSearchParams, router, useNavigation, Redirect } from 'expo-router';
 import {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -26,13 +26,14 @@ export default function ConfirmScreen() {
     const isWait = useMemo(() => {
         return orderLocation?.status === 'WAIT'
     }, [orderLocation?.status])
-    const isLoading = useGlobalLoading()
-    
-    // 날짜와 시간 상태 관리
+
+    // 상태 관리
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showTimePicker, setShowTimePicker] = useState(false)
-    
+    const [isLoading, setIsLoading] = useState(false)
+    const [isCalling, setIsCalling] = useState(false)
+
     const startMutation = useOrderLocationStart()
     const driverMoveMutation = useDriverMove()
 
@@ -60,117 +61,153 @@ export default function ConfirmScreen() {
     
     // 운행 시작
     const handleTransportStart = async () => {
-        const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
-        const res = await startMutation.mutateAsync({
-            orderUid: id,
-            orderLocationUid: orderLocation.uid,
-            arrivedAt: arrivedAt,
-        })
-        if (res) {
-            await refetchOrderLocation()
+        if (isLoading) return
 
-            const coords = await getLocation()
-            if (coords) {
-                await driverMoveMutation.mutateAsync({
-                    name: `[${orderLocation.typeName}] 탁송 기사 출발`,
-                    type: "HISTORY",
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                    orderUid: id,
-                    orderLocationUid: orderLocation.uid,
-                })
+        setIsLoading(true)
+
+        try {
+            const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
+            const res = await startMutation.mutateAsync({
+                orderUid: id,
+                orderLocationUid: orderLocation.uid,
+                arrivedAt: arrivedAt,
+            })
+            if (res) {
+                await refetchOrderLocation()
+
+                const coords = await getLocation()
+                if (coords) {
+                    await driverMoveMutation.mutateAsync({
+                        name: `[${orderLocation.typeName}] 탁송 기사 출발`,
+                        type: "HISTORY",
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        orderUid: id,
+                        orderLocationUid: orderLocation.uid,
+                    })
+                }
             }
+        }
+        finally {
+            setIsLoading(false)
         }
     }
     
     // 도착 및 사진 촬영
     const handleMoveToPrepare = () => {
-        router.push({
-            pathname: `/(protected)/taksongs/${id}/prepare`
-        })
+        if (isLoading) return
+
+        setIsLoading(true)
+
+        try {
+            router.push({
+                pathname: `/(protected)/taksongs/${id}/prepare`
+            })
+        }
+        finally {
+            setIsLoading(false)
+        }
     }
     
     // 네비게이션 앱 열기 핸들러
     const handleOpenNavigation = async () => {
-        const address = orderLocation.roadAddress || orderLocation.jibunAddress || '미등록 장소'
-        const goalName = encodeURIComponent(address)
-        const goalX = orderLocation.longitude // 경도
-        const goalY = orderLocation.latitude // 위도
-        
-        // 사용자에게 앱 선택 옵션 제공
-        Alert.alert(
-            '네비게이션 앱 선택',
-            '사용할 네비게이션 앱을 선택해주세요',
-            [
-                {
-                    text: 'TMap',
-                    onPress: async () => {
-                        // TMap은 goalname, goalx, goaly 파라미터 사용
-                        const tmapUrl = `tmap://route?goalname=${goalName}&goalx=${goalX}&goaly=${goalY}`;
-                        try {
-                            const canOpen = await Linking.canOpenURL(tmapUrl);
-                            if (canOpen) {
-                                await Linking.openURL(tmapUrl);
-                            } else {
-                                // TMap이 설치되어 있지 않은 경우 앱스토어로 이동
-                                const storeUrl = Platform.select({
-                                    ios: 'https://apps.apple.com/kr/app/tmap/id431589174',
-                                    android: 'market://details?id=com.skt.tmap.ku',
-                                });
-                                if (storeUrl) {
-                                    await Linking.openURL(storeUrl);
+        if (isCalling) return
+
+        setIsCalling(true)
+
+        try {
+            const address = orderLocation.roadAddress || orderLocation.jibunAddress || '미등록 장소'
+            const goalName = encodeURIComponent(address)
+            const goalX = orderLocation.longitude // 경도
+            const goalY = orderLocation.latitude // 위도
+
+            // 사용자에게 앱 선택 옵션 제공
+            Alert.alert(
+                '네비게이션 앱 선택',
+                '사용할 네비게이션 앱을 선택해주세요',
+                [
+                    {
+                        text: 'TMap',
+                        onPress: async () => {
+                            // TMap은 goalname, goalx, goaly 파라미터 사용
+                            const tmapUrl = `tmap://route?goalname=${goalName}&goalx=${goalX}&goaly=${goalY}`;
+                            try {
+                                const canOpen = await Linking.canOpenURL(tmapUrl);
+                                if (canOpen) {
+                                    await Linking.openURL(tmapUrl);
+                                } else {
+                                    // TMap이 설치되어 있지 않은 경우 앱스토어로 이동
+                                    const storeUrl = Platform.select({
+                                        ios: 'https://apps.apple.com/kr/app/tmap/id431589174',
+                                        android: 'market://details?id=com.skt.tmap.ku',
+                                    });
+                                    if (storeUrl) {
+                                        await Linking.openURL(storeUrl);
+                                    }
                                 }
+                            } catch (error) {
+                                console.error('TMap 열기 오류:', error);
+                                Alert.alert('오류', 'TMap을 열 수 없습니다.');
                             }
-                        } catch (error) {
-                            console.error('TMap 열기 오류:', error);
-                            Alert.alert('오류', 'TMap을 열 수 없습니다.');
-                        }
+                        },
                     },
-                },
-                {
-                    text: '카카오맵',
-                    onPress: async () => {
-                        // 카카오맵은 ep(위도,경도)와 by(이동수단) 파라미터 사용
-                        const kakaoMapUrl = `kakaomap://route?ep=${goalY},${goalX}&by=CAR`;
-                        try {
-                            const canOpen = await Linking.canOpenURL(kakaoMapUrl);
-                            if (canOpen) {
-                                await Linking.openURL(kakaoMapUrl);
-                            } else {
-                                // 카카오맵이 설치되어 있지 않은 경우 앱스토어로 이동
-                                const storeUrl = Platform.select({
-                                    ios: 'https://apps.apple.com/kr/app/kakaomap/id304608425',
-                                    android: 'market://details?id=net.daum.android.map',
-                                });
-                                if (storeUrl) {
-                                    await Linking.openURL(storeUrl);
+                    {
+                        text: '카카오맵',
+                        onPress: async () => {
+                            // 카카오맵은 ep(위도,경도)와 by(이동수단) 파라미터 사용
+                            const kakaoMapUrl = `kakaomap://route?ep=${goalY},${goalX}&by=CAR`;
+                            try {
+                                const canOpen = await Linking.canOpenURL(kakaoMapUrl);
+                                if (canOpen) {
+                                    await Linking.openURL(kakaoMapUrl);
+                                } else {
+                                    // 카카오맵이 설치되어 있지 않은 경우 앱스토어로 이동
+                                    const storeUrl = Platform.select({
+                                        ios: 'https://apps.apple.com/kr/app/kakaomap/id304608425',
+                                        android: 'market://details?id=net.daum.android.map',
+                                    });
+                                    if (storeUrl) {
+                                        await Linking.openURL(storeUrl);
+                                    }
                                 }
+                            } catch (error) {
+                                console.error('카카오맵 열기 오류:', error);
+                                Alert.alert('오류', '카카오맵을 열 수 없습니다.');
                             }
-                        } catch (error) {
-                            console.error('카카오맵 열기 오류:', error);
-                            Alert.alert('오류', '카카오맵을 열 수 없습니다.');
-                        }
+                        },
                     },
-                },
-                {
-                    text: '취소',
-                    style: 'cancel',
-                },
-            ],
-            { cancelable: true },
-        );
+                    {
+                        text: '취소',
+                        style: 'cancel',
+                    },
+                ],
+                { cancelable: true },
+            )
+        }
+        finally {
+            setIsCalling(false)
+        }
     }
     
     const handleCall = () => {
-        if (orderLocation.phone) {
-            const url = `tel:${orderLocation.phone}`
-            Linking.openURL(url).catch((error) => {
-                console.error('전화 연결 오류:', error)
-                Alert.alert('전화연결 오류', '전화연결에 실패하였습니다.')
-            })
+        if (isCalling) return
+
+        setIsCalling(true)
+
+        try {
+            if (orderLocation.phone) {
+                const url = `tel:${orderLocation.phone}`
+                Linking.openURL(url).catch((error) => {
+                    console.error('전화 연결 오류:', error)
+                    Alert.alert('전화연결 오류', '전화연결에 실패하였습니다.')
+                })
+            }
+            else {
+                Alert.alert('오류', '연락처가 존재하지 않습니다.')
+            }
         }
-        else {
-            Alert.alert('오류', '연락처가 존재하지 않습니다.')
+        finally {
+            setIsCalling(false)
         }
     }
 
@@ -184,7 +221,6 @@ export default function ConfirmScreen() {
         navigation.setOptions({
             title: orderLocation?.typeName || '차량 이동'
         })
-
 
         setMenuConfig(prev => ({
             ...prev,
@@ -223,71 +259,81 @@ export default function ConfirmScreen() {
     
     return (
         <View className="flex-1 bg-black">
-            <View className="flex-1 px-4">
-                <View className="flex-1 mt-6">
-                    <Text className="mb-3 text-lg font-semibold text-white">이동 정보</Text>
+            <ScrollView>
+                <View className="flex-1">
+                    <View className="mt-6 p-4">
+                        <Text className="mb-3 text-lg font-semibold font-color-sub">기본 정보</Text>
 
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">이름</Text>
-                        <Text className="font-semibold text-white">{orderLocation.name}</Text>
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">이름</Text>
+                            <Text className="font-semibold text-white">{orderLocation.name}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">차량번호</Text>
+                            <Text className="font-semibold text-white">{orderLocation.carNumber || '-'}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">연락처</Text>
+                            <Text className="font-semibold text-white">{formatPhone(orderLocation.phone)}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">상태</Text>
+                            <Text className="font-semibold text-white">{orderLocation.statusName}</Text>
+                        </View>
                     </View>
+                    <View className="mt-4 h-[10px] bg-gray-700" />
+                    <View className="mt-4 p-4">
+                        <Text className="mb-3 text-lg font-semibold font-color-sub">이동 정보</Text>
 
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">차량번호</Text>
-                        <Text className="font-semibold text-white">{orderLocation.carNumber || '-'}</Text>
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">장소</Text>
+                            <Text className="flex-1 font-semibold text-white">{orderLocation.typeName || '없음'}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">도로명 주소</Text>
+                            <Text className="flex-1 font-semibold text-white">{orderLocation.roadAddress || '없음'}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">지번 주소</Text>
+                            <Text className="flex-1 font-semibold text-white">{orderLocation.jibunAddress || '없음'}</Text>
+                        </View>
+
+                        <View className="mb-3 flex-row">
+                            <Text className="w-28 text-gray-300">상태</Text>
+                            <Text className="font-semibold text-white">{orderLocation.statusName}</Text>
+                        </View>
                     </View>
+                    <View className="mt-4 h-[10px] bg-gray-700" />
 
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">연락처</Text>
-                        <Text className="font-semibold text-white">{formatPhone(orderLocation.phone)}</Text>
-                    </View>
+                    {/* 도착예정일시 */}
+                    <View className="mt-4 p-4">
+                        <Text className="mb-4 text-lg font-semibold text-white">도착예정일시</Text>
 
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">장소</Text>
-                        <Text className="flex-1 font-semibold text-white">{orderLocation.typeName || '없음'}</Text>
-                    </View>
+                        <View className="flex-row gap-3">
+                            <Pressable
+                                onPress={() => setShowDatePicker(true)}
+                                disabled={!isWait}
+                                className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
+                            >
+                                <Text className="text-base font-medium text-black">{formatDate(selectedDate)} ▼</Text>
+                            </Pressable>
 
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">도로명 주소</Text>
-                        <Text className="flex-1 font-semibold text-white">{orderLocation.roadAddress || '없음'}</Text>
-                    </View>
-
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">지번 주소</Text>
-                        <Text className="flex-1 font-semibold text-white">{orderLocation.jibunAddress || '없음'}</Text>
-                    </View>
-
-                    <View className="mb-3 flex-row">
-                        <Text className="w-28 text-gray-300">상태</Text>
-                        <Text className="font-semibold text-white">{orderLocation.statusName}</Text>
+                            <Pressable
+                                onPress={() => setShowTimePicker(true)}
+                                disabled={!isWait}
+                                className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
+                            >
+                                <Text className="text-base font-medium text-black">{formatTime(selectedDate)} ▼</Text>
+                            </Pressable>
+                        </View>
                     </View>
                 </View>
-
-                <View className="my-5 h-[1px] bg-gray-700" />
-
-                {/* 도착예정일시 */}
-                <View className="mb-6">
-                    <Text className="mb-4 text-lg font-semibold text-white">도착예정일시</Text>
-
-                    <View className="flex-row gap-3">
-                        <Pressable
-                            onPress={() => setShowDatePicker(true)}
-                            disabled={!isWait}
-                            className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
-                        >
-                            <Text className="text-base font-medium text-black">{formatDate(selectedDate)} ▼</Text>
-                        </Pressable>
-
-                        <Pressable
-                            onPress={() => setShowTimePicker(true)}
-                            disabled={!isWait}
-                            className="flex-1 rounded-xl bg-white px-4 py-3 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
-                        >
-                            <Text className="text-base font-medium text-black">{formatTime(selectedDate)} ▼</Text>
-                        </Pressable>
-                    </View>
-                </View>
-            </View>
+            </ScrollView>
 
             {/* DatePicker */}
             {showDatePicker && (
@@ -321,7 +367,11 @@ export default function ConfirmScreen() {
                         <View className={"bg-default flex justify-center items-center w-[60] rounded-lg"}>
                             <IconButton onPress={handleCall} name={"call"} />
                         </View>
-                        <Pressable onPress={handleMoveToPrepare} className="flex-1 w-full rounded-xl bg-btn py-4">
+                        <Pressable
+                            onPress={handleMoveToPrepare}
+                            className={`flex-1 w-full rounded-xl py-4 ${ isLoading ? "bg-gray-400" : 'bg-btn'}`}
+                            disabled={isLoading}
+                        >
                             <Text className="text-center text-xl font-semibold text-white">도착 및 사진촬영</Text>
                         </Pressable>
                     </View>
@@ -329,7 +379,7 @@ export default function ConfirmScreen() {
                 { isWait && (
                     <Pressable
                         onPress={handleTransportStart}
-                        className={`w-full rounded-xl bg-btn py-4 ${ isLoading && "bg-gray-400"}`}
+                        className={`w-full rounded-xl py-4 ${ isLoading ? "bg-gray-400" : 'bg-btn'}`}
                         disabled={isLoading}
                     >
                         <Text className="text-center text-xl font-semibold text-white">

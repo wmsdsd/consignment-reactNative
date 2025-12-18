@@ -4,13 +4,14 @@ import { useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils';
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 
 export default function TaksongListScreen() {
     const { id } = useLocalSearchParams()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
-    
+    const navigation = useNavigation()
+
     const renderItem = ({ item }) => {
         const orderLocations = item.orderLocations
         const startLocation = orderLocations.find(e => e.type === "START")
@@ -20,13 +21,15 @@ export default function TaksongListScreen() {
             <TaksongCard
                 id={item.uid}
                 status={item.status}
-                price={item.deliveryPrice}
+                price={item.driverPrice}
                 carNumber={item.carNumber}
                 distance={item.distance}
                 duration={item.time}
                 start={getAddress(startLocation)}
                 end={getAddress(endLocation)}
                 isRound={item.isRound}
+                carModel={item.carModel}
+                carBrand={item.carBrandName}
             />
         )
     }
@@ -49,7 +52,22 @@ export default function TaksongListScreen() {
         if (id) {
             router.push(`/(protected)/taksongs/${id}`)
         }
+
+
     }, [])
+
+    useEffect(() => {
+        const list = data || []
+        let title = "탁송 목록"
+        if (list.length > 0) {
+            title += ` (${list.length})`
+        }
+
+        navigation.setOptions({
+            title: title
+        })
+    }, [data])
+
 
     return (
         isLoading

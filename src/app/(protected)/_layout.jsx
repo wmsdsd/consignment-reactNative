@@ -109,31 +109,32 @@ export default function ProtectedLayout() {
                         ),
                         drawerLabel: '프로필',
                         title: '프로필',
+                        headerShown: false,
                         drawerItemStyle: menuConfig.direction === 'right'
                             ? { display: 'none' }
                             : {},
                     }}
                 />
-                <Drawer.Screen
-                    name="settings"
-                    options={{
-                        drawerIcon: ({ focused, size, color}) => (
-                            <Image
-                                source={require("../../../assets/menu/ic_setting.png")}
-                                style={{
-                                    width: size,
-                                    height: size,
-                                    tintColor: focused ? "#fff" : "#888"
-                                }}
-                            />
-                        ),
-                        drawerLabel: '설정',
-                        title: '설정',
-                        drawerItemStyle: menuConfig.direction === 'right'
-                            ? { display: 'none' }
-                            : {},
-                    }}
-                />
+                {/*<Drawer.Screen*/}
+                {/*    name="settings"*/}
+                {/*    options={{*/}
+                {/*        drawerIcon: ({ focused, size, color}) => (*/}
+                {/*            <Image*/}
+                {/*                source={require("../../../assets/menu/ic_setting.png")}*/}
+                {/*                style={{*/}
+                {/*                    width: size,*/}
+                {/*                    height: size,*/}
+                {/*                    tintColor: focused ? "#fff" : "#888"*/}
+                {/*                }}*/}
+                {/*            />*/}
+                {/*        ),*/}
+                {/*        drawerLabel: '설정',*/}
+                {/*        title: '설정',*/}
+                {/*        drawerItemStyle: menuConfig.direction === 'right'*/}
+                {/*            ? { display: 'none' }*/}
+                {/*            : {},*/}
+                {/*    }}*/}
+                {/*/>*/}
                 <Drawer.Screen
                     name="prices"
                     options={{

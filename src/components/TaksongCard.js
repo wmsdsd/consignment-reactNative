@@ -32,7 +32,9 @@ export default function TaksongCard({
     duration = 0,
     start = null,
     end = null,
-    isRound = false
+    isRound = false,
+    carBrand = null,
+    carModel = null,
 }) {
     const handlePress = async () => {
         /**
@@ -47,8 +49,8 @@ export default function TaksongCard({
          *             "DRIVER_ROUND": "복귀(왕복)",
          *             "DELIVERY_COMPLETE": "탁송 완료",
          *             "DISPUTE": "분쟁중"
+         *             "ACCIDENT": "사고 완료"
          */
-        console.log("id", id)
         switch (status) {
             case "DRIVER_ASSIGN":   // 기사 배정
                 router.push(`/(protected)/taksongs/${id}`)
@@ -71,7 +73,7 @@ export default function TaksongCard({
                 break
         }
     }
-    
+
     return (
         <TouchableOpacity
             onPress={handlePress}
@@ -96,6 +98,8 @@ export default function TaksongCard({
             <View className="mb-2 flex-row items-center justify-between">
                 <Text className="text-base font-semibold text-white">
                     {carNumber ? `🚗 ${carNumber}` : '차량 배정 대기'}
+                    {` [${carBrand ?? "미정"}`}
+                    {`/${carModel ?? "없음"}]` }
                 </Text>
                 
                 <Text className="text-sm text-gray-300">
