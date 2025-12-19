@@ -27,6 +27,7 @@ import { uriToFileObject } from '@/lib/uriToFile';
 import { isAndroid } from '@/lib/platform';
 import { useRemovePhoto } from '@/hooks/useRemovePhoto';
 import ImageThumbnail from '@/components/ImageThumbnail';
+import { getCameraPermissions } from '@/lib/permissions';
 
 const MAX_COUNT = 3
 
@@ -78,7 +79,7 @@ export default function PriceDetailScreen() {
             return
         }
 
-        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        const status = await getCameraPermissions()
         if (status !== "granted") {
             Alert.alert("카메라 권한이 필요합니다!")
             return

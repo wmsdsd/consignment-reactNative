@@ -27,7 +27,7 @@ const CustomDrawerContent = props => {
                                 ? { uri: user.profileImage }
                                 : require("../../../assets/ic_profile_default.png")
                         }
-                        className="w-14 h-14"
+                        className="w-14 h-14 rounded-lg"
                     />
                     <View>
                         <View className="mb-2">

@@ -6,7 +6,7 @@ import { useDriverSendAuthCode, useDriverVerify } from '@/hooks/useApi';
 import { secondToTime } from '@/lib/utils';
 
 export default function verificationPage() {
-    const { text, type } = useLocalSearchParams()
+    const { text, type, root } = useLocalSearchParams()
     
     const authCodeMutation = useDriverSendAuthCode()
     const verifyMutation = useDriverVerify()
@@ -63,7 +63,8 @@ export default function verificationPage() {
                 router.replace({
                     pathname: '/(auth)/changePassword',
                     params: {
-                        phone: data.phone
+                        phone: data.phone,
+                        root: root
                     }
                 })
             }

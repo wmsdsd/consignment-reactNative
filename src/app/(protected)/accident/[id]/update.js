@@ -24,6 +24,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import KeyboardWrapper from '@/components/KeyboardWrapper'
 import { useRemovePhoto } from '@/hooks/useRemovePhoto'
 import ImageThumbnail from '@/components/ImageThumbnail'
+import { getCameraPermissions } from '@/lib/permissions';
 
 const MAX_COUNT = 10
 export default function AccidentUpdateScreen() {
@@ -60,7 +61,7 @@ export default function AccidentUpdateScreen() {
             return
         }
 
-        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        const status = await getCameraPermissions()
         if (status !== "granted") {
             Alert.alert("카메라 권한이 필요합니다!")
             return

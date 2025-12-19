@@ -6,8 +6,8 @@ import {
     orderLocationApi,
     orderPhotoApi,
     orderSettlementApi,
-    orderAccidentApi,
-} from '@/lib/api'
+    orderAccidentApi, driverPhotoApi,
+} from '@/lib/api';
 
 // Driver Hooks --------------------------------------------------------------------------------------------------------
 export const useDriverLogin = () => {
@@ -88,6 +88,12 @@ export const useDriverVerify = () => {
 export const useDriverChangePassword = () => {
     return useMutation({
         mutationFn: driverApi.changePassword,
+    })
+}
+
+export const useDriverVerifyPassword = () => {
+    return useMutation({
+        mutationFn: driverApi.verifyPassword,
     })
 }
 
@@ -316,5 +322,30 @@ export const useOrderAccidentUpdate = () => {
         }
     })
 }
-
 // OrderAccident Hooks End ---------------------------------------------------------------------------------------------
+
+// DriverPhoto Hooks Start ---------------------------------------------------------------------------------------------
+export const useDriverPhotoUpload = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: driverPhotoApi.upload,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['driver', 'driverPhoto'] })
+        },
+    })
+}
+
+export const useDriverPhotoRemove = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: driverPhotoApi.remove,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['driver', 'driverPhoto'] })
+        },
+    })
+}
+
+
+// DriverPhoto Hooks End -----------------------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ import { getLocation } from '@/hooks/useLocation';
 import { useRemovePhoto } from '@/hooks/useRemovePhoto';
 import ImageThumbnail from '@/components/ImageThumbnail';
 import useGlobalLoading from "@/hooks/useGlobalLoading";
+import { getCameraPermissions } from '@/lib/permissions';
 
 const tabs = [
     {
@@ -89,7 +90,7 @@ export default function CameraScreen() {
     const driverMoveMutation = useDriverMove()
 
     const onHandleTakePicture = async () => {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        const status = await getCameraPermissions()
         if (status !== "granted") {
             alert("카메라 권한이 필요합니다!")
             return

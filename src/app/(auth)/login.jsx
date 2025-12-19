@@ -43,7 +43,8 @@ export default function LoginPage() {
             pathname: '/(auth)/verification',
             params: {
                 text: "비밀번호 변경",
-                type: "password"
+                type: "password",
+                root: "/(auth)/login"
             }
         })
     }

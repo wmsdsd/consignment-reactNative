@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true)
     const [user, setUser] = useState(null)
 
-    const { data: checkData, isLoading: isChecking } = useDriverCheck(isAuthenticated)
+    const { data: checkData, isLoading: isChecking, refetch: refetchUser } = useDriverCheck(isAuthenticated)
     const logoutMutation = useDriverLogout()
     
     // 앱 시작 시 토큰 확인
@@ -35,11 +35,8 @@ export const AuthProvider = ({ children }) => {
     
     // 서버에서 인증 상태 확인
     useEffect(() => {
-        if (checkData?.driver) {
-            const driver = checkData.driver
-            setUser(driver)
-        }
-        
+        const driver = checkData?.driver
+        setUser(driver)
         setIsLoading(false)
     }, [checkData])
     

@@ -95,3 +95,14 @@ export const dateFormatter = (date, format = "YYYY-MM-DD HH:mm:ss") => {
 
     return moment(date).format(format)
 }
+
+export function extractS3KeyFromUrl(url) {
+    if (!url || typeof url !== 'string') return null
+
+    try {
+        const { pathname } = new URL(url)
+        return decodeURIComponent(pathname.replace(/^\/+/, ''))
+    } catch (e) {
+        return null
+    }
+}

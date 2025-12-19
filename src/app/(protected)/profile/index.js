@@ -2,25 +2,34 @@ import { Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { useActionLock } from '@/hooks/useActionLock';
+import { router } from 'expo-router';
 
 export default function ProfileScreen() {
     const { user } = useAuth()
     const { runOnce } = useActionLock()
 
-    const onPressHistory = () => {
-
+    const onPressHistory = async () => {
+        await runOnce(() => {
+            router.push("(protected)/profile/history/index")
+        })
     }
 
-    const onPressNotification = () => {
-
+    const onPressNotification = async () => {
+        await runOnce(() => {
+            router.push("(protected)/profile/notification/index")
+        })
     }
 
-    const onPressMyInfo = () => {
-
+    const onPressMyInfo = async () => {
+        await runOnce(() => {
+            router.push("(protected)/profile/myInfo")
+        })
     }
 
-    const onPressSettings = () => {
-
+    const onPressSettings = async () => {
+        await runOnce(() => {
+            router.push("(protected)/profile/settings")
+        })
     }
 
     return (
@@ -34,11 +43,11 @@ export default function ProfileScreen() {
                                     ? { uri: user.profileImage }
                                     : require("@assets/ic_profile_default.png")
                             }
-                            className="w-14 h-14"
+                            className="w-14 h-14 rounded-lg"
                         />
                     </View>
                     <View>
-                        <Text className={"font-color font-bold text-lg"}>{user.name}</Text>
+                        <Text className={"font-color font-bold text-lg"}>{user?.name}</Text>
                     </View>
                 </View>
                 <View className={"p-5 mt-6 flex-row justify-around items-center bg-default rounded-lg"}>
