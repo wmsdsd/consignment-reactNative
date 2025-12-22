@@ -1,6 +1,8 @@
 import { Redirect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
+import '@/lib/background-location-task';
+
 
 export default function Index() {
     const [isReady, setIsReady] = useState(false)
