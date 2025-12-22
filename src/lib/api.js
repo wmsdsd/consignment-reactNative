@@ -1,7 +1,7 @@
-const BASE_URL = 'http://192.168.0.48:4000/api/mobile';
+// const BASE_URL = 'http://192.168.0.48:4000/api/mobile';
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
-//const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
+const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
 
 import {router} from "expo-router"
 import * as SecureStore from 'expo-secure-store'

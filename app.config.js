@@ -71,6 +71,8 @@ export default {
                     locationAlwaysAndWhenInUsePermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
                     locationAlwaysPermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
                     locationWhenInUsePermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
+                    isAndroidBackgroundLocationEnabled: true,
+                    isAndroidForegroundServiceEnabled: true,
                 },
             ],
             [
