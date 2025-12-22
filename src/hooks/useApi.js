@@ -6,7 +6,7 @@ import {
     orderLocationApi,
     orderPhotoApi,
     orderSettlementApi,
-    orderAccidentApi, driverPhotoApi,
+    orderAccidentApi, driverPhotoApi, pushNotificationApi,
 } from '@/lib/api';
 
 // Driver Hooks --------------------------------------------------------------------------------------------------------
@@ -55,7 +55,11 @@ export const useDriverProfile = (uid) => {
             const qs = new URLSearchParams({ uid })
             return driverApi.getProfile(qs)
         },
-        enabled: !!uid
+        enabled: !!uid,
+        staleTime: 0,
+        cacheTime: 0,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true
     });
 };
 
@@ -94,6 +98,12 @@ export const useDriverChangePassword = () => {
 export const useDriverVerifyPassword = () => {
     return useMutation({
         mutationFn: driverApi.verifyPassword,
+    })
+}
+
+export const useDriverSetPush = () => {
+    return useMutation({
+        mutationFn: driverApi.setPush,
     })
 }
 
@@ -346,6 +356,31 @@ export const useDriverPhotoRemove = () => {
         },
     })
 }
-
-
 // DriverPhoto Hooks End -----------------------------------------------------------------------------------------------
+
+// Push Notification Hooks Start ---------------------------------------------------------------------------------------
+export const usePushNotificationList = (isRead = undefined) => {
+    return useQuery({
+        queryKey: ['pushNotification', isRead],
+        queryFn: async ({ queryKey }) => {
+            const [, isRead] = queryKey
+            let qs
+            if (isRead) {
+                qs = new URLSearchParams({ isRead: isRead })
+            }
+            return pushNotificationApi.list(qs)
+        },
+    })
+}
+
+export const usePushNotificationRead = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: pushNotificationApi.read,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['pushNotification'] })
+        },
+    })
+}
+// Push Notification Hooks End -----------------------------------------------------------------------------------------

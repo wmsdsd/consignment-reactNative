@@ -38,7 +38,7 @@ export default function PrepareScreen() {
 
     return (
         <View className="flex-1 bg-black">
-            <ScrollView className="flex-1">
+            <ScrollView>
                 {/* 차량 도착 헤더 */}
                 <View className="mx-4 mt-6 rounded-xl border border-color bg-[#2C2C31] p-6 shadow-sm">
                     <View className="mb-2 items-center">

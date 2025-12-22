@@ -66,7 +66,6 @@ export default function CustomCameraScreen() {
                     const data = await res.json()
                     if (data?.plates?.length > 0) {
                         const carNumber = data.plates[0]
-                        console.log("carNumber", carNumber)
                         if (orderLocation.carNumber !== carNumber) {
                             Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
                         }

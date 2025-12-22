@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { checkAllPermissionsAsync } from '@/lib/permissions'
 import {useOrder, useOrderCancel, useOrderStatusUpdate} from '@/hooks/useApi'
 import { mToKm, addCommaToNumber, secondToTimeHangul, getAddressShort } from '@/lib/utils'
+import { useRealtimeLocation } from '@/lib/backgroundLocation';
 
 export default function TaksongDetailScreen() {
     const { id } = useLocalSearchParams()
@@ -38,7 +39,6 @@ export default function TaksongDetailScreen() {
     
     const handleStart = async () => {
         const result = await checkAllPermissionsAsync()
-
         if (result?.allGranted) {
             // ✅ 모든 권한 허용 → 다음 화면으로 이동
             const res = await orderStatusUpdateMutation.mutateAsync({

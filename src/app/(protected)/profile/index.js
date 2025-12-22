@@ -3,34 +3,44 @@ import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { useActionLock } from '@/hooks/useActionLock';
 import { router } from 'expo-router';
+import { usePushNotificationList } from '@/hooks/useApi';
+import { useEffect, useState } from 'react';
 
 export default function ProfileScreen() {
     const { user } = useAuth()
     const { runOnce } = useActionLock()
+    const { data: list } = usePushNotificationList()
+    const [count, setCount] = useState(0)
 
     const onPressHistory = async () => {
         await runOnce(() => {
-            router.push("(protected)/profile/history/index")
+            router.push("profile/history")
         })
     }
 
     const onPressNotification = async () => {
         await runOnce(() => {
-            router.push("(protected)/profile/notification/index")
+            router.push("profile/notification")
         })
     }
 
     const onPressMyInfo = async () => {
         await runOnce(() => {
-            router.push("(protected)/profile/myInfo")
+            router.push("profile/info")
         })
     }
 
     const onPressSettings = async () => {
         await runOnce(() => {
-            router.push("(protected)/profile/settings")
+            router.push("profile/settings")
         })
     }
+
+    useEffect(() => {
+        if (list && Array.isArray(list)) {
+            setCount(list.length)
+        }
+    }, [list])
 
     return (
         <View className={"flex-1 bg-black p-4"}>
@@ -59,17 +69,30 @@ export default function ProfileScreen() {
                         <Text className={"color-white text-sm"}>탁송기록</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        className={"flex-col items-center"}
+                        className={"flex-col items-center relative"}
                         onPress={onPressNotification}
                     >
                         <Ionicons name="notifications-outline" size={20} color="#fff" />
                         <Text className={"color-white text-sm"}>알림</Text>
+                        {count > 0 && (
+                            <View className={`absolute -top-2  rounded-full bg-dispute flex justify-center items-center
+                                ${count < 10
+                                    ? "w-5 h-5 -right-2"
+                                    : count < 100
+                                        ? "w-7 h-5 -right-4"
+                                        : "w-9 h-5 -right-5"
+                                    }
+                                `}
+                            >
+                                <Text className={"text-xs color-white"}>{count > 99 ? "99+" : count}</Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
             <View className={'bg-block flex-1 rounded-t-lg'}>
                 <View className={"m-4"}>
-                    <Text className={"font-color-label font-sm"}>내 설정</Text>
+                    <Text className={"font-color-label text-sm"}>내 설정</Text>
                 </View>
                 <TouchableOpacity
                     onPress={onPressMyInfo}

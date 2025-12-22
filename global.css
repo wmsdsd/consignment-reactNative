@@ -20,6 +20,8 @@
 .border-color-input:focus { border-color: #0C1EFF; }
 .border-color { border-color: #5200FF; }
 
+.color-danger { color: #FF0200; }
+
 .font-color { color: #E2E2F0; }
 .font-color-sub { color: #C5CAFF; }
 .font-color-label { color: #88889A; }

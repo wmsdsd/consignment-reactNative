@@ -221,7 +221,7 @@ export default function AccidentUpdateScreen() {
         <View className={"flex-1 bg-black"}>
             <KeyboardWrapper>
                 <ScrollView>
-                    <View className={"flex-1 p-4"}>
+                    <View className={"p-4"}>
                         <Text className="mb-4 text-xl font-bold text-white">사고 처리</Text>
 
                         <View className={"mb-4 w-full rounded-xl bg-[#1E1E1E] p-4"}>

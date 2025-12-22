@@ -229,8 +229,6 @@ export default function CameraScreen() {
 
     const moveToNextProcess = async () => {
         const { data } = await refetchOrderLocation()
-        console.log("refresh orderLocation", data)
-
         if (data) {
             const coords = await getLocation()
             if (coords) {

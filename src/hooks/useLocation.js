@@ -7,7 +7,6 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
     const driverMoveMutation = useDriverMove()
     
     useEffect(() => {
-        console.log('foreground location call')
         let interval = null
         
         const fetchAndSend = async () => {
@@ -39,7 +38,6 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
         interval = setInterval(fetchAndSend, timeout)
         
         return () => {
-            console.log('clear interval')
             clearInterval(interval)
         }
     }, [])

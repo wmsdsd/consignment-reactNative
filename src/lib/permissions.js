@@ -16,10 +16,8 @@ export async function getLocationPermission() {
 export async function getCameraPermissions() {
     // === 📸 카메라 권한 (expo-image-picker 사용) ===
     let { status: cameraStatus } = await ImagePicker.getCameraPermissionsAsync();
-    console.log("camera permissions", cameraStatus)
     if (cameraStatus !== 'granted') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        console.log("status", status)
         cameraStatus = status;
     }
 

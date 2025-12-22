@@ -1,16 +1,43 @@
-import { ActivityIndicator, FlatList, Text } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Text } from 'react-native';
 import TaksongCard from '../../../components/TaksongCard';
 import { useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils';
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
+import { checkAllPermissionsAsync } from '@/lib/permissions';
+import * as Location from 'expo-location';
 
 export default function TaksongListScreen() {
     const { id } = useLocalSearchParams()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
+
+
+    const onHandlePress = async (uid, status) => {
+        switch (status) {
+            case "DRIVER_ASSIGN":   // 기사 배정
+                router.push(`/(protected)/taksongs/${uid}`)
+                break
+            case "DRIVER_RECEIVE":  // 배정 완료
+            case "DRIVER_START":    // 출발지
+            case "DRIVER_MIDDLE":   // 경유지
+            case "DRIVER_END":      // 도착지
+            case "DRIVER_ROUND":    // 왕복지
+                const permission = await checkAllPermissionsAsync()
+                if (permission?.allGranted) {
+                    router.push(`/(protected)/taksongs/${uid}/confirm`)
+                }
+                else {
+                    Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.')
+                }
+                break
+            case "DISPUTE":         // 분쟁중
+                router.push(`/(protected)/accident/${uid}/update`)
+                break
+        }
+    }
 
     const renderItem = ({ item }) => {
         const orderLocations = item.orderLocations
@@ -28,8 +55,9 @@ export default function TaksongListScreen() {
                 start={getAddress(startLocation)}
                 end={getAddress(endLocation)}
                 isRound={item.isRound}
-                carModel={item.carModel}
+                carModel={item.carModelName}
                 carBrand={item.carBrandName}
+                handler={onHandlePress}
             />
         )
     }
@@ -53,7 +81,14 @@ export default function TaksongListScreen() {
             router.push(`/(protected)/taksongs/${id}`)
         }
 
-
+        ;(async () => {
+            console.log(
+                'FG:',
+                await Location.getForegroundPermissionsAsync(),
+                'BG:',
+                await Location.getBackgroundPermissionsAsync()
+            );
+        })()
     }, [])
 
     useEffect(() => {

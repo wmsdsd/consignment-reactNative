@@ -62,6 +62,13 @@ export default function ProfileLayout() {
                     }}
                 />
                 <Stack.Screen
+                    name="info/changePassword"
+                    options={{
+                        title: '비밀번호 변경',
+                        ...commonHeaderStyle(true)
+                    }}
+                />
+                <Stack.Screen
                     name="settings"
                     options={{
                         title: '설정',

@@ -6,6 +6,7 @@ import {useMemo} from 'react';
 import {addCommaToNumber} from "@/lib/utils";
 import {getLocation} from "@/hooks/useLocation";
 import useGlobalLoading from '@/hooks/useGlobalLoading';
+import { stopBackgroundLocation } from '@/lib/backgroundLocation';
 
 export default function CompleteScreen() {
     const { id } = useLocalSearchParams()
@@ -34,6 +35,8 @@ export default function CompleteScreen() {
     }, [order?.orderSettlements])
 
     const onHandleComplete = async () => {
+        await stopBackgroundLocation()
+
         if (order?.status === "DRIVER_END") {
             const res = await updateOrderStatusMutation.mutateAsync({
                 orderId: order.uid,

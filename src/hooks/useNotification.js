@@ -44,3 +44,33 @@ export function useNotification() {
         }
     }, [])
 }
+
+export async function registerForPushToken() {
+    if (!Device.isDevice) {
+        alert('실제 기기에서만 푸시 가능');
+        return;
+    }
+
+    const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+        alert('알림 권한 거부됨');
+        return;
+    }
+
+    const token = (
+        await Notifications.getExpoPushTokenAsync()
+    ).data;
+
+    console.log('Expo Push Token:', token);
+
+    return token;
+}

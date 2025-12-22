@@ -9,6 +9,7 @@ import moment from 'moment'
 import { useForegroundLocation, getLocation } from '@/hooks/useLocation'
 import { useAppContext } from '@/context/AppContext';
 import useGlobalLoading from "@/hooks/useGlobalLoading";
+import { startBackgroundLocation, useRealtimeLocation } from '@/lib/backgroundLocation';
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
@@ -22,6 +23,8 @@ export default function ConfirmScreen() {
         orderUid: order?.uid,
         orderLocationUid: orderLocation?.uid
     })
+
+    useRealtimeLocation(true)
 
     const isWait = useMemo(() => {
         return orderLocation?.status === 'WAIT'
@@ -64,6 +67,8 @@ export default function ConfirmScreen() {
         if (isLoading) return
 
         setIsLoading(true)
+
+        await startBackgroundLocation()
 
         try {
             const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
@@ -260,7 +265,7 @@ export default function ConfirmScreen() {
     return (
         <View className="flex-1 bg-black">
             <ScrollView>
-                <View className="flex-1">
+                <View className="">
                     <View className="mt-6 p-4">
                         <Text className="mb-3 text-lg font-semibold font-color-sub">기본 정보</Text>
 

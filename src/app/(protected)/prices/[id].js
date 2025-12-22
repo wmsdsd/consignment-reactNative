@@ -203,7 +203,7 @@ export default function PriceDetailScreen() {
     return (
         <View className="flex-1 bg-black p-4">
             <ScrollView>
-                <View className="flex-1 w-full rounded-2xl bg-neutral-900 p-6">
+                <View className="w-full rounded-2xl bg-neutral-900 p-6">
                     <Text className="mb-4 text-xl font-bold text-white">청구 정보</Text>
 
                     {/*요금 청구 종류*/}

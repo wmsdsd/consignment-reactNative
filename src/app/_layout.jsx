@@ -5,7 +5,6 @@ import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from '../components/SplashScreen';
 import { AuthProvider } from '@/hooks/useAuth';
-import { startBackgroundLocation } from '@/lib/backgroundLocation'
 import { AppProvider } from '@/context/AppContext'
 
 import '../../global.css'
@@ -45,9 +44,6 @@ export default function RootLayout() {
         (async () => {
             // 즉시 실행 (다음 틱에서)
             await hideNativeSplash()
-
-            // 앱 실행 시 자동으로 백그라운드 위치 시작
-            // await startBackgroundLocation()
         })()
     }, [])
     

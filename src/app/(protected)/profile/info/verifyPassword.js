@@ -27,8 +27,6 @@ export default function VerifyPasswordScreen() {
                 id: id,
                 password: data.password
             })
-
-            console.log("res", res)
             if (res) {
                 router.push({
                     pathname: '/(auth)/changePassword',

@@ -10,7 +10,8 @@ const statusText = {
     "DRIVER_MIDDLE": "경유지",
     "DRIVER_END": "도착지",
     "DRIVER_ROUND": "복귀(왕복)",
-    "DISPUTE": "분쟁중"
+    "DISPUTE": "분쟁중",
+    "DELIVERY_COMPLETE": "탁송 완료",
 }
 
 const statusColor = {
@@ -21,11 +22,13 @@ const statusColor = {
     "DRIVER_END": "bg-receive",
     "DRIVER_ROUND": "bg-receive",
     "DISPUTE": "bg-dispute",
+    "DELIVERY_COMPLETE": "bg-primary",
 }
 
 export default function TaksongCard({
     id,
     status,
+    handler,
     price= 0,
     carNumber = null,
     distance = 0,
@@ -37,40 +40,8 @@ export default function TaksongCard({
     carModel = null,
 }) {
     const handlePress = async () => {
-        /**
-         *             "BOOKING_WAIT": "예약 대기",
-         *             "BOOKING_COMPLETE": "예약 완료",
-         *             "BOOKING_CANCEL": "예약 취소",
-         *             "DRIVER_ASSIGN": "기사 배정",
-         *             "DRIVER_RECEIVE": "배정 완료",
-         *             "DRIVER_START": "출발지",
-         *             "DRIVER_MIDDLE": "경유지",
-         *             "DRIVER_END": "도착지",
-         *             "DRIVER_ROUND": "복귀(왕복)",
-         *             "DELIVERY_COMPLETE": "탁송 완료",
-         *             "DISPUTE": "분쟁중"
-         *             "ACCIDENT": "사고 완료"
-         */
-        switch (status) {
-            case "DRIVER_ASSIGN":   // 기사 배정
-                router.push(`/(protected)/taksongs/${id}`)
-                break
-            case "DRIVER_RECEIVE":  // 배정 완료
-            case "DRIVER_START":    // 출발지
-            case "DRIVER_MIDDLE":   // 경유지
-            case "DRIVER_END":      // 도착지
-            case "DRIVER_ROUND":    // 왕복지
-                const permission = await checkAllPermissionsAsync()
-                if (permission?.allGranted) {
-                    router.push(`/(protected)/taksongs/${id}/confirm`)
-                }
-                else {
-                    Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.')
-                }
-                break
-            case "DISPUTE":         // 분쟁중
-                router.push(`/(protected)/accident/${id}/update`)
-                break
+        if (handler) {
+            handler(id, status)
         }
     }
 
@@ -119,5 +90,5 @@ export default function TaksongCard({
                 <Text className="flex-1 text-white">{end}</Text>
             </View>
         </TouchableOpacity>
-    );
+    )
 }

@@ -202,20 +202,11 @@ export default function MyInfoScreen() {
 
     const onHandleChangePassword = () => {
         router.push({
-            pathname: '/(auth)/changePassword',
+            pathname: 'profile/info/changePassword',
             params: {
                 phone: driver?.phone,
-                root: "(protected)/profile/myInfo"
             }
         })
-
-        // router.push({
-        //     pathname: "(protected)/profile/verifyPassword",
-        //     params: {
-        //         id: driver?.id,
-        //         phone: driver?.phone
-        //     }
-        // })
     }
 
     const submitComplete = handleSubmit(onSubmit)
@@ -254,17 +245,19 @@ export default function MyInfoScreen() {
                                                 ? { uri: driver.profileImage }
                                                 : require("@assets/ic_profile_default.png")
                                         }
-                                        className="w-24 h-24 rounded-lg"
+                                        className="w-28 h-28 rounded-full"
                                     />
                                 )
                             }
                         </Pressable>
-                        <TouchableOpacity
-                            className={"absolute bottom-4 right-10"}
-                            onPress={removeProfileImage}
-                        >
-                            <Text className={"color-gray-400 text-sm"}>프로필 삭제</Text>
-                        </TouchableOpacity>
+                        { driver?.profileImage && (
+                            <TouchableOpacity
+                                className={"absolute bottom-4 right-10"}
+                                onPress={removeProfileImage}
+                            >
+                                <Text className={"color-gray-400 text-sm"}>프로필 삭제</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <View className={"mb-4 p-4"}>
                         {/* 아이디 */}

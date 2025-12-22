@@ -1,4 +1,3 @@
-// app/(protected)/_layout.js
 import { Drawer } from 'expo-router/drawer'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer'
@@ -7,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/hooks/useAuth'
 import { formatPhone } from '@/lib/utils'
 import { useAppContext } from '@/context/AppContext'
-import { useEffect, useRef } from 'react';
 
 const CustomDrawerContent = props => {
     const insets = useSafeAreaInsets()

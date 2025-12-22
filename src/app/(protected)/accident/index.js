@@ -62,15 +62,14 @@ export default function AccidentReceiveScreen() {
                 {
                     text: '확인',
                     onPress: async () => {
-                        console.log("data", data)
                         let res = await receiveMutation.mutateAsync(data)
-                        console.log("receive res", res)
+                        if (res) {
+                            if (isAndroid) {
+                                ToastAndroid.show("사고 접수 되었습니다.", ToastAndroid.SHORT)
+                            }
 
-                        if (isAndroid) {
-                            ToastAndroid.show("사고 접수 되었습니다.", ToastAndroid.SHORT)
+                            router.replace('/(protected)/taksongs')
                         }
-
-                        router.replace('/(protected)/taksongs')
                     },
                 },
             ])
@@ -109,7 +108,7 @@ export default function AccidentReceiveScreen() {
             <KeyboardWrapper>
                 <Animated.View className={"flex-1"}>
                     <ScrollView>
-                        <View className={"flex-1 w-full p-4"}>
+                        <View className={"w-full p-4"}>
                             <Text className="text-xl font-bold text-white">접수 정보</Text>
                             <Text className="mb-4 ml-1 text-sm text-[#ccc]">1대 이상 사고의 경우 콤마(,)로 구분해 주세요.</Text>
 

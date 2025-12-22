@@ -33,6 +33,7 @@ export default {
                 'ACCESS_COARSE_LOCATION',
                 'ACCESS_BACKGROUND_LOCATION',
                 'FOREGROUND_SERVICE',
+                'FOREGROUND_SERVICE_LOCATION',
                 'CAMERA',
                 'RECORD_AUDIO',
                 'READ_EXTERNAL_STORAGE',

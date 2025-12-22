@@ -12,8 +12,9 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
     
     if (data) {
         const { locations } = data;
-        
+
         // 가장 최근 위치
+        if (!locations || locations.length === 0) return;
         const loc = locations[0];
         
         const payload = {

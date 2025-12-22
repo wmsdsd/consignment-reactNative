@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.0.23:4000/api/mobile';
+const BASE_URL = 'http://192.168.0.48:4000/api/mobile';
 
 //const BASE_URL = 'https://api.olgomobility.com/api';  // real
 //const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
@@ -76,7 +76,11 @@ export const driverApi = {
     verifyPassword: (data) => apiCall('/driver/password/verify', {
         method: 'POST',
         body: JSON.stringify(data),
-    })
+    }),
+    setPush: (data) => apiCall('/driver/push', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
 }
 
 // Order API
@@ -175,4 +179,11 @@ export const driverPhotoApi = {
         method: 'POST',
         body: JSON.stringify(data),
     })
+}
+
+export const pushNotificationApi = {
+    list: (qs) => apiCall(`/pushNotification/list${ qs ? `?${qs}` : '' }`),
+    read: () => apiCall(`/pushNotification/read`, {
+        method: 'POST',
+    }),
 }
