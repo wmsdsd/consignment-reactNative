@@ -1,7 +1,9 @@
-// const BASE_URL = 'http://192.168.0.48:4000/api/mobile';
+// const ROOT = "http://192.168.0.43:4000"
+// const ROOT = "https://api.olgomobility.com" // real
+const ROOT = "http://13.209.6.245:4000" // stage
+const SUFFIX = "/api/mobile"
 
-//const BASE_URL = 'https://api.olgomobility.com/api';  // real
-const BASE_URL = 'http://13.209.6.245:4000/api';      // stage
+const BASE_URL = `${ROOT}${SUFFIX}`
 
 import {router} from "expo-router"
 import * as SecureStore from 'expo-secure-store'
@@ -21,8 +23,11 @@ const apiCall = async (endpoint, options = {}) => {
     
     try {
         const response = await fetch(url, config)
-        const data = await response.json()
-        
+        const contentType = response.headers.get("content-type")
+        const data = contentType && contentType.includes("application/json")
+            ? await response.json()
+            : await response.text()
+
         if (!response.ok) {
             console.log("error data", data)
             const result = data?.result

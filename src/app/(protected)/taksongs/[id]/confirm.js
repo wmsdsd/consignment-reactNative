@@ -68,7 +68,8 @@ export default function ConfirmScreen() {
 
         setIsLoading(true)
 
-        await startBackgroundLocation()
+        //todo: 이승준 - 백그라운드 로직 호출 부분
+        //await startBackgroundLocation()
 
         try {
             const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')

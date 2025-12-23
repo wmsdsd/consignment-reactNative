@@ -27,8 +27,7 @@ export async function startBackgroundLocation() {
     }
 
     // 3. 중복 실행 방지
-    const hasStarted =
-        await Location.hasStartedLocationUpdatesAsync(BACKGROUND_TASK_NAME);
+    const hasStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_TASK_NAME);
 
     if (hasStarted) return;
 
@@ -45,11 +44,9 @@ export async function startBackgroundLocation() {
 }
 
 export async function stopBackgroundLocation() {
-    const isRunning =
-        await Location.hasStartedLocationUpdatesAsync(BACKGROUND_TASK_NAME);
-
+    const isRunning = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_TASK_NAME)
     if (isRunning) {
-        await Location.stopLocationUpdatesAsync(BACKGROUND_TASK_NAME);
-        console.log('🛑 백그라운드 위치 추적 중단됨');
+        await Location.stopLocationUpdatesAsync(BACKGROUND_TASK_NAME)
+        console.log('🛑 백그라운드 위치 추적 중단됨')
     }
 }
