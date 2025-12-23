@@ -3,9 +3,7 @@ import { useEffect } from "react"
 import { useRouter } from 'expo-router'
 
 export function useNotification() {
-
     const router = useRouter()
-
     Notifications.setNotificationHandler({
         handleNotification: async () => ({
             shouldShowAlert: true,   // 🔔 배너 표시
@@ -43,34 +41,4 @@ export function useNotification() {
             responseSub.remove()
         }
     }, [])
-}
-
-export async function registerForPushToken() {
-    if (!Device.isDevice) {
-        alert('실제 기기에서만 푸시 가능');
-        return;
-    }
-
-    const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-        alert('알림 권한 거부됨');
-        return;
-    }
-
-    const token = (
-        await Notifications.getExpoPushTokenAsync()
-    ).data;
-
-    console.log('Expo Push Token:', token);
-
-    return token;
 }

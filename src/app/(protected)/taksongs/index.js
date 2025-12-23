@@ -1,12 +1,12 @@
 import { ActivityIndicator, Alert, FlatList, Text } from 'react-native';
 import TaksongCard from '../../../components/TaksongCard';
-import { useOrderList } from '@/hooks/useApi'
+import { useDriverSetToken, useOrderList } from '@/hooks/useApi';
 import { getAddress } from '@/lib/utils';
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { checkAllPermissionsAsync } from '@/lib/permissions';
-import * as Location from 'expo-location';
+import { getPushToken } from '@/lib/notification';
 
 export default function TaksongListScreen() {
     const { id } = useLocalSearchParams()
@@ -14,6 +14,7 @@ export default function TaksongListScreen() {
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
 
+    const setTokenMutation = useDriverSetToken()
 
     const onHandlePress = async (uid, status) => {
         switch (status) {
@@ -80,15 +81,28 @@ export default function TaksongListScreen() {
         if (id) {
             router.push(`/(protected)/taksongs/${id}`)
         }
+        else {
+            // getPushToken().then(token => {
+            //     if (token) {
+            //         setTokenMutation.mutateAsync({
+            //             token: token,
+            //         })
+            //             .then(e => {
+            //                 console.log("token register", e)
+            //             })
+            //     }
+            // })
+        }
 
-        ;(async () => {
-            console.log(
-                'FG:',
-                await Location.getForegroundPermissionsAsync(),
-                'BG:',
-                await Location.getBackgroundPermissionsAsync()
-            );
-        })()
+        //todo: 이승준 - location (위치) 권한 확인
+        // ;(async () => {
+        //     console.log(
+        //         'FG:',
+        //         await Location.getForegroundPermissionsAsync(),
+        //         'BG:',
+        //         await Location.getBackgroundPermissionsAsync()
+        //     );
+        // })()
     }, [])
 
     useEffect(() => {

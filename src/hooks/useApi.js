@@ -107,6 +107,12 @@ export const useDriverSetPush = () => {
     })
 }
 
+export const useDriverSetToken = () => {
+    return useMutation({
+        mutationFn: driverApi.setToken,
+    })
+}
+
 // Driver Hooks End ----------------------------------------------------------------------------------------------------
 
 // Order Hooks ---------------------------------------------------------------------------------------------------------

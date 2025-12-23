@@ -86,6 +86,10 @@ export const driverApi = {
         method: 'POST',
         body: JSON.stringify(data),
     }),
+    setToken: (data) => apiCall('/driver/token', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
 }
 
 // Order API

@@ -1,8 +1,20 @@
 import * as Notifications from 'expo-notifications'
 import * as Device from 'expo-device'
 import { Platform } from 'react-native'
+import Constants from 'expo-constants'
+
+const checkDevice = () => {
+    if (!Device.isDevice) {
+        alert('실제 디바이스에서만 Push Notification이 동작합니다.');
+        return false
+    }
+
+    return true
+}
 
 export async function setupNotifications() {
+    if (!checkDevice()) return
+
     if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('default', {
             name: 'default',
@@ -11,20 +23,40 @@ export async function setupNotifications() {
             lightColor: '#FF231F7C',
         })
     }
+}
 
-    const { status } = await Notifications.requestPermissionsAsync()
+export async function requestPermission() {
+    let isGranted = await getPermission()
+    if (isGranted) {
+        const { status } = await Notifications.requestPermissionsAsync()
+        isGranted = status === 'granted'
+    }
+    return isGranted
+}
+
+export async function getPermission() {
+    if (!checkDevice()) return
+
+    const { status } = await Notifications.getPermissionsAsync()
     return status === 'granted'
 }
 
 export async function getPushToken() {
-    if (!Device.isDevice) return null
+    if (!checkDevice()) return
 
-    const { status } = await Notifications.getPermissionsAsync()
-    if (status !== 'granted') return null
+    let isGranted = await requestPermission()
+    if (!isGranted) {
+        alert('알림 권한이 거부되었습니다.')
+        return
+    }
 
     const token = await Notifications.getExpoPushTokenAsync({
-        projectId: 'f846f146-ae60-4064-a21d-ba75b82b7d8b'
+        projectId: Constants.expoConfig.extra.eas.projectId,
     })
+
+    await setupNotifications()
+
+    console.log("token", token.data)
 
     return token.data
 }

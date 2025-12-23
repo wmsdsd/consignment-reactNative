@@ -8,11 +8,14 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { AppProvider } from '@/context/AppContext'
 
 import '../../global.css'
+import { useNotification } from '@/hooks/useNotification';
 
 // 스플래시 스크린이 자동으로 숨겨지지 않도록 설정
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+    useNotification()
+
     const [appIsReady, setAppIsReady] = useState(false);
     const [isSplashHidden, setIsSplashHidden] = useState(false);
     const [queryClient] = useState(

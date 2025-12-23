@@ -17,7 +17,6 @@ export default function SettingsScreen() {
     const [isGallery, setIsGallery] = useState(false)
 
     const trackColor = { false: '#767577', true: '#816DFF' }
-
     const setPushMutation = useDriverSetPush()
 
     const onToggleLocation = async (value) => {
