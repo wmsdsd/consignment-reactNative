@@ -6,10 +6,9 @@ import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { checkAllPermissionsAsync } from '@/lib/permissions';
-import { getPushToken } from '@/lib/notification';
+import { getPushToken, syncPushToken } from '@/lib/notification';
 
 export default function TaksongListScreen() {
-    const { id } = useLocalSearchParams()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
@@ -78,21 +77,9 @@ export default function TaksongListScreen() {
     )
 
     useEffect(() => {
-        if (id) {
-            router.push(`/(protected)/taksongs/${id}`)
-        }
-        else {
-            // getPushToken().then(token => {
-            //     if (token) {
-            //         setTokenMutation.mutateAsync({
-            //             token: token,
-            //         })
-            //             .then(e => {
-            //                 console.log("token register", e)
-            //             })
-            //     }
-            // })
-        }
+        ;(async () => {
+            await syncPushToken(setTokenMutation)
+        })()
 
         //todo: 이승준 - location (위치) 권한 확인
         // ;(async () => {

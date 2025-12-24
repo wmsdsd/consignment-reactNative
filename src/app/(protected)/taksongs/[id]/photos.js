@@ -344,7 +344,7 @@ export default function CameraScreen() {
                 className={`mt-4 mx-5 rounded-xl py-4 mb-16 items-center
                     ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                 `}
-                onPress={handleEndOrderLocation}
+                onPress={handleComplete}
                 disabled={isLoading}
             >
                 {

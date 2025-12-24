@@ -2,6 +2,9 @@ import * as Notifications from 'expo-notifications'
 import * as Device from 'expo-device'
 import { Platform } from 'react-native'
 import Constants from 'expo-constants'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+const TOKEN_KEY = 'expo_push_token'
 
 const checkDevice = () => {
     if (!Device.isDevice) {
@@ -46,7 +49,7 @@ export async function getPushToken() {
 
     let isGranted = await requestPermission()
     if (!isGranted) {
-        alert('알림 권한이 거부되었습니다.')
+        alert('알림 권한이 거부되었습니다. 시스템 설정에서 허용해 주세요.')
         return
     }
 
@@ -59,4 +62,16 @@ export async function getPushToken() {
     console.log("token", token.data)
 
     return token.data
+}
+
+export async function syncPushToken(mutation) {
+    const newToken = await getPushToken()
+    const oldToken = await AsyncStorage.getItem(TOKEN_KEY)
+
+    if (oldToken !== newToken) {
+        mutation.mutateAsync({
+            token: newToken
+        })
+        await AsyncStorage.setItem(TOKEN_KEY, newToken);
+    }
 }

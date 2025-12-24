@@ -13,12 +13,7 @@ export function useNotification() {
     })
 
     const moveToOrder = (uid) => {
-        router.push({
-            pathname: `/(protected)/taksongs`,
-            params: {
-                id: uid
-            }
-        })
+        router.push("/(protected)/taksongs")
     }
 
     useEffect(() => {
@@ -27,8 +22,6 @@ export function useNotification() {
         })
 
         const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('알림 클릭:', response)
-
             const { data } = response.notification.request.content
             const { uid } = JSON.stringify(data ?? {})
             if (uid) {

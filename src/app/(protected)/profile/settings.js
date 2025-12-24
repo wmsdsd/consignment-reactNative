@@ -5,12 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { getCameraPermissions, getGalleryPermissions, getLocationPermission } from '@/lib/permissions';
 import * as Location from 'expo-location'
 import * as ImagePicker from 'expo-image-picker'
-import { useDriverProfile, useDriverSetPush } from '@/hooks/useApi';
+import { useDriverProfile, useDriverSetPush, useDriverSetToken } from '@/hooks/useApi';
+import { getPermission, getPushToken, requestPermission, syncPushToken } from '@/lib/notification';
 
 export default function SettingsScreen() {
-    const { user } = useAuth()
-    const { data:driver, refetch: refetchDriver } = useDriverProfile(user?.uid)
-
     const [isPush, setIsPush] = useState(false)
     const [isLocation, setIsLocation] = useState(false)
     const [isCamera, setIsCamera] = useState(false)
@@ -18,6 +16,7 @@ export default function SettingsScreen() {
 
     const trackColor = { false: '#767577', true: '#816DFF' }
     const setPushMutation = useDriverSetPush()
+    const setTokenMutation = useDriverSetToken()
 
     const onToggleLocation = async (value) => {
         if (value) {
@@ -77,17 +76,35 @@ export default function SettingsScreen() {
     }
 
     const onTogglePush = async (value) => {
+        let status = null
+        if (value) {
+            status = requestPermission()
+        }
+        else {
+            await onSavePushNotification(false)
+        }
+
+        if (!value || value && status === true) {
+            await onSavePushNotification(value)
+        }
+        else {
+            setIsPush(!value)
+        }
+    }
+
+    const onSavePushNotification = async (value) => {
         const res = await setPushMutation.mutateAsync({
             isPush: value,
         })
-
         if (res) {
-            await refetchDriver()
+            setIsPush(value)
+            await syncPushToken(setTokenMutation)
         }
         else {
             Alert.alert('알림', '푸시 알림 설정에 실패하였습니다. 네트워크 환경을 확인해 주세요.');
         }
     }
+
 
     const noAuthorized = () => {
         // ❗ 권한은 앱에서 직접 해제 불가
@@ -96,6 +113,9 @@ export default function SettingsScreen() {
 
     useEffect(() => {
         ;(async () => {
+            const pushStatus = await getPermission()
+            setIsPush(pushStatus === true)
+
             const locationStatus = await getLocationPermission()
             setIsLocation(locationStatus === 'granted')
 
@@ -106,12 +126,6 @@ export default function SettingsScreen() {
             setIsGallery(galleryStatus === 'granted')
         })()
     }, [])
-
-    useEffect(() => {
-        if (driver) {
-            setIsPush(driver.isPushNotification)
-        }
-    }, [driver?.isPushNotification])
 
     return (
         <View className="bg-black flex flex-1 p-8">

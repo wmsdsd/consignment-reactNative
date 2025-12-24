@@ -1,6 +1,6 @@
 export default {
     expo: {
-        name: 'olgo',
+        name: '올고 드라이버',
         slug: 'olgo-mobility',
         scheme: 'olgo',
         version: '1.0.0',
