@@ -64,6 +64,7 @@ export default function CustomCameraScreen() {
 
                 if (res.ok) {
                     const data = await res.json()
+                    console.log("data", data)
                     if (data?.plates?.length > 0) {
                         const carNumber = data.plates[0]
                         if (orderLocation.carNumber !== carNumber) {

@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     useDriverMove,
     useOrder,
@@ -70,17 +70,18 @@ export default function CameraScreen() {
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
+    const isMountedRef = useRef(false)
+
     const [isLoading, setIsLoading] = useState(false)
     const [isTakingPicture, setIsTakingPicture] = useState(false)
     const [ready, setReady] = React.useState(false)
     const [tab, setTab] = useState(tabs[0])
-    const [photoList, setPhotoList] = useState({
-        FRONT: [null],
-        LEFT: [null],
-        BACK: [null],
-        RIGHT: [null],
-        INSIDE: [null],
-    })
+    const [photoList, setPhotoList] = useState([])
+
+    const orderPhotoList = useMemo(() => {
+        const list = photoList.filter(e => e.position === tab.key)
+        return list.length > 0 ? list : [null]
+    }, [photoList, tab.key])
 
     const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
 
@@ -90,6 +91,8 @@ export default function CameraScreen() {
     const driverMoveMutation = useDriverMove()
 
     const onHandleTakePicture = async () => {
+        if (isTakingPicture) return
+
         const status = await getCameraPermissions()
         if (status !== "granted") {
             alert("카메라 권한이 필요합니다!")
@@ -97,79 +100,80 @@ export default function CameraScreen() {
         }
 
         setIsTakingPicture(true)
+        try {
+            const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: false,
+                quality: 0.8,
+            })
 
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: false,
-            quality: 0.8,
-        })
+            if (!result.canceled) {
+                const uri = result.assets[0].uri
+                const isUnder = await isFileUnder2MB(uri)
 
-        if (!result.canceled) {
-            const uri = result.assets[0].uri
-            const isUnder = await isFileUnder2MB(uri)
-
-            if (!isUnder) {
-                Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
-                await onHandleTakePicture()
-            }
-            else {
-                const file = await uriToFileObject(uri)
-                const sendData = {
-                    orderUid: order.uid,
-                    orderLocationUid: orderLocation.uid,
-                    type: orderLocation.type,
-                    position: tab.key,
-                    fileList: [
-                        {
-                            fileName: file.name,
-                            fileType: file.type
-                        }
-                    ]
-                }
-
-                const list = await uploadMutation.mutateAsync(sendData)
-                if (Array.isArray(list) && list.length > 0) {
-                    const orderPhoto = list[0]
-                    await fetch(orderPhoto.url, {
-                        method: "PUT",
-                        headers: {
-                            'Content-Type': file.type,
-                        },
-                        body: file.blob
-                    })
-
-                    const list = photoList[tab.key].filter(e => e !== null)
-                    setPhotoList({
-                        ...photoList,
-                        [tab.key]: [orderPhoto, ...list],
-                    })
-
-                    if (photoList[tab.key].length < tab.max) {
-                        await onHandleTakePicture()
-                    }
+                if (!isUnder) {
+                    Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
+                    await onHandleTakePicture()
                 }
                 else {
-                    Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
+                    const file = await uriToFileObject(uri)
+                    const sendData = {
+                        orderUid: order.uid,
+                        orderLocationUid: orderLocation.uid,
+                        type: orderLocation.type,
+                        position: tab.key,
+                        fileList: [
+                            {
+                                fileName: file.name,
+                                fileType: file.type
+                            }
+                        ]
+                    }
+
+                    const list = await uploadMutation.mutateAsync(sendData)
+                    if (Array.isArray(list) && list.length > 0) {
+                        const orderPhoto = list[0]
+                        await fetch(orderPhoto.url, {
+                            method: "PUT",
+                            headers: {
+                                'Content-Type': file.type,
+                            },
+                            body: file.blob
+                        })
+
+                        if (!isMountedRef.current) return
+                        setPhotoList(prev => {
+                            const exists = prev.some(p => p.uid === orderPhoto.uid)
+                            return exists
+                                ? prev
+                                : [...prev, orderPhoto]
+                        })
+
+                        if (orderPhotoList.length < tab.max) {
+                            setTimeout(onHandleTakePicture, 100)
+                        }
+                    }
+                    else {
+                        Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
+                    }
                 }
             }
         }
-
-        setIsTakingPicture(false)
-    }
-
-    const updatePhotoList = (list) => {
-        setPhotoList({
-            ...photoList,
-            [tab.key]: list,
-        })
+        finally {
+            setIsTakingPicture(false)
+        }
     }
 
     const { removePhoto } = useRemovePhoto({
         photoList: photoList[tab.key],
-        setPhotoList: updatePhotoList
+        setPhotoList: setPhotoList
     })
 
     const renderSlot = useCallback(({ item }) => (
-        <ImageThumbnail item={item} onRemove={removePhoto} />
+        <ImageThumbnail
+            key={item?.uid ?? "1"}
+            item={item}
+            onRemove={removePhoto}
+        />
     ), [removePhoto])
 
 
@@ -177,7 +181,7 @@ export default function CameraScreen() {
     const handleComplete = async () => {
         let isValid = true
         for (const _tab of tabs) {
-            const list = photoList[_tab.key]
+            const list = photoList.filter(e => e.position === _tab.key)
             const length = list.length
             if (length < _tab.min || length > _tab.max) {
                 Alert.alert("알림", `${_tab.name} 이미지를 ${_tab.min}장 이상 ${_tab.max}장 이하로 촬영해 주세요.`)
@@ -268,32 +272,26 @@ export default function CameraScreen() {
     }
 
     useEffect(() => {
-        setReady(!!order?.uid && !!orderLocation?.uid)
-        setTab(tabs[0])
-        setPhotoList({
-            FRONT: [null],
-            LEFT: [null],
-            BACK: [null],
-            RIGHT: [null],
-            INSIDE: [null],
-        })
+        isMountedRef.current = true
 
+        return () => {
+            isMountedRef.current = false
+        }
     }, [])
 
     useEffect(() => {
-        if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
-            for (const orderPhoto of orderPhotos) {
-                if (orderPhoto.position) {
-                    const list = photoList[orderPhoto.position]
-                    if (list.find(e => e?.uid === orderPhoto.uid)) break
+        if (!isMountedRef.current) return
 
-                    const removeNullList = list.filter(e => e !== null)
-                    setPhotoList({
-                        ...photoList,
-                        [orderPhoto.position]: [orderPhoto, ...removeNullList],
-                    })
-                }
-            }
+        setReady(!!order?.uid && !!orderLocation?.uid)
+        setTab(tabs[0])
+        setPhotoList([])
+    }, [])
+
+    useEffect(() => {
+        if (!isMountedRef.current) return
+
+        if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
+            setPhotoList(orderPhotos)
         }
     }, [orderPhotos])
 
@@ -330,11 +328,10 @@ export default function CameraScreen() {
                 <Text className={"color-white absolute bottom-4"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
             </View>
 
-            {/* Grid 3×3 */}
             <FlatList
-                data={photoList[tab.key]}
+                data={orderPhotoList}
                 renderItem={renderSlot}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={(item, index) => `${item?.uid}_${index.toString()}`}
                 numColumns={3}
                 className={"px-5 mt-5"}
             />
@@ -345,17 +342,15 @@ export default function CameraScreen() {
                     ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                 `}
                 onPress={handleComplete}
-                disabled={isLoading}
+                disabled={isLoading || isTakingPicture}
             >
-                {
-                    isLoading
-                        ? (<ActivityIndicator color="#fff" />)
-                        : (
-                            <Text className="color-white text-base font-semibold">
-                                촬영 완료
-                            </Text>
-                        )
-                }
+                {isLoading || isTakingPicture
+                    ? (<ActivityIndicator color="#fff" />)
+                    : (
+                        <Text className="color-white text-base font-semibold">
+                            촬영 완료
+                        </Text>
+                    )}
             </TouchableOpacity>
         </View>
     )

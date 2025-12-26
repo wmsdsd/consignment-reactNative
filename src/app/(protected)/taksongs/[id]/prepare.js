@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useOrder } from '@/hooks/useApi';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useActionLock } from '@/hooks/useActionLock';
 
 export default function PrepareScreen() {
@@ -134,8 +134,12 @@ export default function PrepareScreen() {
                 {/* 예시 이미지 영역 (플레이스홀더) */}
                 <View className="mx-4 mb-6 rounded-lg border border-gray-200 bg-gray-100 p-6">
                     <Text className="mb-2 text-center text-sm font-medium text-gray-600">📷 촬영 예시</Text>
-                    <View className="h-48 items-center justify-center rounded-lg bg-gray-200">
-                        <Text className="text-gray-500">차량 사진 예시</Text>
+                    <View className="items-center justify-center rounded-lg bg-gray-200 p-4">
+                        <Image
+                            source={require('@assets/images/photo_example.jpg')}
+                            className="w-full block"
+                            resizeMode="contain"
+                        />
                     </View>
                 </View>
 
