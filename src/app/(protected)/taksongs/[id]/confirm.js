@@ -152,7 +152,6 @@ export default function ConfirmScreen() {
                                     }
                                 }
                             } catch (error) {
-                                console.error('TMap 열기 오류:', error);
                                 Alert.alert('오류', 'TMap을 열 수 없습니다.');
                             }
                         },
@@ -177,7 +176,6 @@ export default function ConfirmScreen() {
                                     }
                                 }
                             } catch (error) {
-                                console.error('카카오맵 열기 오류:', error);
                                 Alert.alert('오류', '카카오맵을 열 수 없습니다.');
                             }
                         },
@@ -204,7 +202,6 @@ export default function ConfirmScreen() {
             if (orderLocation.phone) {
                 const url = `tel:${orderLocation.phone}`
                 Linking.openURL(url).catch((error) => {
-                    console.error('전화 연결 오류:', error)
                     Alert.alert('전화연결 오류', '전화연결에 실패하였습니다.')
                 })
             }

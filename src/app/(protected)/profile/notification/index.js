@@ -84,7 +84,9 @@ export default function notificationScreen() {
 
     useEffect(() => {
         ;(async () => {
-            await readMutation.mutateAsync()
+            if (list?.length > 0) {
+                await readMutation.mutateAsync()
+            }
         })()
     }, [])
 

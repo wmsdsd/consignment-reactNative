@@ -5,7 +5,7 @@ const SUFFIX = "/api/mobile"
 
 const BASE_URL = `${ROOT}${SUFFIX}`
 
-import {router} from "expo-router"
+import {router, usePathname } from "expo-router"
 import * as SecureStore from 'expo-secure-store'
 
 // 기본 fetch 함수
@@ -35,7 +35,13 @@ const apiCall = async (endpoint, options = {}) => {
             // 비인가
             if (result?.code === 401) {
                 await SecureStore.deleteItemAsync('authToken')
-                router.replace("/(auth)/login")
+
+                const targetPath = "/(auth)/login"
+                const pathname = usePathname()
+
+                if (pathname !== targetPath) {
+                    router.replace("/(auth)/login")
+                }
             }
 
             throw new Error(data?.result?.message || 'API 호출 실패')
@@ -43,7 +49,6 @@ const apiCall = async (endpoint, options = {}) => {
         
         return data.data
     } catch (error) {
-        console.error('API Error:', error)
         throw error
     }
 }

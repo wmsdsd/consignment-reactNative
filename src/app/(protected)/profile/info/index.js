@@ -15,7 +15,6 @@ import { useDriverPhotoRemove, useDriverPhotoUpload, useDriverProfile, useDriver
 import KeyboardWrapper from "@/components/KeyboardWrapper";
 import { Controller, useForm } from 'react-hook-form';
 import * as ImagePicker from 'expo-image-picker'
-import { Platform } from 'react-native'
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { extractS3KeyFromUrl, isFileUnder2MB } from '@/lib/utils';
 import { uriToFileObject } from '@/lib/uriToFile';
@@ -224,7 +223,7 @@ export default function MyInfoScreen() {
                 ...driver
             })
         }
-    }, [])
+    }, [driver])
 
     return (
         <View className={"flex-1 bg-black p-4"}>

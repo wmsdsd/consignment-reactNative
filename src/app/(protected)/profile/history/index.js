@@ -24,7 +24,7 @@ export default function HistoryScreen() {
     }
 
     const renderEmptyList = () => {
-        return <Text style={{ textAlign: 'center', marginTop: 20, color: 'white' }}>알림 내역이 없습니다.</Text>
+        return <Text style={{ textAlign: 'center', marginTop: 20, color: 'white' }}>탁송 완료 내역이 없습니다.</Text>
     }
 
     const renderItem = ({ item }) => {

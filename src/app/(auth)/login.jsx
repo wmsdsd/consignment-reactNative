@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,10 +5,6 @@ import {
     TouchableOpacity,
     Image,
     Alert,
-    KeyboardAvoidingView,
-    TouchableWithoutFeedback,
-    Keyboard,
-    Platform,
     Animated,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -144,13 +139,6 @@ export default function LoginPage() {
                                     <Text className="text-sm font-semibold text-white pl-4">비밀번호 찾기</Text>
                                 </TouchableOpacity>
                             </View>
-                            
-                            <TouchableOpacity
-                                className="mt-3 items-center rounded-lg border-2 border-gray-300 bg-white py-4"
-                                onPress={() => router.replace('/(protected)/home')}
-                            >
-                                <Text className="text-lg font-semibold text-gray-700">체험하기</Text>
-                            </TouchableOpacity>
                         </View>
                     </Animated.View>
                 </Animated.View>

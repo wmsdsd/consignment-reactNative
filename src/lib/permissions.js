@@ -56,7 +56,6 @@ export async function checkAllPermissionsAsync() {
 
         return { locationStatus, cameraStatus, galleryStatus, allGranted }
     } catch (error) {
-        console.error('권한 체크 중 오류:', error)
         Alert.alert('오류 발생', '권한을 확인하는 중 문제가 발생했습니다.')
         return null
     }

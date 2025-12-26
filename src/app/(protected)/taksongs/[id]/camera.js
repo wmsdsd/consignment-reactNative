@@ -80,7 +80,6 @@ export default function CustomCameraScreen() {
                 }
                 else {
                     const text = await res.text()
-                    console.error('server error:', res.status, text);
                     Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
                 }
             }

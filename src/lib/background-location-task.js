@@ -6,7 +6,6 @@ const TASK_NAME = "BACKGROUND_LOCATION_TASK";
 
 TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
     if (error) {
-        console.error("백그라운드 위치 에러:", error);
         return;
     }
     
