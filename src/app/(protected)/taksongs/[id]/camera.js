@@ -64,7 +64,6 @@ export default function CustomCameraScreen() {
 
                 if (res.ok) {
                     const data = await res.json()
-                    console.log("data", data)
                     if (data?.plates?.length > 0) {
                         const carNumber = data.plates[0]
                         if (orderLocation.carNumber !== carNumber) {
@@ -79,7 +78,6 @@ export default function CustomCameraScreen() {
                     }
                 }
                 else {
-                    const text = await res.text()
                     Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
                 }
             }
@@ -100,7 +98,9 @@ export default function CustomCameraScreen() {
 
     const PLATE_WIDTH = 250
     const PLATE_HEIGHT = 150
-    const bgColor = 'rgba(0,0,0,0.6)'
+    const TOP = "46%"
+    const BOTTOM = "54%"
+    const bgColor = 'rgba(0,0,0,0.5)'
 
     return (
         <View
@@ -130,14 +130,38 @@ export default function CustomCameraScreen() {
                 {/* 위 */}
                 <View
                     style={{
-                        height: '50%',
-                        backgroundColor: bgColor,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: TOP,
                         marginTop: -PLATE_HEIGHT / 2,
+                        backgroundColor: bgColor,
+                    }}
+                />
+
+                {/* 아래 */}
+                <View
+                    style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: BOTTOM,
+                        marginBottom: -PLATE_HEIGHT / 2,
+                        backgroundColor: bgColor,
                     }}
                 />
 
                 {/* 가운데 (좌/우) */}
-                <View style={{ flexDirection: 'row' }}>
+                <View style={{
+                    position: 'absolute',
+                    top: TOP,
+                    marginTop: -PLATE_HEIGHT / 2,
+                    flexDirection: 'row',
+                    width: '100%',
+                    height: PLATE_HEIGHT,
+                }}>
                     <View
                         style={{
                             flex: 1,
@@ -150,6 +174,7 @@ export default function CustomCameraScreen() {
                         style={{
                             width: PLATE_WIDTH,
                             height: PLATE_HEIGHT,
+                            backgroundColor: "transparent",
                         }}
                     />
 
@@ -161,13 +186,6 @@ export default function CustomCameraScreen() {
                     />
                 </View>
 
-                {/* 아래 */}
-                <View
-                    style={{
-                        flex: 1,
-                        backgroundColor: bgColor,
-                    }}
-                />
             </View>
 
             {/* ----- 커스텀 촬영 버튼 UI ----- */}
@@ -180,7 +198,7 @@ export default function CustomCameraScreen() {
             >
                 {/* 촬영 버튼 */}
                 <TouchableOpacity
-                    onPress={takePicture}
+                    onPress={onSuccess}
                     className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white 
                         ${ isLoading ? "bg-gray-400" : 'bg-white'}
                     `}
@@ -200,9 +218,9 @@ export default function CustomCameraScreen() {
                     width: PLATE_WIDTH,
                     height: PLATE_HEIGHT,
                     backgroundColor: 'transparent',
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: '#d30000',
-                    top: '50%',
+                    top: TOP,
                     left: '50%',
                     transform: [
                         { translateX: -PLATE_WIDTH / 2 }, // width의 절반
@@ -211,7 +229,6 @@ export default function CustomCameraScreen() {
                 }}
             >
             </View>
-
         </View>
     );
 }

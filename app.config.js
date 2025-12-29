@@ -83,6 +83,15 @@ export default {
                     recordAudioAndroid: true,
                 },
             ],
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "minifyEnabled": true,
+                        "shrinkResources": true
+                    }
+                }
+            ]
         ],
         extra: {
             router: {},

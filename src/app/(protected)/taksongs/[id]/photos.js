@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router'
+import { useLocalSearchParams, router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     useDriverMove,
@@ -12,59 +12,14 @@ import {
 } from '@/hooks/useApi';
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
-import {isAndroid} from "@/lib/platform"
 import { isFileUnder2MB } from '@/lib/utils';
 import { getLocation } from '@/hooks/useLocation';
 import { useRemovePhoto } from '@/hooks/useRemovePhoto';
 import ImageThumbnail from '@/components/ImageThumbnail';
-import useGlobalLoading from "@/hooks/useGlobalLoading";
 import { getCameraPermissions } from '@/lib/permissions';
+import { TABS } from '@/data/codes'
 
-const tabs = [
-    {
-        name: "정면",
-        key: "FRONT",
-        min: 3,
-        max: 5,
-        sampleImage: require('@assets/images/sample/car_front.png')
-    },
-    {
-        name: "좌측",
-        key: "LEFT",
-        min: 2,
-        max: 5,
-        sampleImage: require('@assets/images/sample/car_left.png')
-    },
-    {
-        name: "후면",
-        key: "BACK",
-        min: 3,
-        max: 5,
-        sampleImage: require('@assets/images/sample/car_back.png')
-    },
-    {
-        name: "우측",
-        key: "RIGHT",
-        min: 2,
-        max: 5,
-        sampleImage: require('@assets/images/sample/car_right.png')
-    },
-    {
-        name: "내부 및 계기판",
-        key: "INSIDE",
-        min: 3,
-        max: 10,
-        sampleImage: require('@assets/images/sample/car_inside.png')
-    },
-    // {
-    //     name: "하부",
-    //     key: "BOTTOM",
-    //     selected: false,
-    //     min: 2,
-    //     max: 5
-    // },
-]
-
+const tabs = TABS
 export default function CameraScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
@@ -271,6 +226,15 @@ export default function CameraScreen() {
         }
     }
 
+    const onTakeMainImage = () => {
+        router.push({
+            pathname: `/(protected)/taksongs/${orderLocation.uid}/cameraOutline`,
+            params: {
+                type: tab.key
+            }
+        })
+    }
+
     useEffect(() => {
         isMountedRef.current = true
 
@@ -317,7 +281,7 @@ export default function CameraScreen() {
                 <Image source={tab.sampleImage} className={"absolute opacity-60"} />
                 <TouchableOpacity
                     className={"justify-center items-center"}
-                    onPress={onHandleTakePicture}
+                    onPress={onTakeMainImage}
                     disabled={isTakingPicture}
                 >
                     { isTakingPicture
@@ -325,7 +289,13 @@ export default function CameraScreen() {
                         : (<Image source={require('@assets/icon/ic_photo.png')} className="mb-8 h-28 w-28" />)
                     }
                 </TouchableOpacity>
-                <Text className={"color-white absolute bottom-4"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
+                <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>
+            </View>
+
+            <View className={"flex-col justify-center items-center mt-8"}>
+                <Text className={"color-white text-sm mb-1"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
+                <Text className={"color-white text-sm mb-1"}>스크래치 및 찌그러짐이 있는 부분 위주로 사진을 찍어 주세요.</Text>
+                <Text className={"color-white text-sm"}>({tab.imageText})</Text>
             </View>
 
             <FlatList

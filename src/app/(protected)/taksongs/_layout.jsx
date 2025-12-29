@@ -2,6 +2,18 @@ import { Stack } from 'expo-router';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 
 export default function TaksongsLayout() {
+    const commonOptions = {
+        headerShown: true,
+        headerStyle: { backgroundColor: '#000000' },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: { color: '#ffffff' }
+    }
+
+    const commonOptionBackVisible = {
+        ...commonOptions,
+        headerBackVisible: true,
+    }
+
     return (
         <Stack
             screenOptions={{
@@ -12,81 +24,61 @@ export default function TaksongsLayout() {
             <Stack.Screen
                 name="index"
                 options={{
-                    headerShown: true,
                     title: '탁송 목록',
                     headerLeft: () => <DrawerToggleButton tintColor={'white'} />,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptions,
                 }}
             />
             <Stack.Screen
                 name="[id]"
                 options={{
-                    headerShown: true,
                     title: '탁송 상세',
-                    headerBackVisible: true,
                     headerLeft: undefined,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
                 name="[id]/confirm"
                 options={{
-                    headerShown: true,
                     title: '예약 완료',
-                    headerBackVisible: true,
                     headerLeft: undefined,
                     headerRight: () => <DrawerToggleButton tintColor={'white'} />,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
                 name="[id]/prepare"
                 options={{
-                    headerShown: true,
                     title: '사진 촬영 안내',
-                    headerBackVisible: true,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
                 name="[id]/camera"
                 options={{
-                    headerShown: true,
                     title: '차량번호 확인',
-                    headerBackVisible: true,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
                 name="[id]/photos"
                 options={{
-                    headerShown: true,
                     title: '사진 촬영',
-                    headerBackVisible: true,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
                 name="[id]/complete"
                 options={{
-                    headerShown: true,
                     title: '탁송 완료',
-                    headerBackVisible: true,
-                    headerStyle: { backgroundColor: '#000000' },
-                    headerTintColor: '#ffffff',
-                    headerTitleStyle: { color: '#ffffff' },
+                    ...commonOptionBackVisible
+                }}
+            />
+            <Stack.Screen
+                name="[id]/cameraOutline"
+                options={{
+                    title: '차량 촬영',
+                    ...commonOptionBackVisible
                 }}
             />
         </Stack>

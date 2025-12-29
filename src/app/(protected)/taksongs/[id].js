@@ -140,7 +140,11 @@ export default function TaksongDetailScreen() {
                         <Text className="text-center text-lg text-white">취소</Text>
                     </Pressable>
                     
-                    <Pressable onPress={handleStart} className="flex-1 rounded-xl bg-btn py-4">
+                    <Pressable
+                        onPress={handleStart}
+                        className="flex-1 rounded-xl bg-btn py-4 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
+                        disabled={orderStatusUpdateMutation.isPending}
+                    >
                         <Text className="text-center text-lg font-semibold text-white">탁송 시작</Text>
                     </Pressable>
                 </View>

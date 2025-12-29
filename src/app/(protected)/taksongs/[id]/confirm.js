@@ -305,11 +305,6 @@ export default function ConfirmScreen() {
                             <Text className="w-28 text-gray-300">지번 주소</Text>
                             <Text className="flex-1 font-semibold text-white">{orderLocation.jibunAddress || '없음'}</Text>
                         </View>
-
-                        <View className="mb-3 flex-row">
-                            <Text className="w-28 text-gray-300">상태</Text>
-                            <Text className="font-semibold text-white">{orderLocation.statusName}</Text>
-                        </View>
                     </View>
                     <View className="mt-4 h-[10px] bg-gray-700" />
 
