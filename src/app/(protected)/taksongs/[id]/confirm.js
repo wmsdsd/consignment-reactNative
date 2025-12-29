@@ -124,8 +124,8 @@ export default function ConfirmScreen() {
         try {
             const address = orderLocation.roadAddress || orderLocation.jibunAddress || '미등록 장소'
             const goalName = encodeURIComponent(address)
-            const goalX = orderLocation.longitude // 경도
-            const goalY = orderLocation.latitude // 위도
+            const goalX = orderLocation.latitude        // 경도
+            const goalY = orderLocation.longitude       // 위도
 
             // 사용자에게 앱 선택 옵션 제공
             Alert.alert(

@@ -108,8 +108,13 @@ export const useDriverSetPush = () => {
 }
 
 export const useDriverSetToken = () => {
+    const queryClient = useQueryClient()
+
     return useMutation({
         mutationFn: driverApi.setToken,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['driver'] });
+        }
     })
 }
 

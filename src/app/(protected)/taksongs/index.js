@@ -6,9 +6,11 @@ import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { checkAllPermissionsAsync } from '@/lib/permissions';
-import { getPushToken, syncPushToken } from '@/lib/notification';
+import { syncPushToken } from '@/lib/notification';
+import {useAuth} from "@/hooks/useAuth";
 
 export default function TaksongListScreen() {
+    const { user } = useAuth()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
@@ -78,7 +80,8 @@ export default function TaksongListScreen() {
 
     useEffect(() => {
         ;(async () => {
-            await syncPushToken(setTokenMutation)
+            const updateFlag = !!user?.token
+            await syncPushToken(setTokenMutation, updateFlag)
         })()
 
         //todo: 이승준 - location (위치) 권한 확인
