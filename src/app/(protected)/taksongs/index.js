@@ -29,7 +29,7 @@ export default function TaksongListScreen() {
             case "DRIVER_ROUND":    // 왕복지
                 const permission = await checkAllPermissionsAsync()
                 if (permission?.allGranted) {
-                    router.push(`/(protected)/taksongs/${uid}/confirm`)
+                    router.push(`/(protected)/taksongs/${uid}/detail`)
                 }
                 else {
                     Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.')
@@ -83,16 +83,6 @@ export default function TaksongListScreen() {
             const updateFlag = !!user?.token
             await syncPushToken(setTokenMutation, updateFlag)
         })()
-
-        //todo: 이승준 - location (위치) 권한 확인
-        // ;(async () => {
-        //     console.log(
-        //         'FG:',
-        //         await Location.getForegroundPermissionsAsync(),
-        //         'BG:',
-        //         await Location.getBackgroundPermissionsAsync()
-        //     );
-        // })()
     }, [])
 
     useEffect(() => {

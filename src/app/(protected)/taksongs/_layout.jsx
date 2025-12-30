@@ -32,15 +32,15 @@ export default function TaksongsLayout() {
             <Stack.Screen
                 name="[id]"
                 options={{
-                    title: '탁송 상세',
+                    title: '탁송 정보',
                     headerLeft: undefined,
                     ...commonOptionBackVisible
                 }}
             />
             <Stack.Screen
-                name="[id]/confirm"
+                name="[id]/detail"
                 options={{
-                    title: '예약 완료',
+                    title: '탁송 상세 정보',
                     headerLeft: undefined,
                     headerRight: () => <DrawerToggleButton tintColor={'white'} />,
                     ...commonOptionBackVisible

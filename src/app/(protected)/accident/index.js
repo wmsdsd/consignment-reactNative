@@ -1,6 +1,6 @@
 import { useAppContext } from '@/context/AppContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     Alert,
@@ -10,8 +10,6 @@ import {
     ToastAndroid,
     View,
     Animated,
-    Keyboard,
-    Platform,
     ScrollView,
 } from 'react-native';
 import { useOrderAccidentReceive, useOrderLocationProcess } from '@/hooks/useApi';
@@ -20,16 +18,21 @@ import { router } from 'expo-router';
 import { formatDate, formatDatetime, formatTime } from '@/lib/utils';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import KeyboardWrapper from '@/components/KeyboardWrapper'
+import { useDateTimePicker } from '@/hooks/useDatetimePicker';
 
 export default function AccidentReceiveScreen() {
     const { menuConfig } = useAppContext()
     const insets = useSafeAreaInsets()
 
     const [orderUid, setOrderUid] = useState(null)
-    const [showDatePicker, setShowDatePicker] = useState(false)
-    const [showTimePicker, setShowTimePicker] = useState(false)
-    const [selectedDate, setSelectedDate] = useState(new Date())
 
+    const {
+        selectedDate,
+        showDatePicker,
+        showTimePicker,
+        handleDateChange,
+        handleTimeChange
+    } = useDateTimePicker()
     const { data: orderLocation } = useOrderLocationProcess(orderUid)
 
     const receiveMutation = useOrderAccidentReceive()
@@ -73,26 +76,6 @@ export default function AccidentReceiveScreen() {
                     },
                 },
             ])
-    }
-
-    const handleDateChange = (event, date) => {
-        setShowDatePicker(false)
-        if (date) {
-            const newDate = new Date(date)
-            newDate.setHours(selectedDate.getHours())
-            newDate.setMinutes(selectedDate.getMinutes())
-            setSelectedDate(newDate)
-        }
-    }
-
-    const handleTimeChange = (event, date) => {
-        setShowTimePicker(false)
-        if (date) {
-            const newDate = new Date(selectedDate)
-            newDate.setHours(date.getHours())
-            newDate.setMinutes(date.getMinutes())
-            setSelectedDate(newDate)
-        }
     }
 
     useEffect(() => {

@@ -12,18 +12,26 @@ import {
 } from '@/hooks/useApi';
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
-import { isFileUnder2MB } from '@/lib/utils';
+import { deepCopy, isFileUnder2MB } from '@/lib/utils';
 import { getLocation } from '@/hooks/useLocation';
 import { useRemovePhoto } from '@/hooks/useRemovePhoto';
 import ImageThumbnail from '@/components/ImageThumbnail';
 import { getCameraPermissions } from '@/lib/permissions';
 import { TABS } from '@/data/codes'
+import { useImageUriStore } from '@/store/useImageUriStore';
 
-const tabs = TABS
+const tabs = deepCopy(TABS)
 export default function CameraScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
+    const {
+        imageUri,
+        type ,
+        orderPhoto,
+        setOrderPhoto,
+        clearOrderPhoto
+    } = useImageUriStore()
 
     const isMountedRef = useRef(false)
 
@@ -70,51 +78,65 @@ export default function CameraScreen() {
                     await onHandleTakePicture()
                 }
                 else {
-                    const file = await uriToFileObject(uri)
-                    const sendData = {
-                        orderUid: order.uid,
-                        orderLocationUid: orderLocation.uid,
-                        type: orderLocation.type,
-                        position: tab.key,
-                        fileList: [
-                            {
-                                fileName: file.name,
-                                fileType: file.type
-                            }
-                        ]
-                    }
-
-                    const list = await uploadMutation.mutateAsync(sendData)
-                    if (Array.isArray(list) && list.length > 0) {
-                        const orderPhoto = list[0]
-                        await fetch(orderPhoto.url, {
-                            method: "PUT",
-                            headers: {
-                                'Content-Type': file.type,
-                            },
-                            body: file.blob
-                        })
-
-                        if (!isMountedRef.current) return
-                        setPhotoList(prev => {
-                            const exists = prev.some(p => p.uid === orderPhoto.uid)
-                            return exists
-                                ? prev
-                                : [...prev, orderPhoto]
-                        })
-
-                        if (orderPhotoList.length < tab.max) {
-                            setTimeout(onHandleTakePicture, 100)
-                        }
-                    }
-                    else {
-                        Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
-                    }
+                    await onUploadPhoto(uri, tab.key, 'SUB')
                 }
             }
         }
         finally {
             setIsTakingPicture(false)
+        }
+    }
+
+    const onUploadPhoto = async (uri, position, subType) => {
+        const file = await uriToFileObject(uri)
+        const sendData = {
+            orderUid: order.uid,
+            orderLocationUid: orderLocation.uid,
+            type: orderLocation.type,
+            subType: subType,
+            position: position,
+            fileList: [
+                {
+                    fileName: file.name,
+                    fileType: file.type
+                }
+            ]
+        }
+
+        const list = await uploadMutation.mutateAsync(sendData)
+        if (Array.isArray(list) && list.length > 0) {
+            const orderPhoto = list[0]
+            await fetch(orderPhoto.url, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': file.type,
+                },
+                body: file.blob
+            })
+
+            if (!isMountedRef.current) return
+            if (subType === "MAIN") {
+                setOrderPhoto(orderPhoto, position)
+            }
+            else if (subType === "SUB") {
+                onSaveSubPhoto(orderPhoto)
+            }
+        }
+        else {
+            Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
+        }
+    }
+
+    const onSaveSubPhoto = (orderPhoto) => {
+        setPhotoList(prev => {
+            const exists = prev.some(p => p.uid === orderPhoto.uid)
+            return exists
+                ? prev
+                : [...prev, orderPhoto]
+        })
+
+        if (orderPhotoList.length < tab.max) {
+            setTimeout(onHandleTakePicture, 100)
         }
     }
 
@@ -201,7 +223,7 @@ export default function CameraScreen() {
                 })
             }
 
-            router.replace(`/(protected)/taksongs/${id}/confirm`)
+            router.replace(`/(protected)/taksongs/${id}/detail`)
         }
         else {
             const res = await updateOrderStatusMutation.mutateAsync({
@@ -228,7 +250,7 @@ export default function CameraScreen() {
 
     const onTakeMainImage = () => {
         router.push({
-            pathname: `/(protected)/taksongs/${orderLocation.uid}/cameraOutline`,
+            pathname: `/(protected)/taksongs/${id}/cameraOutline`,
             params: {
                 type: tab.key
             }
@@ -240,6 +262,7 @@ export default function CameraScreen() {
 
         return () => {
             isMountedRef.current = false
+            clearOrderPhoto()
         }
     }, [])
 
@@ -258,6 +281,12 @@ export default function CameraScreen() {
             setPhotoList(orderPhotos)
         }
     }, [orderPhotos])
+
+    useEffect(() => {
+        if (imageUri && type) {
+
+        }
+    }, [imageUri, type])
 
     return (
         <View className={"bg-black flex-1"}>

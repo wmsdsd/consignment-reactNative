@@ -106,3 +106,9 @@ export function extractS3KeyFromUrl(url) {
         return null
     }
 }
+
+export function deepCopy(data) {
+    return typeof structuredClone === 'function'
+        ? structuredClone(data)
+        : JSON.parse(JSON.stringify(data))
+}

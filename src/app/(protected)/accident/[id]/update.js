@@ -199,7 +199,10 @@ export default function AccidentUpdateScreen() {
     })
 
     const renderImage = useCallback(({ item }) => (
-        <ImageThumbnail item={item} onRemove={removePhoto} />
+        <ImageThumbnail
+            item={item}
+            onRemove={removePhoto}
+        />
     ), [removePhoto])
 
     useEffect(() => {
