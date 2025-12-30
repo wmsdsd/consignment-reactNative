@@ -1,7 +1,7 @@
 import { TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 
-export default function ImageThumbnail ({ item, onRemove }) {
+export default function ImageThumbnail ({ item, onRemove, onPress }) {
     const [loading, setLoading] = useState(true)
     const url = item
         ? item.url
@@ -10,6 +10,12 @@ export default function ImageThumbnail ({ item, onRemove }) {
                 : item.url
             : null
         : null
+
+    const onTouchEmpty = () => {
+        if (onPress && typeof onPress === "function") {
+            onPress()
+        }
+    }
 
     return (
         <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
@@ -31,7 +37,10 @@ export default function ImageThumbnail ({ item, onRemove }) {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <TouchableOpacity className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}>
+                <TouchableOpacity
+                    className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}
+                    onPress={onTouchEmpty}
+                >
                     <Image source={require("@assets/images/sample/sample_thumbnail.png")} className={"w-8 h-8"} />
                 </TouchableOpacity>
             )}

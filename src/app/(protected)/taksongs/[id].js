@@ -47,7 +47,7 @@ export default function TaksongDetailScreen() {
             })
 
             if (res) {
-                router.push(`/(protected)/taksongs/${id}/confirm`);
+                router.push(`/(protected)/taksongs/${id}/detail`);
             }
         } else {
             // ❌ 하나라도 거부됨 → 경고 표시

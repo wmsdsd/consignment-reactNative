@@ -182,7 +182,10 @@ export default function PriceDetailScreen() {
     })
 
     const renderImage = useCallback(({ item }) => (
-        <ImageThumbnail item={item} onRemove={removePhoto} />
+        <ImageThumbnail
+            item={item}
+            onRemove={removePhoto} 
+        />
     ), [removePhoto])
 
 

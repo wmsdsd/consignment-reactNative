@@ -20,7 +20,7 @@ export const TABS = [
         min: 3,
         max: 5,
         sampleImage: require('@assets/images/sample/car_front.png'),
-        imageText: "차량 앞 유리, 라이트 확인"
+        imageText: "차량 앞 유리, 라이트 확인",
     },
     {
         name: "좌측",
@@ -28,7 +28,7 @@ export const TABS = [
         min: 2,
         max: 5,
         sampleImage: require('@assets/images/sample/car_left.png'),
-        imageText: "타이어 및 유리, 사이드미러와 도어 확인"
+        imageText: "타이어 및 유리, 사이드미러와 도어 확인",
     },
     {
         name: "후면",
@@ -36,7 +36,7 @@ export const TABS = [
         min: 3,
         max: 5,
         sampleImage: require('@assets/images/sample/car_back.png'),
-        imageText: "후면 유리, 범퍼 확인"
+        imageText: "후면 유리, 범퍼 확인",
     },
     {
         name: "우측",
@@ -44,7 +44,7 @@ export const TABS = [
         min: 2,
         max: 5,
         sampleImage: require('@assets/images/sample/car_right.png'),
-        imageText: "타이어 및 유리, 사이드미러와 도어 확인"
+        imageText: "타이어 및 유리, 사이드미러와 도어 확인",
     },
     {
         name: "내부 및 계기판",
@@ -52,7 +52,7 @@ export const TABS = [
         min: 3,
         max: 10,
         sampleImage: require('@assets/images/sample/car_inside.png'),
-        imageText: "계기판의 km와 주유량, 앞뒤좌석 내부 물건 확인"
+        imageText: "계기판의 km와 주유량, 앞뒤좌석 내부 물건 확인",
     },
     // {
     //     name: "하부",

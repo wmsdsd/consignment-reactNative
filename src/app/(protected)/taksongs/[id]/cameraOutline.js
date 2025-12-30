@@ -1,22 +1,23 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import { View, TouchableOpacity, Text, Alert, ActivityIndicator, Image } from 'react-native';
-import { useEffect, useRef, useState } from 'react';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { useOrderLocation, useOrderLocationProcess } from '@/hooks/useApi';
-import * as ImageManipulator from 'expo-image-manipulator';
+import { View, TouchableOpacity, Text, Alert, Image } from 'react-native';
+import { useRef, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import { isFileUnder2MB } from '@/lib/utils';
+import { useAutoOrientation } from '@/hooks/useAutoOrientation';
+import { useImageUriStore } from '@/store/useImageUriStore';
 
 const layoutImages = {
     front: require("@assets/images/sample/car_front.png")
 }
 
 export default function CameraOutlineScreen() {
-    const { id, type } = useLocalSearchParams()
-    // const { data } = useOrderLocation(orderLocationUid)
+    useAutoOrientation()
 
-    const [permission, requestPermission] = useCameraPermissions()
-    const [isLoading, setIsLoading] = useState(false)
+    const { id, type } = useLocalSearchParams()
+
     const cameraRef = useRef(null)
+    const [permission, requestPermission] = useCameraPermissions()
+    const [photoUri, setPhotoUri] = useState(null)
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -33,8 +34,6 @@ export default function CameraOutlineScreen() {
     const takePicture = async () => {
         if (!cameraRef.current) return
 
-        setIsLoading(true)
-
         const result = await cameraRef.current.takePictureAsync({
             quality: 0.5,
             base64: false,
@@ -42,78 +41,24 @@ export default function CameraOutlineScreen() {
             skipProcessing: true
         })
 
-        try {
-            if (!result || !result.uri) return
+        if (!result || !result.uri) return
 
-            const uri = result.uri
-            const isUnder = await isFileUnder2MB(uri)
+        const uri = result.uri
+        const isUnder = await isFileUnder2MB(uri)
 
-            if (!isUnder) {
-                Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
-                return
-            }
-
-            console.log("result.uri", uri)
-
-            // const image = await ImageManipulator.manipulateAsync(
-            //     result.uri,
-            //     [{ resize: { width: 1024 } }],
-            //     {
-            //         compress: 0.6,
-            //         format: ImageManipulator.SaveFormat.JPEG
-            //     }
-            // )
-            // const formData = new FormData()
-            //
-            // formData.append('image', {
-            //     uri: image.uri,
-            //     name: 'carPlate.jpg',
-            //     type: 'image/jpeg'
-            // })
-            //
-            // try {
-            //     const res = await fetch(plateUrl, {
-            //         method: "POST",
-            //         body: formData,
-            //     })
-            //
-            //     if (res.ok) {
-            //         const data = await res.json()
-            //         if (data?.plates?.length > 0) {
-            //             const carNumber = data.plates[0]
-            //             if (orderLocation.carNumber !== carNumber) {
-            //                 Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
-            //             }
-            //             else {
-            //                 onSuccess()
-            //             }
-            //         }
-            //         else {
-            //             Alert.alert("알림", "번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.")
-            //         }
-            //     }
-            //     else {
-            //         Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
-            //     }
-            // }
-            // catch (e) {
-            //     console.log('fetch error', e)
-            //     Alert.alert("알림", "사진 정보가 올바르지 않습니다.")
-            // }
-
+        if (!isUnder) {
+            Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
+            return
         }
-        finally {
-            setIsLoading(false)
-        }
+
+        setPhotoUri(uri)
     }
 
-    const onSuccess = (uri) => {
-        router.back()
+    const onSuccess = () => {
+        if (!photoUri) return
 
-        // 뒤로 가면서 데이터 전달
-        router.setParams({
-            capturedPhoto: uri,
-        })
+        useImageUriStore.getState().setImageUri(photoUri, type)
+        router.back()
     }
 
     return (
@@ -124,11 +69,38 @@ export default function CameraOutlineScreen() {
             }}
         >
             {/* ----- 카메라 화면 ----- */}
-            <CameraView
-                style={{ flex: 1 }}
-                ref={cameraRef}
-                facing="back"
-            />
+            {photoUri ? (
+                <Image source={{ uri: photoUri }} style={{ flex: 1 }} />
+            ) : (
+                <CameraView
+                    style={{ flex: 1 }}
+                    ref={cameraRef}
+                    facing="back"
+                />
+            )}
+
+            {/* ----- 레이아웃 ----- */}
+            {!photoUri && (
+                <View
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        opacity: 0.5,
+                        backgroundColor: 'transparent'
+                    }}
+                >
+                    <Image
+                        className={'w-[550px] h-[330px]'}
+                        source={layoutImages['front']}
+                        resizeMode={'contain'}
+                    />
+                </View>
+            )}
 
             {/* ----- 커스텀 촬영 버튼 UI ----- */}
             <View
@@ -138,40 +110,31 @@ export default function CameraOutlineScreen() {
                     alignSelf: 'center',
                 }}
             >
-                {/* 촬영 버튼 */}
-                <TouchableOpacity
-                    onPress={takePicture}
-                    className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white 
-                        ${ isLoading ? "bg-gray-400" : 'bg-white'}
-                    `}
-                    disabled={isLoading}
-                >
-                    { isLoading
-                        ? (<ActivityIndicator color={"fff"} />)
-                        : (<View className="h-12 w-12 rounded-full bg-primary" />)
-                    }
-                </TouchableOpacity>
+                {photoUri ? (
+                    <View className={"flex-row mb-8 gap-4"}>
+                        <TouchableOpacity
+                            onPress={() => setPhotoUri(null)}
+                            className={`items-center justify-center`}
+                        >
+                            <Text className={"color-white"}>다시찍기</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={onSuccess}
+                            className={`items-center justify-center`}
+                        >
+                            <Text className={"color-white"}>사진 사용</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <TouchableOpacity
+                        onPress={takePicture}
+                        className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white`}
+                    >
+                        <View className="h-12 w-12 rounded-full bg-primary" />
+                    </TouchableOpacity>
+                )}
             </View>
 
-            {/* ----- 레이아웃 ----- */}
-            <View
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    opacity: 0.5,
-                    backgroundColor: 'transparent'
-                }}
-            >
-                <Image
-                    className={'w-full'}
-                    source={layoutImages['front']}
-                />
-            </View>
         </View>
     );
 }

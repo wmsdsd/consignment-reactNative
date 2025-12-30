@@ -91,6 +91,7 @@ export default function CustomCameraScreen() {
     }
 
     const onSuccess = () => {
+        router.dismissAll()
         router.push({
             pathname: `/(protected)/taksongs/${id}/photos`
         })

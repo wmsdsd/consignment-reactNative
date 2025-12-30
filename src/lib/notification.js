@@ -64,11 +64,16 @@ export async function getPushToken() {
     return token.data
 }
 
-export async function syncPushToken(mutation) {
+export async function syncPushToken(mutation, checkToken = true) {
     const newToken = await getPushToken()
     const oldToken = await AsyncStorage.getItem(TOKEN_KEY)
 
-    if (oldToken !== newToken) {
+    let updateFlag = true
+    if (checkToken) {
+        updateFlag = oldToken !== newToken
+    }
+
+    if (updateFlag) {
         mutation.mutateAsync({
             token: newToken
         })

@@ -6,9 +6,11 @@ import { useCallback, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { checkAllPermissionsAsync } from '@/lib/permissions';
-import { getPushToken, syncPushToken } from '@/lib/notification';
+import { syncPushToken } from '@/lib/notification';
+import {useAuth} from "@/hooks/useAuth";
 
 export default function TaksongListScreen() {
+    const { user } = useAuth()
     const { data, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
@@ -27,7 +29,7 @@ export default function TaksongListScreen() {
             case "DRIVER_ROUND":    // 왕복지
                 const permission = await checkAllPermissionsAsync()
                 if (permission?.allGranted) {
-                    router.push(`/(protected)/taksongs/${uid}/confirm`)
+                    router.push(`/(protected)/taksongs/${uid}/detail`)
                 }
                 else {
                     Alert.alert('권한이 필요합니다', '위치, 카메라, 사진 접근 권한을 모두 허용해주세요.')
@@ -78,18 +80,9 @@ export default function TaksongListScreen() {
 
     useEffect(() => {
         ;(async () => {
-            await syncPushToken(setTokenMutation)
+            const updateFlag = !!user?.token
+            await syncPushToken(setTokenMutation, updateFlag)
         })()
-
-        //todo: 이승준 - location (위치) 권한 확인
-        // ;(async () => {
-        //     console.log(
-        //         'FG:',
-        //         await Location.getForegroundPermissionsAsync(),
-        //         'BG:',
-        //         await Location.getBackgroundPermissionsAsync()
-        //     );
-        // })()
     }, [])
 
     useEffect(() => {

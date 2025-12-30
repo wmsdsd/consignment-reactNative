@@ -9,7 +9,8 @@ import moment from 'moment'
 import { useForegroundLocation, getLocation } from '@/hooks/useLocation'
 import { useAppContext } from '@/context/AppContext';
 import useGlobalLoading from "@/hooks/useGlobalLoading";
-import { startBackgroundLocation, useRealtimeLocation } from '@/lib/backgroundLocation';
+import { requestLocationPermissions, startBackgroundLocation, useRealtimeLocation } from '@/lib/backgroundLocation';
+import { useDateTimePicker } from '@/hooks/useDatetimePicker';
 
 export default function ConfirmScreen() {
     const navigation = useNavigation()
@@ -31,45 +32,25 @@ export default function ConfirmScreen() {
     }, [orderLocation?.status])
 
     // 상태 관리
-    const [selectedDate, setSelectedDate] = useState(new Date())
-    const [showDatePicker, setShowDatePicker] = useState(false)
-    const [showTimePicker, setShowTimePicker] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isCalling, setIsCalling] = useState(false)
 
+    const {
+        selectedDate,
+        setSelectedDate,
+        showDatePicker,
+        showTimePicker,
+        handleDateChange,
+        handleTimeChange
+    } = useDateTimePicker()
     const startMutation = useOrderLocationStart()
     const driverMoveMutation = useDriverMove()
 
-    // 날짜 선택 핸들러
-    const handleDateChange = (event, date) => {
-        setShowDatePicker(false)
-        if (date) {
-            const newDate = new Date(date)
-            newDate.setHours(selectedDate.getHours())
-            newDate.setMinutes(selectedDate.getMinutes())
-            setSelectedDate(newDate)
-        }
-    };
-    
-    // 시간 선택 핸들러
-    const handleTimeChange = (event, date) => {
-        setShowTimePicker(false)
-        if (date) {
-            const newDate = new Date(selectedDate)
-            newDate.setHours(date.getHours())
-            newDate.setMinutes(date.getMinutes())
-            setSelectedDate(newDate)
-        }
-    }
-    
     // 운행 시작
     const handleTransportStart = async () => {
         if (isLoading) return
 
         setIsLoading(true)
-
-        //todo: 이승준 - 백그라운드 로직 호출 부분
-        //await startBackgroundLocation()
 
         try {
             const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
@@ -124,8 +105,8 @@ export default function ConfirmScreen() {
         try {
             const address = orderLocation.roadAddress || orderLocation.jibunAddress || '미등록 장소'
             const goalName = encodeURIComponent(address)
-            const goalX = orderLocation.longitude // 경도
-            const goalY = orderLocation.latitude // 위도
+            const goalX = orderLocation.latitude        // 경도
+            const goalY = orderLocation.longitude       // 위도
 
             // 사용자에게 앱 선택 옵션 제공
             Alert.alert(
@@ -202,6 +183,7 @@ export default function ConfirmScreen() {
             if (orderLocation.phone) {
                 const url = `tel:${orderLocation.phone}`
                 Linking.openURL(url).catch((error) => {
+                    console.log("Linking error", error)
                     Alert.alert('전화연결 오류', '전화연결에 실패하였습니다.')
                 })
             }
@@ -231,6 +213,12 @@ export default function ConfirmScreen() {
             orderUid: id
         }))
 
+        ;(async () => {
+            const granted = await requestLocationPermissions()
+            if (granted) {
+                await startBackgroundLocation()
+            }
+        })()
     }, [])
 
 

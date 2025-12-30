@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 import { useDriverCheck, useDriverLogout } from './useApi'
 import { driverApi } from '@/lib/api'
 import { router } from 'expo-router'
+import { stopBackgroundLocation } from '@/lib/backgroundLocation';
 
 const AuthContext = createContext(null)
 
@@ -63,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await logoutMutation.mutateAsync()
+            await stopBackgroundLocation()
         }
         catch (error) {
             console.error('Logout error:', error)
