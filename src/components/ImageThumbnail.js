@@ -1,7 +1,7 @@
 import { TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 
-export default function ImageThumbnail ({ item, onRemove, onPress }) {
+export default function ImageThumbnail ({ item, onRemove, onPressEmpty }) {
     const [loading, setLoading] = useState(true)
     const url = item
         ? item.url
@@ -12,8 +12,8 @@ export default function ImageThumbnail ({ item, onRemove, onPress }) {
         : null
 
     const onTouchEmpty = () => {
-        if (onPress && typeof onPress === "function") {
-            onPress()
+        if (onPressEmpty && typeof onPressEmpty === "function") {
+            onPressEmpty()
         }
     }
 

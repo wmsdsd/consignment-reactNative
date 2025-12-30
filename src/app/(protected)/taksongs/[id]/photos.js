@@ -44,7 +44,7 @@ export default function CameraScreen() {
 
     const orderPhotoList = useMemo(() => {
         const list = photoList.filter(e => e.position === tab.key)
-        return list.length > 0 ? list : [null]
+        return list.length > 0 ? [...list, null] : [null]
     }, [photoList, tab.key])
 
     const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
@@ -151,9 +151,9 @@ export default function CameraScreen() {
             key={item?.uid ?? "1"}
             item={item}
             onRemove={removePhoto}
+            onPressEmpty={onHandleTakePicture}
         />
-    ), [removePhoto])
-
+    ), [removePhoto, onHandleTakePicture])
 
     // 촬영 완료 핸들러
     const handleComplete = async () => {
@@ -322,21 +322,25 @@ export default function CameraScreen() {
             {/* Big Camera Area */}
             <View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>
                 {mainOrderPhoto[tab.key] ? (
-                    <Image source={mainOrderPhoto[tab.key].url} className={"absolute"} />
+                    <Image
+                        source={{ uri: mainOrderPhoto[tab.key].url }}
+                        className={"absolute w-full h-[260px]"}
+                        resizeMode={"contain"}
+                    />
                 ) : (
-                    <Image source={tab.sampleImage} className={"absolute opacity-60"} />
+                    <>
+                        <Image source={tab.sampleImage} className={"absolute opacity-60"} />
+                        <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>
+                    </>
                 )}
+
                 <TouchableOpacity
-                    className={"justify-center items-center"}
+                    className={"absolute right-4 bottom-4"}
                     onPress={onTakeMainImage}
-                    disabled={isTakingPicture}
                 >
-                    { isTakingPicture
-                        ? (<ActivityIndicator color={"fff"} /> )
-                        : (<Image source={require('@assets/icon/ic_photo.png')} className="mb-8 h-28 w-28" />)
-                    }
+                    <Image source={require('@assets/icon/ic_photo.png')} className="w-14 h-14" />
                 </TouchableOpacity>
-                <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>
+
             </View>
 
             <View className={"flex-col justify-center items-center mt-8"}>
