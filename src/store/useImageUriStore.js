@@ -8,24 +8,27 @@ export const useImageUriStore = create((set) => ({
         imageUri: uri,
         type: type,
     }),
-    clearData: () => set({ imageUri: null, type: null }),
+    clearImageUri: () => set({
+        imageUri: null,
+        type: null
+    }),
 
-    orderPhoto: {
+    mainOrderPhoto: {
         FRONT: null,
         LEFT: null,
         RIGHT: null,
         BACK: null,
         INSIDE: null,
     },
-    setOrderPhoto: (orderPhoto, position) => set((state) => ({
-        orderPhoto: {
-            ...state.orderPhoto,
+    setMainOrderPhoto: (orderPhoto, position) => set((state) => ({
+        mainOrderPhoto: {
+            ...state.mainOrderPhoto,
             [position]: orderPhoto
         }
     })),
-    clearOrderPhoto: () =>
+    clearMainOrderPhoto: () =>
         set({
-            orderPhoto: {
+            mainOrderPhoto: {
                 FRONT: null,
                 LEFT: null,
                 RIGHT: null,

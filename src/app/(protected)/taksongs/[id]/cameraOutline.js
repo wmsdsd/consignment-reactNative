@@ -13,7 +13,7 @@ const layoutImages = {
 export default function CameraOutlineScreen() {
     useAutoOrientation()
 
-    const { id, type } = useLocalSearchParams()
+    const { type } = useLocalSearchParams()
 
     const cameraRef = useRef(null)
     const [permission, requestPermission] = useCameraPermissions()

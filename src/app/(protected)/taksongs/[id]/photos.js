@@ -28,9 +28,10 @@ export default function CameraScreen() {
     const {
         imageUri,
         type ,
-        orderPhoto,
-        setOrderPhoto,
-        clearOrderPhoto
+        clearImageUri,
+        mainOrderPhoto,
+        setMainOrderPhoto,
+        clearMainOrderPhoto
     } = useImageUriStore()
 
     const isMountedRef = useRef(false)
@@ -105,8 +106,8 @@ export default function CameraScreen() {
 
         const list = await uploadMutation.mutateAsync(sendData)
         if (Array.isArray(list) && list.length > 0) {
-            const orderPhoto = list[0]
-            await fetch(orderPhoto.url, {
+            const item = list[0]
+            await fetch(item.url, {
                 method: "PUT",
                 headers: {
                     'Content-Type': file.type,
@@ -116,10 +117,10 @@ export default function CameraScreen() {
 
             if (!isMountedRef.current) return
             if (subType === "MAIN") {
-                setOrderPhoto(orderPhoto, position)
+                setMainOrderPhoto(item, position)
             }
             else if (subType === "SUB") {
-                onSaveSubPhoto(orderPhoto)
+                onSaveSubPhoto(item)
             }
         }
         else {
@@ -127,12 +128,12 @@ export default function CameraScreen() {
         }
     }
 
-    const onSaveSubPhoto = (orderPhoto) => {
+    const onSaveSubPhoto = (item) => {
         setPhotoList(prev => {
-            const exists = prev.some(p => p.uid === orderPhoto.uid)
+            const exists = prev.some(p => p.uid === item.uid)
             return exists
                 ? prev
-                : [...prev, orderPhoto]
+                : [...prev, item]
         })
 
         if (orderPhotoList.length < tab.max) {
@@ -262,7 +263,7 @@ export default function CameraScreen() {
 
         return () => {
             isMountedRef.current = false
-            clearOrderPhoto()
+            clearMainOrderPhoto()
         }
     }, [])
 
@@ -278,13 +279,26 @@ export default function CameraScreen() {
         if (!isMountedRef.current) return
 
         if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
-            setPhotoList(orderPhotos)
+            const subList = []
+            for (const item of orderPhotos) {
+                if (item.subType === "MAIN") {
+                    setMainOrderPhoto(item, item.position)
+                }
+                if (item.subType === "SUB") {
+                    subList.push(item)
+                }
+            }
+
+            setPhotoList(subList)
         }
     }, [orderPhotos])
 
     useEffect(() => {
         if (imageUri && type) {
-
+            onUploadPhoto(imageUri, type, "MAIN")
+                .then(() => {
+                    clearImageUri()
+                })
         }
     }, [imageUri, type])
 
@@ -307,7 +321,11 @@ export default function CameraScreen() {
 
             {/* Big Camera Area */}
             <View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>
-                <Image source={tab.sampleImage} className={"absolute opacity-60"} />
+                {mainOrderPhoto[tab.key] ? (
+                    <Image source={mainOrderPhoto[tab.key].url} className={"absolute"} />
+                ) : (
+                    <Image source={tab.sampleImage} className={"absolute opacity-60"} />
+                )}
                 <TouchableOpacity
                     className={"justify-center items-center"}
                     onPress={onTakeMainImage}
