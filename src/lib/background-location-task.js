@@ -1,4 +1,6 @@
 import * as TaskManager from "expo-task-manager"
+import * as BackgroundFetch from 'expo-background-fetch';
+import { AppState } from 'react-native';
 import { driverMoveApi } from '@/lib/api'
 
 const TASK_NAME = "BACKGROUND_LOCATION_TASK"
@@ -10,9 +12,9 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
         console.log("Location task error", error)
         return
     }
-
     if (isRunning) return
-    
+    if (AppState.currentState === 'active') return
+
     if (data) {
         const { locations } = data
 
@@ -32,8 +34,11 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
         // 서버 전송
         try {
             await driverMoveApi.background(payload)
+
+            return 2
         } catch (e) {
             console.warn("백그라운드 위치 전송 실패:", e)
+            return 3
         }
         finally {
             isRunning = false
