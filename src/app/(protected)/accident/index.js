@@ -27,6 +27,8 @@ export default function AccidentReceiveScreen() {
     const [orderUid, setOrderUid] = useState(null)
 
     const {
+        setShowDatePicker,
+        setShowTimePicker,
         selectedDate,
         showDatePicker,
         showTimePicker,

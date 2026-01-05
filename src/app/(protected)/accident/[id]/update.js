@@ -33,6 +33,7 @@ export default function AccidentUpdateScreen() {
 
     const [photoList, setPhotoList] = useState([null])
     const [typeModalVisible, setTypeModalVisible] = useState(false)
+
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showTimePicker, setShowTimePicker] = useState(false)
     const [selectedDate, setSelectedDate] = useState(new Date())

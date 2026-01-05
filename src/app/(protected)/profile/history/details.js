@@ -41,7 +41,7 @@ export default function HistoryDetailsScreen() {
 
                                 <View className="mb-3 flex-row">
                                     <Text className="w-28 text-gray-300">탁송 금액</Text>
-                                    <Text className="font-semibold text-white">{addCommaToNumber(order.deliveryPrice)}원</Text>
+                                    <Text className="font-semibold text-white">{addCommaToNumber(order.driverPrice)}원</Text>
                                 </View>
 
                                 <View className="mb-3 flex-row">

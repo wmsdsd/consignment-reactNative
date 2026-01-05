@@ -125,7 +125,7 @@ export default function TaksongDetailScreen() {
                     <View
                         className="mt-4 w-full flex-row items-center justify-between rounded-xl border border-color bg-black p-4">
                         <Text className="text-lg text-gray-300">탁송비</Text>
-                        <Text className="text-2xl font-semibold text-white">{addCommaToNumber(data.deliveryPrice)} 원</Text>
+                        <Text className="text-2xl font-semibold text-white">{addCommaToNumber(data.driverPrice)} 원</Text>
                     </View>
                 </View>
             </View>

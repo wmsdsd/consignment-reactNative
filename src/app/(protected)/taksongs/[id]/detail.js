@@ -36,6 +36,8 @@ export default function ConfirmScreen() {
     const [isCalling, setIsCalling] = useState(false)
 
     const {
+        setShowDatePicker,
+        setShowTimePicker,
         selectedDate,
         setSelectedDate,
         showDatePicker,

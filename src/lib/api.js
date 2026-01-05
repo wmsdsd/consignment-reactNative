@@ -1,6 +1,6 @@
-//const ROOT = "http://192.168.0.8:4000"
-const ROOT = "http://192.168.45.108:4000"
-// const ROOT = "https://api.olgomobility.com" // real
+// const ROOT = "http://192.168.0.24:4000"
+// const ROOT = "http://192.168.45.108:4000"
+const ROOT = "https://api.olgomobility.com" // real
 // const ROOT = "http://13.209.6.245:4000" // stage
 
 const SUFFIX = "/api/mobile"
@@ -39,6 +39,10 @@ const apiCall = async (endpoint, options = {}) => {
 
                 const targetPath = "/(auth)/login"
                 const pathname = usePathname()
+
+                console.log("targetPath", targetPath)
+                console.log("pathname", pathname)
+                console.log(pathname !== targetPath)
 
                 if (pathname !== targetPath) {
                     router.replace("/(auth)/login")
