@@ -1,7 +1,7 @@
-// @/lib/backgroundLocation.js
 import { useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { BACKGROUND_TASK_NAME } from './background-location-task';
+import * as SecureStore from 'expo-secure-store';
 
 export function useRealtimeLocation(enabled) {
     const enabledRef = useRef(enabled)
@@ -47,6 +47,7 @@ export async function stopBackgroundLocation() {
     const isRunning = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_TASK_NAME)
     if (isRunning) {
         await Location.stopLocationUpdatesAsync(BACKGROUND_TASK_NAME)
+        await SecureStore.deleteItemAsync('bg_location_notified')
         console.log('🛑 백그라운드 위치 추적 중단됨')
     }
 }

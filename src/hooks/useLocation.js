@@ -1,6 +1,8 @@
 import { useEffect } from "react"
 import * as Location from "expo-location"
 import { useDriverMove } from '@/hooks/useApi'
+import { isAndroid } from '@/lib/platform'
+import { ToastAndroid } from 'react-native'
 
 export function useForegroundLocation({ orderUid, orderLocationUid }) {
     const timeout = 1000 * 30 // 30s
@@ -29,6 +31,10 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
             console.log("📍 포어그라운드 위치:", payload)
 
             await driverMoveMutation.mutateAsync(payload)
+
+            if (isAndroid) {
+                ToastAndroid.show("위치정보를 서버에 공유 합니다.", ToastAndroid.SHORT)
+            }
         }
         
         // 1회 실행

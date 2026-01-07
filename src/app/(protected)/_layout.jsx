@@ -30,8 +30,10 @@ const CustomDrawerContent = props => {
                     <View>
                         <View className="mb-2">
                             <Text className="text-2xl font-bold text-white font-bold">{ user?.name } 기사님</Text>
+                            {/*<Text className="text-2xl font-bold text-white font-bold">test 기사님</Text>*/}
                         </View>
                         <Text className="text-sm text-gray-400 text-white">{ formatPhone(user?.phone) }</Text>
+                        {/*<Text className="text-sm text-gray-400 text-white">010xxxx0000</Text>*/}
                     </View>
                 </View>
             </View>

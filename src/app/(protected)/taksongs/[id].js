@@ -2,13 +2,14 @@ import { View, Text, Pressable, Alert, ScrollView, Image } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { checkAllPermissionsAsync } from '@/lib/permissions'
-import {useOrder, useOrderCancel, useOrderStatusUpdate} from '@/hooks/useApi'
+import { useOrder, useOrderCancel, useOrderStatusUpdate } from '@/hooks/useApi'
 import { mToKm, addCommaToNumber, secondToTimeHangul, getAddressShort } from '@/lib/utils'
-import { useRealtimeLocation } from '@/lib/backgroundLocation';
+import testData from "../../../data/testData.json"
 
 export default function TaksongDetailScreen() {
     const { id } = useLocalSearchParams()
-    const { data } = useOrder(id)
+    const { data: order } = useOrder(id)
+    // const order = testData.items[0]
     const insets = useSafeAreaInsets()
 
     const orderCancelMutation = useOrderCancel()
@@ -55,7 +56,7 @@ export default function TaksongDetailScreen() {
         }
     }
     
-    if (!data) {
+    if (!order) {
         return (
             <View className="flex-1 items-center justify-center bg-black">
                 <Text className="text-lg text-gray-300">탁송 정보를 찾을 수 없습니다.</Text>
@@ -77,15 +78,15 @@ export default function TaksongDetailScreen() {
                     <View className="w-full flex-1 items-center justify-center rounded-2xl bg-block p-6">
                         {/* 차량 번호 */}
                         <Text className="text-center text-4xl font-bold text-white bg-box w-full rounded-2xl p-[15px]">
-                            {data.carNumber || '미배정'}
+                            {order.carNumber || '미배정'}
                         </Text>
                         
                         {/* 거리 및 시간 */}
                         <View className="mt-5 flex-row justify-center gap-4">
-                            <Text className="text-xl text-gray-300">{mToKm(data.distance)}</Text>
+                            <Text className="text-xl text-gray-300">{mToKm(order.distance)}</Text>
                             <Text className="text-lg text-gray-600">|</Text>
-                            <Text className="text-xl text-gray-300">{secondToTimeHangul(data.time)}</Text>
-                            { data.isRound && (
+                            <Text className="text-xl text-gray-300">{secondToTimeHangul(order.time)}</Text>
+                            { order.isRound && (
                                 <>
                                     <Text className="text-lg text-gray-600">|</Text>
                                     <Text className="text-xl text-gray-300">왕복</Text>
@@ -95,7 +96,7 @@ export default function TaksongDetailScreen() {
                         
                         {/* 위치 정보 */}
                         <ScrollView>
-                            {data?.orderLocations && data.orderLocations.map((location, index) => (
+                            {order?.orderLocations && order.orderLocations.map((location, index) => (
                                 <View key={'order-location-' + location.uid}>
                                     <View className="mt-7 items-center">
                                         <Text className="mb-2 rounded-md bg-green-600 px-3 py-1.5 text-sm text-white">
@@ -107,7 +108,7 @@ export default function TaksongDetailScreen() {
                                     </View>
 
                                     {/* 화살표 */}
-                                    { index !== data.orderLocations.length - 1 && (
+                                    { index !== order.orderLocations.length - 1 && (
                                         <View className="my-7 items-center">
                                             <Image
                                                 source={require('../../../../assets/arrow.png')}
@@ -125,7 +126,7 @@ export default function TaksongDetailScreen() {
                     <View
                         className="mt-4 w-full flex-row items-center justify-between rounded-xl border border-color bg-black p-4">
                         <Text className="text-lg text-gray-300">탁송비</Text>
-                        <Text className="text-2xl font-semibold text-white">{addCommaToNumber(data.driverPrice)} 원</Text>
+                        <Text className="text-2xl font-semibold text-white">{addCommaToNumber(order.driverPrice)} 원</Text>
                     </View>
                 </View>
             </View>

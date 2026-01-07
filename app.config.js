@@ -68,9 +68,9 @@ export default {
             [
                 'expo-location',
                 {
-                    locationAlwaysAndWhenInUsePermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
-                    locationAlwaysPermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
-                    locationWhenInUsePermission: '탁송 서비스를 위해 위치 정보 수집이 필요합니다.',
+                    locationAlwaysAndWhenInUsePermission: '본 앱은 사용자 위치정보를 서버로 전송하여 [배송 관리/기록 등] 목적에만 사용합니다. 앱 화면 내에서는 위치정보를 표시하거나 사용하지 않습니다.',
+                    locationAlwaysPermission: '본 앱은 사용자 위치정보를 서버로 전송하여 [배송 관리/기록 등] 목적에만 사용합니다. 앱 화면 내에서는 위치정보를 표시하거나 사용하지 않습니다.',
+                    locationWhenInUsePermission: '본 앱은 사용자 위치정보를 서버로 전송하여 [배송 관리/기록 등] 목적에만 사용합니다. 앱 화면 내에서는 위치정보를 표시하거나 사용하지 않습니다.',
                     isAndroidBackgroundLocationEnabled: true,
                     isAndroidForegroundServiceEnabled: true,
                 },

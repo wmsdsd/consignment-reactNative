@@ -7,11 +7,12 @@ import { useAppContext } from '@/context/AppContext';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { checkAllPermissionsAsync } from '@/lib/permissions';
 import { syncPushToken } from '@/lib/notification';
-import {useAuth} from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import testData from '../../../data/testData.json'
 
 export default function TaksongListScreen() {
     const { user } = useAuth()
-    const { data, isLoading, refetch } = useOrderList()
+    const { data: orderList, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
     const navigation = useNavigation()
 
@@ -85,17 +86,17 @@ export default function TaksongListScreen() {
         })()
     }, [])
 
-    useEffect(() => {
-        const list = data || []
-        let title = "탁송 목록"
-        if (list.length > 0) {
-            title += ` (${list.length})`
-        }
-
-        navigation.setOptions({
-            title: title
-        })
-    }, [data])
+    // useEffect(() => {
+    //     const list = orderList || []
+    //     let title = "탁송 목록"
+    //     if (list.length > 0) {
+    //         title += ` (${list.length})`
+    //     }
+    //
+    //     navigation.setOptions({
+    //         title: title
+    //     })
+    // }, [orderList])
 
 
     return (
@@ -103,7 +104,7 @@ export default function TaksongListScreen() {
             ? (<ActivityIndicator size="large" color="#0000ff" />)
             : (
                 <FlatList
-                    data={data || []}
+                    data={orderList || []}
                     renderItem={renderItem}
                     keyExtractor={item => item.uid}
                     contentContainerStyle={{ padding: 16, paddingBottom: 60 }}

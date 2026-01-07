@@ -1,11 +1,22 @@
 import * as TaskManager from "expo-task-manager"
-import * as BackgroundFetch from 'expo-background-fetch';
-import { AppState } from 'react-native';
+import { AppState } from 'react-native'
 import { driverMoveApi } from '@/lib/api'
+import * as Notifications from 'expo-notifications'
+import * as SecureStore from 'expo-secure-store'
 
 const TASK_NAME = "BACKGROUND_LOCATION_TASK"
 
 let isRunning = false
+
+async function sendBackgroundLocationNotification() {
+    await Notifications.scheduleNotificationAsync({
+        content: {
+            title: '위치정보 수집 안내',
+            body: '앱이 백그라운드에서 위치 정보를 수집하여 서버로 전송합니다.',
+        },
+        trigger: null
+    })
+}
 
 TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
     if (error) {
@@ -34,6 +45,12 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
         // 서버 전송
         try {
             await driverMoveApi.background(payload)
+
+            const notified = await SecureStore.getItemAsync('bg_location_notified')
+            if (!notified) {
+                await sendBackgroundLocationNotification()
+                await SecureStore.setItemAsync('bg_location_notified', 'true')
+            }
 
             return 2
         } catch (e) {
