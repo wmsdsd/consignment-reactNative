@@ -3,9 +3,14 @@ import { View, TouchableOpacity, Text, Alert, ActivityIndicator } from 'react-na
 import { useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router'
 import { useOrderLocationProcess } from '@/hooks/useApi'
-import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from 'expo-image-manipulator'
 
 const plateUrl = "https://plate.olgomobility.com/recognize/"
+const PLATE_WIDTH = 250
+const PLATE_HEIGHT = 150
+const TOP = "46%"
+const BOTTOM = "54%"
+const bgColor = 'rgba(0,0,0,0.5)'
 
 export default function CustomCameraScreen() {
     const { id} = useLocalSearchParams()
@@ -13,6 +18,10 @@ export default function CustomCameraScreen() {
 
     const [permission, requestPermission] = useCameraPermissions()
     const [isLoading, setIsLoading] = useState(false)
+    const [layout, setLayout] = useState({
+        width: 0,
+        height: 0,
+    })
     const cameraRef = useRef(null)
 
     if (!permission) return <View />
@@ -36,15 +45,44 @@ export default function CustomCameraScreen() {
             quality: 0.5,
             base64: false,
             exif: false,
-            skipProcessing: true
+            skipProcessing: false
         })
 
         if (result && result.uri) {
+            // 실제 사진 크기
+            const photoWidth = result.width
+            const photoHeight = result.height
+
+            // Camera preview 크기
+            const previewWidth = layout.width
+            const previewHeight = layout.height
+
+            const scaleX = photoWidth / previewWidth
+            const scaleY = photoHeight / previewHeight
+
+            const originX = (previewWidth / 2 - PLATE_WIDTH / 2) * scaleX
+            const originY = (previewHeight / 2 - PLATE_HEIGHT / 2) * scaleY
+
+            const width = PLATE_WIDTH * scaleX
+            const height = PLATE_HEIGHT * scaleY
+
             const image = await ImageManipulator.manipulateAsync(
                 result.uri,
-                [{ resize: { width: 1024 } }],
+                [
+                    {
+                        crop: {
+                            originX,
+                            originY,
+                            width,
+                            height,
+                        },
+                        resize: {
+                            width: 1024
+                        }
+                    }
+                ],
                 {
-                    compress: 0.6,
+                    compress: 0.7,
                     format: ImageManipulator.SaveFormat.JPEG
                 }
             )
@@ -97,12 +135,6 @@ export default function CustomCameraScreen() {
         })
     }
 
-    const PLATE_WIDTH = 250
-    const PLATE_HEIGHT = 150
-    const TOP = "46%"
-    const BOTTOM = "54%"
-    const bgColor = 'rgba(0,0,0,0.5)'
-
     return (
         <View
             style={{
@@ -115,6 +147,10 @@ export default function CustomCameraScreen() {
                 ref={cameraRef}
                 style={{ flex: 1 }}
                 facing="back"
+                onLayout={(e) => {
+                    const { width, height } = e.nativeEvent.layout
+                    setLayout({ width, height })
+                }}
             />
 
             {/* ====== 어두운 오버레이 ====== */}
@@ -199,7 +235,7 @@ export default function CustomCameraScreen() {
             >
                 {/* 촬영 버튼 */}
                 <TouchableOpacity
-                    onPress={onSuccess}
+                    onPress={takePicture}
                     className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white 
                         ${ isLoading ? "bg-gray-400" : 'bg-white'}
                     `}
