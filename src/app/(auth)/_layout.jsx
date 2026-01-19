@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 export default function AuthLayout() {
     const headerOptions = {
         headerTitle: "",
-        headerTintColor: "#fff",
+        headerTintColor: "#ffffff",
         headerStyle: { backgroundColor: "#000" },
         headerShadowVisible: false,
     }

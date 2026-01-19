@@ -36,7 +36,6 @@ const cardColor = {
     DELIVERY_COMPLETE: "bg-card-primary",
 }
 
-
 export default function TaksongCard({
     id,
     status,
@@ -58,6 +57,17 @@ export default function TaksongCard({
         }
     }
 
+    let carInfo = "(없음)"
+    if (carBrand) {
+        carInfo = `(${carBrand})`
+        if (carModel) {
+            carInfo = `(${carBrand} ${carModel})`
+        }
+    }
+    else if (carModel) {
+        carInfo = `(${carModel})`
+    }
+
     return (
         <TouchableOpacity
             onPress={handlePress}
@@ -65,41 +75,38 @@ export default function TaksongCard({
             className={`mb-4 w-full rounded-xl p-4 ${cardColor[status] || 'bg-[#1E1E1E]'}`}
         >
             {/* 상단 Row */}
-            <View className="mb-2 flex-row items-center justify-between border-b-1 border-white">
+            <View className="mb-2 flex-row items-center justify-between border-b border-1 border-[#ffffff33] pb-4">
                 <View className={"flex flex-row items-center"}>
                     <View className={`rounded-md px-3 py-1 ${statusColor[status] || 'bg-gray-600'}`}>
-                        <Text className="text-xs font-semibold text-white">{statusText[status]}</Text>
+                        <Text className="text-sm font-semibold text-white">{statusText[status]}</Text>
                     </View>
-                    {isRound && (
-                        <Text className="text-xs font-semibold text-white ml-4">(왕복)</Text>
-                    )}
+                    {isRound && (<Text className="text-sm font-semibold text-white ml-4">(왕복)</Text>)}
                 </View>
-                
                 <Text className={"text-xl font-bold font-color-price"}>{addCommaToNumber(price)} 원</Text>
             </View>
             
             {/* 차량 번호 + 거리/시간 */}
             <View className="mb-2 flex-col">
-                <Text className="text-base font-bold text-white text-[20px]">
+                <Text className="text-xl font-bold text-white">
                     {carNumber ? `${carNumber}` : '차량 배정 대기'}
-                    {` (${carBrand ?? "미정"}`}
-                    {` ${carModel ?? "없음"})` }
+                    {" "}
+                    {carInfo}
                 </Text>
-                <Text className="text-sm text-gray-300">
+                <Text className="text-base text-[#ccc]">
                     {mToKm(distance)} | {dateFormatter(expectedAt, "YYYY-MM-DD HH:mm")}
                 </Text>
             </View>
             
             {/* 출발 */}
             <View className="mb-1 flex-row">
-                <Text className="w-10 text-gray-300">출발</Text>
-                <Text className="flex-1 font-semibold text-white">{start}</Text>
+                <Text className="w-10 text-lg text-[#ccc]">출발</Text>
+                <Text className="flex-1 text-lg font-semibold text-white">{start}</Text>
             </View>
             
             {/* 도착 */}
             <View className="flex-row">
-                <Text className="w-10 text-gray-400">도착</Text>
-                <Text className="flex-1 font-bold text-white">{end}</Text>
+                <Text className="w-10 text-lg text-[#ccc]">도착</Text>
+                <Text className="flex-1 text-lg font-bold text-white">{end}</Text>
             </View>
         </TouchableOpacity>
     )

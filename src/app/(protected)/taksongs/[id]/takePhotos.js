@@ -1,20 +1,16 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import {View, TouchableOpacity, Text, Alert, ActivityIndicator, ToastAndroid} from 'react-native';
+import {View, TouchableOpacity, Text, Alert, ActivityIndicator, ToastAndroid, Image, Dimensions} from 'react-native';
 import { useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router'
-import { useOrderLocationProcess } from '@/hooks/useApi'
+import {useOrder, useOrderLocationProcess} from '@/hooks/useApi'
 import {isAndroid} from "@/lib/platform";
 
-const plateUrl = "https://plate.olgomobility.com/yolo/recognize"
-const PLATE_WIDTH = 250
-const PLATE_HEIGHT = 150
-const TOP = "46%"
-const BOTTOM = "54%"
-const bgColor = 'rgba(0,0,0,0.5)'
+export default function TakePhotosScreen() {
+    const { id } = useLocalSearchParams()
+    const { data: order } = useOrder(id)
+    const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
-export default function CustomCameraScreen() {
-    const { id} = useLocalSearchParams()
-    const { data: orderLocation } = useOrderLocationProcess(id)
+    const { width } = Dimensions.get("window")
 
     const [permission, requestPermission] = useCameraPermissions()
     const [isLoading, setIsLoading] = useState(false)
@@ -94,7 +90,7 @@ export default function CustomCameraScreen() {
     const onSuccess = () => {
         router.dismissAll()
         router.push({
-            pathname: `/(protected)/taksongs/${id}/takePhotos`
+            pathname: `/(protected)/taksongs/${id}/photos`
         })
     }
 
@@ -126,78 +122,6 @@ export default function CustomCameraScreen() {
                 facing="back"
             />
 
-            {/* ====== 어두운 오버레이 ====== */}
-            <View
-                pointerEvents="none"
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                }}
-            >
-                {/* 위 */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: TOP,
-                        marginTop: -PLATE_HEIGHT / 2,
-                        backgroundColor: bgColor,
-                    }}
-                />
-
-                {/* 아래 */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: BOTTOM,
-                        marginBottom: -PLATE_HEIGHT / 2,
-                        backgroundColor: bgColor,
-                    }}
-                />
-
-                {/* 가운데 (좌/우) */}
-                <View style={{
-                    position: 'absolute',
-                    top: TOP,
-                    marginTop: -PLATE_HEIGHT / 2,
-                    flexDirection: 'row',
-                    width: '100%',
-                    height: PLATE_HEIGHT,
-                }}>
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: bgColor,
-                        }}
-                    />
-
-                    {/* 투명 영역 */}
-                    <View
-                        style={{
-                            width: PLATE_WIDTH,
-                            height: PLATE_HEIGHT,
-                            backgroundColor: "transparent",
-                        }}
-                    />
-
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: bgColor,
-                        }}
-                    />
-                </View>
-
-            </View>
-
             {/* ----- 커스텀 촬영 버튼 UI ----- */}
             <View
                 className={"flex-row"}
@@ -210,46 +134,38 @@ export default function CustomCameraScreen() {
                 {/* 촬영 버튼 */}
                 <TouchableOpacity
                     onPress={takePicture}
-                    className={`mb-8 h-16 w-16 items-center justify-center rounded-full border-4 border-white 
-                        ${ isLoading ? "bg-gray-400" : 'bg-white'}
+                    className={`mb-8 h-20 w-20 items-center justify-center rounded-full 
+                        ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                     `}
                     disabled={isLoading}
                 >
                     { isLoading
                         ? (<ActivityIndicator color={"fff"} />)
-                        : (<View className="h-12 w-12 rounded-full bg-primary" />)
+                        : (<Image source={require('assets/icon/ic_camera_small.png')} />)
                     }
                 </TouchableOpacity>
-                { isFailed && (
-                    <TouchableOpacity
-                        onPress={onPassCarPlate}
-                        className={`mb-8 ml-8 h-16 px-4 rounded-lg items-center justify-center 
-                        ${ isLoading ? "bg-gray-400" : 'bg-primary'}
-                    `}
-                        disabled={isLoading}
-                    >
-                        <Text className={"text-white"}>번호판 인식 오류</Text>
-                    </TouchableOpacity>
-                )}
             </View>
 
-            {/* ----- 차량 번호판 영역 지정 ----- */}
+            {/* ----- 차량 가이드 영역 ----- */}
             <View
                 style={{
                     position: 'absolute',
-                    width: PLATE_WIDTH,
-                    height: PLATE_HEIGHT,
-                    backgroundColor: 'transparent',
+                    width: width - 40,
+                    height: 100,
+                    backgroundColor: '#000',
                     borderWidth: 1,
-                    borderColor: '#d30000',
-                    top: TOP,
-                    left: '50%',
-                    transform: [
-                        { translateX: -PLATE_WIDTH / 2 }, // width의 절반
-                        { translateY: -PLATE_HEIGHT / 2 }, // height의 절반
-                    ],
+                    borderColor: '#FFF56C',
+                    top: 15,
+                    left: 20,
+                    borderRadius: 10,
+                    display: 'flex'
                 }}
             >
+                <View></View>
+                <View>
+                    <Text>전면 01</Text>
+                    <Text>해당 이미지의 촬영 구도와 맞추어서 촬영해 주세요.</Text>
+                </View>
             </View>
         </View>
     );

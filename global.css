@@ -10,10 +10,10 @@
 .bg-receive { background-color: #0055FF; }
 .bg-dispute { background-color: #FF0200; }
 
-.bg-card-assign { background-color: #89C69730; }
-.bg-card-receive { background-color: #6397FF30; }
-.bg-card-dispute { background-color: #E2767630; }
-.bg-card-primary { background-color: #704cbd30; }
+.bg-card-assign { background-color: #89C6974D; }
+.bg-card-receive { background-color: #6397FF4D; }
+.bg-card-dispute { background-color: #E276764D; }
+.bg-card-primary { background-color: #704cbd4D; }
 
 .bg-btn { background-color: #32009C; }
 .bg-block { background-color: #2C2C31; }

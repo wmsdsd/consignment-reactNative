@@ -62,3 +62,13 @@ export const TABS = [
     //     max: 5
     // },
 ]
+
+export const IMAGE_LAYOUTS = [
+    {
+        label: "",
+        img: "",
+        key: "",
+        position: "",
+        subType: ""
+    }
+]

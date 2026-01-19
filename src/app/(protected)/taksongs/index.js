@@ -4,12 +4,13 @@ import { useDriverSetToken, useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils'
 import { useCallback, useEffect } from 'react'
 import { useAppContext } from '@/context/AppContext'
-import { router, useFocusEffect } from 'expo-router'
+import {router, useFocusEffect, useNavigation} from 'expo-router'
 import { checkAllPermissionsAsync } from '@/lib/permissions'
 import { syncPushToken } from '@/lib/notification'
 import { useAuth } from "@/hooks/useAuth"
 
 export default function TaksongListScreen() {
+    const navigation = useNavigation()
     const { user } = useAuth()
     const { data: orderList, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
@@ -85,18 +86,17 @@ export default function TaksongListScreen() {
         })()
     }, [])
 
-    // useEffect(() => {
-    //     const list = orderList || []
-    //     let title = "탁송 목록"
-    //     if (list.length > 0) {
-    //         title += ` (${list.length})`
-    //     }
-    //
-    //     navigation.setOptions({
-    //         title: title
-    //     })
-    // }, [orderList])
+    useEffect(() => {
+        const list = orderList || []
+        let title = "탁송 목록"
+        if (list.length > 0) {
+            title += ` (${list.length})`
+        }
 
+        navigation.setOptions({
+            title: title
+        })
+    }, [orderList])
 
     return (
         isLoading

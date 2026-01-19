@@ -81,6 +81,13 @@ export default function TaksongsLayout() {
                     ...commonOptionBackVisible
                 }}
             />
+            <Stack.Screen
+                name="[id]/takePhotos"
+                options={{
+                    title: '차량 촬영',
+                    ...commonOptionBackVisible
+                }}
+            />
         </Stack>
     )
 }

@@ -33,7 +33,7 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
             await driverMoveMutation.mutateAsync(payload)
 
             if (isAndroid) {
-                ToastAndroid.show("위치정보를 서버에 공유 합니다.", ToastAndroid.SHORT)
+                ToastAndroid.show("주문 진행 중 기사님의 이동 기록 저장 및 고객 안내를 위해 위치정보를 전송 합니다.", ToastAndroid.SHORT)
             }
         }
         
@@ -46,7 +46,7 @@ export function useForegroundLocation({ orderUid, orderLocationUid }) {
         return () => {
             clearInterval(interval)
         }
-    }, [])
+    }, [orderUid, orderLocationUid])
 }
 
 export async function getLocation() {
