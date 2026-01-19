@@ -1,20 +1,18 @@
-import { ActivityIndicator, Alert, FlatList, Text } from 'react-native';
-import TaksongCard from '../../../components/TaksongCard';
-import { useDriverSetToken, useOrderList } from '@/hooks/useApi';
-import { getAddress } from '@/lib/utils';
-import { useCallback, useEffect } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
-import { checkAllPermissionsAsync } from '@/lib/permissions';
-import { syncPushToken } from '@/lib/notification';
-import { useAuth } from "@/hooks/useAuth";
-import testData from '../../../data/testData.json'
+import { ActivityIndicator, Alert, FlatList, Text } from 'react-native'
+import TaksongCard from '../../../components/TaksongCard'
+import { useDriverSetToken, useOrderList } from '@/hooks/useApi'
+import { getAddress } from '@/lib/utils'
+import { useCallback, useEffect } from 'react'
+import { useAppContext } from '@/context/AppContext'
+import { router, useFocusEffect } from 'expo-router'
+import { checkAllPermissionsAsync } from '@/lib/permissions'
+import { syncPushToken } from '@/lib/notification'
+import { useAuth } from "@/hooks/useAuth"
 
 export default function TaksongListScreen() {
     const { user } = useAuth()
     const { data: orderList, isLoading, refetch } = useOrderList()
     const { setMenuConfig } = useAppContext()
-    const navigation = useNavigation()
 
     const setTokenMutation = useDriverSetToken()
 
@@ -61,6 +59,7 @@ export default function TaksongListScreen() {
                 carModel={item.carModelName}
                 carBrand={item.carBrandName}
                 handler={onHandlePress}
+                expectedAt={item.expectedAt}
             />
         )
     }

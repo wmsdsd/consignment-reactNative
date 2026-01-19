@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
-import { router } from 'expo-router'
-import { secondToTimeHangul, addCommaToNumber, mToKm } from '@/lib/utils'
-import {checkAllPermissionsAsync} from "@/lib/permissions"
+import { View, Text, TouchableOpacity } from 'react-native'
+import { addCommaToNumber, mToKm, dateFormatter } from '@/lib/utils';
+
+import "../../global.css"
 
 const statusText = {
     "DRIVER_ASSIGN": "기사 배정",
@@ -25,6 +25,18 @@ const statusColor = {
     "DELIVERY_COMPLETE": "bg-primary",
 }
 
+const cardColor = {
+    DRIVER_ASSIGN: "bg-card-assign",
+    DRIVER_RECEIVE: "bg-card-receive",
+    DRIVER_START: "bg-card-receive",
+    DRIVER_MIDDLE: "bg-card-receive",
+    DRIVER_END: "bg-card-receive",
+    DRIVER_ROUND: "bg-card-receive",
+    DISPUTE: "bg-card-dispute",
+    DELIVERY_COMPLETE: "bg-card-primary",
+}
+
+
 export default function TaksongCard({
     id,
     status,
@@ -38,6 +50,7 @@ export default function TaksongCard({
     isRound = false,
     carBrand = null,
     carModel = null,
+    expectedAt
 }) {
     const handlePress = async () => {
         if (handler) {
@@ -49,10 +62,10 @@ export default function TaksongCard({
         <TouchableOpacity
             onPress={handlePress}
             activeOpacity={0.7}
-            className="mb-4 w-full rounded-xl bg-[#1E1E1E] p-4"
+            className={`mb-4 w-full rounded-xl p-4 ${cardColor[status] || 'bg-[#1E1E1E]'}`}
         >
             {/* 상단 Row */}
-            <View className="mb-2 flex-row items-center justify-between">
+            <View className="mb-2 flex-row items-center justify-between border-b-1 border-white">
                 <View className={"flex flex-row items-center"}>
                     <View className={`rounded-md px-3 py-1 ${statusColor[status] || 'bg-gray-600'}`}>
                         <Text className="text-xs font-semibold text-white">{statusText[status]}</Text>
@@ -62,32 +75,31 @@ export default function TaksongCard({
                     )}
                 </View>
                 
-                <Text className="text-xl font-bold text-white">{addCommaToNumber(price)} 원</Text>
+                <Text className={"text-xl font-bold font-color-price"}>{addCommaToNumber(price)} 원</Text>
             </View>
             
             {/* 차량 번호 + 거리/시간 */}
-            <View className="mb-2 flex-row items-center justify-between">
-                <Text className="text-base font-semibold text-white">
-                    {carNumber ? `🚗 ${carNumber}` : '차량 배정 대기'}
-                    {` [${carBrand ?? "미정"}`}
-                    {`/${carModel ?? "없음"}]` }
+            <View className="mb-2 flex-col">
+                <Text className="text-base font-bold text-white text-[20px]">
+                    {carNumber ? `${carNumber}` : '차량 배정 대기'}
+                    {` (${carBrand ?? "미정"}`}
+                    {` ${carModel ?? "없음"})` }
                 </Text>
-                
                 <Text className="text-sm text-gray-300">
-                    {mToKm(distance)} | {secondToTimeHangul(duration)}
+                    {mToKm(distance)} | {dateFormatter(expectedAt, "YYYY-MM-DD HH:mm")}
                 </Text>
             </View>
             
             {/* 출발 */}
             <View className="mb-1 flex-row">
-                <Text className="w-10 text-gray-400">출발</Text>
-                <Text className="flex-1 text-white">{start}</Text>
+                <Text className="w-10 text-gray-300">출발</Text>
+                <Text className="flex-1 font-semibold text-white">{start}</Text>
             </View>
             
             {/* 도착 */}
             <View className="flex-row">
                 <Text className="w-10 text-gray-400">도착</Text>
-                <Text className="flex-1 text-white">{end}</Text>
+                <Text className="flex-1 font-bold text-white">{end}</Text>
             </View>
         </TouchableOpacity>
     )

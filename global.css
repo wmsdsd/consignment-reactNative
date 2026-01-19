@@ -9,6 +9,12 @@
 .bg-assign { background-color: #00AD28; }
 .bg-receive { background-color: #0055FF; }
 .bg-dispute { background-color: #FF0200; }
+
+.bg-card-assign { background-color: #89C69730; }
+.bg-card-receive { background-color: #6397FF30; }
+.bg-card-dispute { background-color: #E2767630; }
+.bg-card-primary { background-color: #704cbd30; }
+
 .bg-btn { background-color: #32009C; }
 .bg-block { background-color: #2C2C31; }
 .bg-black { background-color: black; }
@@ -25,5 +31,7 @@
 .font-color { color: #E2E2F0; }
 .font-color-sub { color: #C5CAFF; }
 .font-color-label { color: #88889A; }
+.font-color-sub-title { color: #cccccc !important; }
 .font-color-primary { color: #3400A2; }
 .font-color-primary-dark { color: #32009C; }
+.font-color-price { color: #FFF56C !important; }

@@ -3,9 +3,8 @@ import { View, TouchableOpacity, Text, Alert, ActivityIndicator } from 'react-na
 import { useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router'
 import { useOrderLocationProcess } from '@/hooks/useApi'
-import * as ImageManipulator from 'expo-image-manipulator'
 
-const plateUrl = "https://plate.olgomobility.com/recognize/"
+const plateUrl = "https://plate.olgomobility.com/yolo/recognize"
 const PLATE_WIDTH = 250
 const PLATE_HEIGHT = 150
 const TOP = "46%"
@@ -49,47 +48,9 @@ export default function CustomCameraScreen() {
         })
 
         if (result && result.uri) {
-            // 실제 사진 크기
-            const photoWidth = result.width
-            const photoHeight = result.height
-
-            // Camera preview 크기
-            const previewWidth = layout.width
-            const previewHeight = layout.height
-
-            const scaleX = photoWidth / previewWidth
-            const scaleY = photoHeight / previewHeight
-
-            const originX = (previewWidth / 2 - PLATE_WIDTH / 2) * scaleX
-            const originY = (previewHeight / 2 - PLATE_HEIGHT / 2) * scaleY
-
-            const width = PLATE_WIDTH * scaleX
-            const height = PLATE_HEIGHT * scaleY
-
-            const image = await ImageManipulator.manipulateAsync(
-                result.uri,
-                [
-                    {
-                        crop: {
-                            originX,
-                            originY,
-                            width,
-                            height,
-                        },
-                        resize: {
-                            width: 1024
-                        }
-                    }
-                ],
-                {
-                    compress: 0.7,
-                    format: ImageManipulator.SaveFormat.JPEG
-                }
-            )
             const formData = new FormData()
-
             formData.append('image', {
-                uri: image.uri,
+                uri: result.uri,
                 name: 'carPlate.jpg',
                 type: 'image/jpeg'
             })
@@ -103,7 +64,7 @@ export default function CustomCameraScreen() {
                 if (res.ok) {
                     const data = await res.json()
                     if (data?.plates?.length > 0) {
-                        const carNumber = data.plates[0]
+                        const carNumber = data.plates[0]?.plate
                         if (orderLocation.carNumber !== carNumber) {
                             Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
                         }
