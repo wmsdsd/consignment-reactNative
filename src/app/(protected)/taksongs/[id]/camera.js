@@ -220,17 +220,6 @@ export default function CustomCameraScreen() {
                         : (<View className="h-12 w-12 rounded-full bg-primary" />)
                     }
                 </TouchableOpacity>
-                { isFailed && (
-                    <TouchableOpacity
-                        onPress={onPassCarPlate}
-                        className={`mb-8 ml-8 h-16 px-4 rounded-lg items-center justify-center 
-                        ${ isLoading ? "bg-gray-400" : 'bg-primary'}
-                    `}
-                        disabled={isLoading}
-                    >
-                        <Text className={"text-white"}>번호판 인식 오류</Text>
-                    </TouchableOpacity>
-                )}
             </View>
 
             {/* ----- 차량 번호판 영역 지정 ----- */}
@@ -251,6 +240,24 @@ export default function CustomCameraScreen() {
                 }}
             >
             </View>
+
+            {/* ----- 넘어가기 ----- */}
+            { isFailed && (
+                <TouchableOpacity
+                    style={{
+                        position: 'absolute',
+                        bottom: 40,
+                        right: 40,
+                    }}
+                    onPress={onPassCarPlate}
+                    className={`mb-8 ml-8 h-16 px-4 rounded-lg items-center justify-center 
+                        ${ isLoading ? "bg-gray-400" : 'bg-primary'}
+                    `}
+                    disabled={isLoading}
+                >
+                    <Text className={"text-white"}>번호 확인</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }

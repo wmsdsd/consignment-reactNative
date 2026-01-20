@@ -53,7 +53,6 @@ export default function ConfirmScreen() {
         if (isLoading) return
 
         setIsLoading(true)
-
         try {
             const arrivedAt = moment(selectedDate.toISOString()).format('YYYY-MM-DD HH:mm:ss')
             const res = await startMutation.mutateAsync({
@@ -264,7 +263,7 @@ export default function ConfirmScreen() {
 
                         <View className="mb-3 flex-row">
                             <Text className="w-28 text-gray-300">차량번호</Text>
-                            <Text className="font-semibold text-white">{orderLocation.carNumber || '-'}</Text>
+                            <Text className="font-semibold text-white">{orderLocation.carNumber || order.carNumber || '-'}</Text>
                         </View>
 
                         <View className="mb-3 flex-row">

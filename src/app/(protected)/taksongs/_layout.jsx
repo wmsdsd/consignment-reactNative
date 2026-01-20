@@ -63,7 +63,7 @@ export default function TaksongsLayout() {
             <Stack.Screen
                 name="[id]/photos"
                 options={{
-                    title: '사진 촬영',
+                    title: '사진 목록',
                     ...commonOptionBackVisible
                 }}
             />

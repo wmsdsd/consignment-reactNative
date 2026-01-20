@@ -1,21 +1,40 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import {View, TouchableOpacity, Text, Alert, ActivityIndicator, ToastAndroid, Image, Dimensions} from 'react-native';
-import { useRef, useState } from 'react';
+import { View, TouchableOpacity, Text, Alert, ActivityIndicator, Image, Dimensions } from 'react-native'
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router'
-import {useOrder, useOrderLocationProcess} from '@/hooks/useApi'
-import {isAndroid} from "@/lib/platform";
+import { useOrder, useOrderLocationProcess } from '@/hooks/useApi'
+import { uriToFileObject } from '@/lib/uriToFile'
+import { enqueueUpload } from '@/lib/uploadImageQueue'
+import { IMAGE_LAYOUTS } from '@/data/codes'
 
 export default function TakePhotosScreen() {
-    const { id } = useLocalSearchParams()
-    const { data: order } = useOrder(id)
-    const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
+    const { id, startIndex } = useLocalSearchParams()
+    const { data: orderLocation } = useOrderLocationProcess(id)
 
     const { width } = Dimensions.get("window")
-
     const [permission, requestPermission] = useCameraPermissions()
     const [isLoading, setIsLoading] = useState(false)
-    const [isFailed, setIsFailed] = useState(false)
+    const [photoUri, setPhotoUri] = useState(null)
+
     const cameraRef = useRef(null)
+
+    const imageLayouts = useMemo(() => IMAGE_LAYOUTS, [])
+    const [imageIndex, setImageIndex] = useState(0)
+    const selectedImageLayout = useMemo(() => {
+        if (imageLayouts.length === 0) return null
+
+        const length = imageLayouts.length
+        const safeIndex = ((imageIndex % length) + length) % length
+
+        return imageLayouts[safeIndex]
+    }, [imageIndex, imageLayouts])
+
+    useEffect(() => {
+        const index = parseInt(startIndex)
+        if (startIndex && !isNaN(index)) {
+            setImageIndex(index)
+        }
+    }, [startIndex])
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -30,82 +49,65 @@ export default function TakePhotosScreen() {
     }
 
     const takePicture = async () => {
-        if (!cameraRef.current) return
-
-        setIsLoading(true)
-
-        const result = await cameraRef.current.takePictureAsync({
-            quality: 0.5,
-            base64: false,
-            exif: false,
-            skipProcessing: false
-        })
-
-        if (result && result.uri) {
-            const formData = new FormData()
-            formData.append('image', {
-                uri: result.uri,
-                name: 'carPlate.jpg',
-                type: 'image/jpeg'
+        if (!cameraRef.current || isLoading) return
+        
+        try {
+            setIsLoading(true)
+            const result = await cameraRef.current.takePictureAsync({
+                quality: 0.8,
+                skipProcessing: true
             })
 
-            try {
-                const res = await fetch(plateUrl, {
-                    method: "POST",
-                    body: formData,
+            if (result && result.uri) {
+                const uri = result.uri
+                const file = await uriToFileObject(uri)
+                const promise = enqueueUpload({
+                    id: String(Date.now()),
+                    uri: uri,
+                    mimeType: file.type,
+                    file: file,
+                    extra: {
+                        orderUid: orderLocation.orderUid,
+                        orderLocationUid: orderLocation.uid,
+                        type: orderLocation.type,
+                        subType: selectedImageLayout?.subType ?? "ETC",
+                        position: selectedImageLayout?.position ?? "ETC",
+                        fileList: [
+                            {
+                                fileName: file.name,
+                                fileType: file.type
+                            }
+                        ]
+                    }
                 })
 
-                if (res.ok) {
-                    const data = await res.json()
-                    if (data?.plates?.length > 0) {
-                        const carNumber = data.plates[0]?.plate
-                        console.log("carNumber", carNumber)
-                        if (orderLocation.carNumber !== carNumber) {
-                            Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
+
+                setPhotoUri(uri)
+                setImageIndex(prev => prev + 1)
+
+                promise
+                    .then(res => {
+                        if (res) {
+                            if (imageIndex >= imageLayouts.length - 1) {
+                                onSuccess()
+                            }
                         }
-                        else {
-                            onSuccess()
-                        }
-                    }
-                    else {
-                        Alert.alert("알림", "번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.")
-                    }
-                }
-                else {
-                    Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
-                }
-            }
-            catch (e) {
-                console.log('fetch error', e)
-                Alert.alert("알림", "사진 정보가 올바르지 않습니다.")
-            }
-            finally {
-                setIsFailed(true)
+                    })
             }
         }
-
-        setIsLoading(false)
+        catch (e) {
+            console.warn("takePhoto error:", e)
+            setIsLoading(false)
+        }
+        finally {
+            setIsLoading(false)
+        }
     }
 
     const onSuccess = () => {
-        router.dismissAll()
         router.push({
             pathname: `/(protected)/taksongs/${id}/photos`
         })
-    }
-
-    const onPassCarPlate = () => {
-        Alert.alert(
-            "번호판 인식 넘어가기",
-            `현재 차량의 번호판이 ${orderLocation.carNumber}가 맞습니까? \n번호 확인을 반드시 해주세요.`,
-            [
-                { text: '취소', style: 'cancel' },
-                {
-                    text: '확인',
-                    onPress: onSuccess,
-                },
-            ]
-        )
     }
 
     return (
@@ -158,15 +160,46 @@ export default function TakePhotosScreen() {
                     top: 15,
                     left: 20,
                     borderRadius: 10,
-                    display: 'flex'
                 }}
+                className={"flex-row p-4"}
             >
-                <View></View>
+                <View className={"mr-4"}>
+                    <Image source={selectedImageLayout.thumbnail} className={"w-32 h-20 rounded-lg"} resizeMode={"cover"} />
+                </View>
                 <View>
-                    <Text>전면 01</Text>
-                    <Text>해당 이미지의 촬영 구도와 맞추어서 촬영해 주세요.</Text>
+                    <Text className={"text-white font-bold text-xl"}>{selectedImageLayout.name} {selectedImageLayout.label}</Text>
+                    <Text className={"font-color-price flex-1 flex-wrap text-base flex-shrink"}>
+                        해당 이미지의 촬영 구도와 {"\n"}
+                        맞추어서 촬영해 주세요.
+                    </Text>
                 </View>
             </View>
+
+            {/* ----- 이전에 촬영한 사진 ----- */}
+            { photoUri && (
+                <View
+                    style={{
+                        position: 'absolute',
+                        bottom: 80,
+                        left: 20,
+                        borderRadius: 10,
+                    }}
+                    className={""}
+                >
+                    <Image source={{uri: photoUri}} className={"w-20 h-32 rounded-lg"} resizeMode={"cover"} />
+                </View>
+            )}
+            <TouchableOpacity
+                style={{
+                    position: 'absolute',
+                    bottom: 45,
+                    right: 40,
+                }}
+                onPress={onSuccess}
+                className={`mb-8 ml-8 h-16 px-4 rounded-lg items-center justify-center bg-primary`}
+            >
+                <Text className={"text-white"}>사진 목록</Text>
+            </TouchableOpacity>
         </View>
     );
 }

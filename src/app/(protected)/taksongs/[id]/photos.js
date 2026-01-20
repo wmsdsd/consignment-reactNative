@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Alert, Image, FlatList, ToastAndroid, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { View, Text, TouchableOpacity, Alert, FlatList, ToastAndroid, ActivityIndicator, Image } from 'react-native';
+import { useLocalSearchParams, router } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     useDriverMove,
@@ -9,7 +9,8 @@ import {
     useOrderPhotoList,
     useOrderPhotoUpload,
     useOrderStatusUpdate,
-} from '@/hooks/useApi';
+} from '@/hooks/useApi'
+
 import * as ImagePicker from 'expo-image-picker'
 import { uriToFileObject } from "@/lib/uriToFile"
 import { deepCopy, isFileUnder2MB } from '@/lib/utils';
@@ -29,7 +30,6 @@ export default function CameraScreen() {
         imageUri,
         type ,
         clearImageUri,
-        mainOrderPhoto,
         setMainOrderPhoto,
         clearMainOrderPhoto
     } = useImageUriStore()
@@ -151,9 +151,9 @@ export default function CameraScreen() {
             key={item?.uid ?? "1"}
             item={item}
             onRemove={removePhoto}
-            onPressEmpty={onHandleTakePicture}
+            onPressEmpty={reTakePhotos}
         />
-    ), [removePhoto, onHandleTakePicture])
+    ), [removePhoto, reTakePhotos])
 
     // 촬영 완료 핸들러
     const handleComplete = async () => {
@@ -249,13 +249,30 @@ export default function CameraScreen() {
         }
     }
 
-    const onTakeMainImage = () => {
-        router.push({
-            pathname: `/(protected)/taksongs/${id}/cameraOutline`,
-            params: {
-                type: tab.key
-            }
+    const reTakePhotos = () => {
+        const tabIndex = tabs.findIndex(t => t.key === tab.key)
+
+        let startIndex = 0
+        switch (tabIndex) {
+            case 1:
+                startIndex = 3
+                break
+            case 2:
+                startIndex = 9
+                break
+            case 3:
+                startIndex = 12
+                break
+            case 4:
+                startIndex = 18
+                break
+        }
+
+        router.setParams({
+            id: id,
+            startIndex: startIndex
         })
+        router.back()
     }
 
     useEffect(() => {
@@ -279,28 +296,9 @@ export default function CameraScreen() {
         if (!isMountedRef.current) return
 
         if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
-            const subList = []
-            for (const item of orderPhotos) {
-                if (item.subType === "MAIN") {
-                    setMainOrderPhoto(item, item.position)
-                }
-                if (item.subType === "SUB") {
-                    subList.push(item)
-                }
-            }
-
-            setPhotoList(subList)
+            setPhotoList(orderPhotos)
         }
     }, [orderPhotos])
-
-    useEffect(() => {
-        if (imageUri && type) {
-            onUploadPhoto(imageUri, type, "MAIN")
-                .then(() => {
-                    clearImageUri()
-                })
-        }
-    }, [imageUri, type])
 
     return (
         <View className={"bg-black flex-1"}>
@@ -320,30 +318,30 @@ export default function CameraScreen() {
             </View>
 
             {/* Big Camera Area */}
-            <View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>
-                {mainOrderPhoto[tab.key] ? (
-                    <Image
-                        source={{ uri: mainOrderPhoto[tab.key].url }}
-                        className={"absolute w-full h-[260px]"}
-                        resizeMode={"contain"}
-                    />
-                ) : (
-                    <>
-                        <Image source={tab.sampleImage} className={"absolute opacity-60"} />
-                        <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>
-                    </>
-                )}
+            {/*<View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>*/}
+            {/*    {mainOrderPhoto[tab.key] ? (*/}
+            {/*        <Image*/}
+            {/*            source={{ uri: mainOrderPhoto[tab.key].url }}*/}
+            {/*            className={"absolute w-full h-[260px]"}*/}
+            {/*            resizeMode={"contain"}*/}
+            {/*        />*/}
+            {/*    ) : (*/}
+            {/*        <>*/}
+            {/*            <Image source={tab.sampleImage} className={"absolute opacity-60"} />*/}
+            {/*            <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>*/}
+            {/*        </>*/}
+            {/*    )}*/}
 
-                <TouchableOpacity
-                    className={"absolute right-4 bottom-4"}
-                    onPress={onTakeMainImage}
-                >
-                    <Image source={require('@assets/icon/ic_photo.png')} className="w-14 h-14" />
-                </TouchableOpacity>
+            {/*    <TouchableOpacity*/}
+            {/*        className={"absolute right-4 bottom-4"}*/}
+            {/*        onPress={onTakeMainImage}*/}
+            {/*    >*/}
+            {/*        <Image source={require('@assets/icon/ic_photo.png')} className="w-14 h-14" />*/}
+            {/*    </TouchableOpacity>*/}
 
-            </View>
+            {/*</View>*/}
 
-            <View className={"flex-col justify-center items-center mt-8"}>
+            <View className={"flex-col justify-center items-center mt-2"}>
                 <Text className={"color-white text-sm mb-1"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
                 <Text className={"color-white text-sm mb-1"}>스크래치 및 찌그러짐이 있는 부분 위주로 사진을 찍어 주세요.</Text>
                 <Text className={"color-white text-sm"}>({tab.imageText})</Text>
@@ -356,6 +354,16 @@ export default function CameraScreen() {
                 numColumns={3}
                 className={"px-5 mt-5"}
             />
+
+            <TouchableOpacity
+                className={`flex flex-row mx-10 rounded-xl py-4 items-center justify-center bg-secondary gap-2`}
+                onPress={reTakePhotos}
+                disabled={orderPhotoList.length >= tab.max}
+            >
+                <Image source={require("assets/icon/ic_camera_primary.png")} resizeMode={"cover"} />
+                <Text className="font-color-primary text-base font-bold">추가 촬영</Text>
+            </TouchableOpacity>
+
 
             {/* Bottom Button */}
             <TouchableOpacity

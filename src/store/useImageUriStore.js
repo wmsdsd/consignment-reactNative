@@ -12,7 +12,6 @@ export const useImageUriStore = create((set) => ({
         imageUri: null,
         type: null
     }),
-
     mainOrderPhoto: {
         FRONT: null,
         LEFT: null,
