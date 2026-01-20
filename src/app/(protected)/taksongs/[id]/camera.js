@@ -34,18 +34,22 @@ export default function CustomCameraScreen() {
     }
 
     const takePicture = async () => {
+        const startTime = Date.now()
+
         if (!cameraRef.current) return
 
-        setIsLoading(true)
+        try {
+            setIsLoading(true)
 
-        const result = await cameraRef.current.takePictureAsync({
-            quality: 0.5,
-            base64: false,
-            exif: false,
-            skipProcessing: false
-        })
+            const result = await cameraRef.current.takePictureAsync({
+                quality: 0.5,
+                base64: false,
+                exif: false,
+                skipProcessing: false
+            })
 
-        if (result && result.uri) {
+            if (!result || !result.uri) return
+
             const formData = new FormData()
             formData.append('image', {
                 uri: result.uri,
@@ -53,42 +57,53 @@ export default function CustomCameraScreen() {
                 type: 'image/jpeg'
             })
 
-            try {
-                const res = await fetch(plateUrl, {
-                    method: "POST",
-                    body: formData,
-                })
+            const res = await fetch(plateUrl, {
+                method: "POST",
+                body: formData,
+            })
 
-                if (res.ok) {
-                    const data = await res.json()
-                    if (data?.plates?.length > 0) {
-                        const carNumber = data.plates[0]?.plate
-                        console.log("carNumber", carNumber)
-                        if (orderLocation.carNumber !== carNumber) {
-                            Alert.alert("알림", "인식된 번호판과 차량 번호가 일치하지 않습니다.")
-                        }
-                        else {
-                            onSuccess()
-                        }
-                    }
-                    else {
-                        Alert.alert("알림", "번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.")
-                    }
-                }
-                else {
-                    Alert.alert('오류', '이미지 용량이 너무 큽니다. 다시 촬영해주세요.')
-                }
+            if (!res?.ok) {
+                if (isAndroid)
+                    ToastAndroid.show('이미지 용량이 너무 큽니다. 다시 촬영해주세요.', ToastAndroid.SHORT)
+
+                return
             }
-            catch (e) {
-                console.log('fetch error', e)
-                Alert.alert("알림", "사진 정보가 올바르지 않습니다.")
+
+            const data = await res.json()
+            const length = data?.plates?.length
+
+            if (length <= 0) {
+                if (isAndroid)
+                    ToastAndroid.show("번호판이 인식되지 않았습니다. 번호판만 나오게 다시 찍어주세요.", ToastAndroid.SHORT)
+                return
             }
-            finally {
-                setIsFailed(true)
+
+            const carNumber = data.plates[0]?.plate
+            console.log("carNumber", carNumber)
+
+            if (orderLocation.carNumber !== carNumber) {
+                if (isAndroid)
+                    ToastAndroid.show("인식된 번호판과 차량 번호가 일치하지 않습니다.", ToastAndroid.SHORT)
             }
+            else {
+                onSuccess()
+            }
+
         }
+        catch (e) {
+            console.log('fetch error', e)
+            Alert.alert("알림", "[오류] 사진 정보가 올바르지 않습니다.")
+        }
+        finally {
+            setIsLoading(false)
+            setIsFailed(true)
 
-        setIsLoading(false)
+            const endTime = Date.now()
+            const elapsed = endTime - startTime;
+
+            if (isAndroid)
+                ToastAndroid.show(`경과 시간: ${elapsed / 1000}초`, ToastAndroid.SHORT)
+        }
     }
 
     const onSuccess = () => {
@@ -104,10 +119,7 @@ export default function CustomCameraScreen() {
             `현재 차량의 번호판이 ${orderLocation.carNumber}가 맞습니까? \n번호 확인을 반드시 해주세요.`,
             [
                 { text: '취소', style: 'cancel' },
-                {
-                    text: '확인',
-                    onPress: onSuccess,
-                },
+                { text: '확인', onPress: onSuccess },
             ]
         )
     }

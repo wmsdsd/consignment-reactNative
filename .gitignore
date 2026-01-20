@@ -71,7 +71,6 @@ __generated__
 
 ### ReactNative.macOS Stack ###
 # General
-.DS_Store
 .AppleDouble
 .LSOverride
 
@@ -123,7 +122,6 @@ deploymentTargetDropDown.xml
 render.experimental.xml
 
 # Keystore files
-*.jks
 *.keystore
 
 # Google Services (e.g. APIs or Firebase)
@@ -217,14 +215,10 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
