@@ -15,12 +15,20 @@ export default {
         ios: {
             supportsTablet: true,
             bundleIdentifier: 'com.kangja.olgo',
+            buildNumber: "1",
+            icon: './assets/logo/logo.png',
             infoPlist: {
-                NSLocationWhenInUseUsageDescription: '이 앱은 위치 기반 기능을 위해 위치 권한이 필요합니다.',
-                NSCameraUsageDescription: '이 앱은 사진/영상 촬영을 위해 카메라 접근 권한이 필요합니다.',
-                NSMicrophoneUsageDescription: '이 앱은 영상 녹화 시 오디오 녹음을 위해 마이크 접근 권한이 필요합니다.',
-                NSPhotoLibraryUsageDescription: '이 앱은 사진 업로드를 위해 앨범 접근 권한이 필요합니다.',
+                NSLocationWhenInUseUsageDescription: '탁송 진행 중 기사 위치를 확인하고 배송 상태를 관리하기 위해 사용됩니다.',
+                NSLocationAlwaysAndWhenInUseUsageDescription: '탁송 진행 중 기사 위치 추적 및 배송 이력 기록을 위해 백그라운드에서도 위치를 사용합니다.',
+                NSCameraUsageDescription: '이 앱은 탁송 서비스에서 사용되는 차량 사진, 번호판 사진 촬영을 위해 카메라 접근 권한이 필요합니다.',
+                NSMicrophoneUsageDescription: '이 앱은 탁송 서비스에서 사용되는 영상 녹화 시 오디오 녹음을 위해 마이크 접근 권한이 필요합니다.',
+                NSPhotoLibraryUsageDescription: '이 앱은 탁송 서비스에서 사용되는 사진 업로드를 위해 앨범 접근 권한이 필요합니다.',
             },
+            UIBackgroundModes: [
+                "location",
+                "fetch"
+            ],
+            newArchEnabled: false,
         },
         android: {
             adaptiveIcon: {

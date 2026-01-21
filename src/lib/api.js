@@ -1,4 +1,4 @@
-// const ROOT = "http://192.168.0.50:4000"
+// const ROOT = "http://192.168.0.8:4000"
 // const ROOT = "http://192.168.45.27:4000"
 const ROOT = "https://api.olgomobility.com" // real
 // const ROOT = "http://13.209.6.245:4000" // stage
@@ -34,19 +34,9 @@ const apiCall = async (endpoint, options = {}) => {
             const result = data?.result
 
             // 비인가
-            if (result?.code === 401) {
+            if (result?.code === 401 || result?.code === 422) {
                 await SecureStore.deleteItemAsync('authToken')
                 router.replace("/(auth)/login")
-
-                // const targetPath = "/(auth)/login"
-                // const pathname = usePathname()
-                //
-                // console.log("targetPath", targetPath)
-                // console.log("pathname", pathname)
-                // console.log(pathname !== targetPath)
-                //
-                // if (pathname !== targetPath) {
-                // }
             }
 
             throw new Error(data?.result?.message || 'API 호출 실패')

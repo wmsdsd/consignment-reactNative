@@ -1,5 +1,6 @@
-import { TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { TouchableOpacity, View, ActivityIndicator } from 'react-native'
+import { useState } from 'react'
+import { Image } from 'expo-image'
 
 export default function ImageThumbnail ({ item, onRemove, onPressEmpty }) {
     const [loading, setLoading] = useState(true)
@@ -17,33 +18,67 @@ export default function ImageThumbnail ({ item, onRemove, onPressEmpty }) {
         }
     }
 
+    const resizeImage = (url, size = 400) =>
+        `${url}?w=${size}`
+
     return (
-        <View className={"p-[6px] aspect-1 w-[100px] h-[100px]"}>
-            {item && url ? (
-                <View className={"border border-[#444] flex-1 rounded-2xl border-dashed relative"}>
-                    {loading && (<ActivityIndicator className={"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"} color="#fff" />)}
+        <View className="p-[6px] w-[100px] h-[100px]">
+            <View
+                className="relative"
+                style={{
+                    width: "100%",
+                    height: '100%'
+                }}
+            >
+                {/* 이미지 영역 */}
+                <View
+                    className="border border-[#444] rounded-2xl border-dashed"
+                    style={{
+                        width: "100%",
+                        height: '100%',
+                        overflow: 'hidden',
+                    }}
+                >
+                    {loading && (
+                        <ActivityIndicator
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                            color="#fff"
+                        />
+                    )}
+
                     <Image
-                        className={"flex-1 rounded-lg"}
-                        source={{ uri: url }}
-                        resizeMode={"contain"}
+                        source={{ uri: resizeImage(url) }}
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                         onLoadStart={() => setLoading(true)}
                         onLoadEnd={() => setLoading(false)}
+                        onError={() => setLoading(false)}
                     />
-                    <TouchableOpacity
-                        className={"absolute top-[-10px] right-[-10px] rounded-lg w-6 h-6 items-center justify-center"}
-                        onPress={() => onRemove(item.key, item.uid)}
-                    >
-                        <Image source={require("@assets/icon/ic_close.png")} className={"w-4 h-4"} />
-                    </TouchableOpacity>
                 </View>
-            ) : (
+
+                {/* close 버튼 */}
                 <TouchableOpacity
-                    className={"flex-1 border border-[#444] rounded-2xl border-dashed justify-center items-center"}
-                    onPress={onTouchEmpty}
+                    onPress={() => onRemove(item.key, item.uid)}
+                    style={{
+                        position: 'absolute',
+                        top: -8,
+                        right: -8,
+                        width: 20,
+                        height: 20,
+                        borderRadius: 12,
+                        backgroundColor: 'transparent',
+                        zIndex: 50,
+                        elevation: 10,
+                    }}
                 >
-                    <Image source={require("@assets/images/sample/sample_thumbnail.png")} className={"w-8 h-8"} />
+                    <Image
+                        source={require('assets/icon/ic_close.png')}
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit="cover"
+                    />
                 </TouchableOpacity>
-            )}
+            </View>
         </View>
     )
 }

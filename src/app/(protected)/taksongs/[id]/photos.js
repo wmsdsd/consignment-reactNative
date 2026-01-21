@@ -1,150 +1,66 @@
-import { View, Text, TouchableOpacity, Alert, FlatList, ToastAndroid, ActivityIndicator, Image } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Alert,
+    FlatList,
+    ToastAndroid,
+    ActivityIndicator,
+    Image
+} from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
     useDriverMove,
     useOrder,
     useOrderLocationEnd,
     useOrderLocationProcess,
     useOrderPhotoList,
-    useOrderPhotoUpload,
     useOrderStatusUpdate,
 } from '@/hooks/useApi'
 
-import * as ImagePicker from 'expo-image-picker'
-import { uriToFileObject } from "@/lib/uriToFile"
-import { deepCopy, isFileUnder2MB } from '@/lib/utils';
-import { getLocation } from '@/hooks/useLocation';
-import { useRemovePhoto } from '@/hooks/useRemovePhoto';
-import ImageThumbnail from '@/components/ImageThumbnail';
-import { getCameraPermissions } from '@/lib/permissions';
+import { deepCopy } from '@/lib/utils'
+import { getLocation } from '@/hooks/useLocation'
+import { useRemovePhoto } from '@/hooks/useRemovePhoto'
+import ImageThumbnail from '@/components/ImageThumbnail'
 import { TABS } from '@/data/codes'
-import { useImageUriStore } from '@/store/useImageUriStore';
 
 const tabs = deepCopy(TABS)
 export default function CameraScreen() {
     const { id } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
-    const {
-        imageUri,
-        type ,
-        clearImageUri,
-        setMainOrderPhoto,
-        clearMainOrderPhoto
-    } = useImageUriStore()
 
     const isMountedRef = useRef(false)
 
     const [isLoading, setIsLoading] = useState(false)
-    const [isTakingPicture, setIsTakingPicture] = useState(false)
-    const [ready, setReady] = React.useState(false)
+    const [ready, setReady] = useState(false)
     const [tab, setTab] = useState(tabs[0])
     const [photoList, setPhotoList] = useState([])
 
     const orderPhotoList = useMemo(() => {
-        const list = photoList.filter(e => e.position === tab.key)
-        return list.length > 0 ? [...list, null] : [null]
-    }, [photoList, tab.key])
+        const list = photoList.filter(e => e.position === tab.position)
+        return list.length > 0 ? [...list] : []
+    }, [photoList, tab.position])
 
     const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
 
-    const uploadMutation = useOrderPhotoUpload()
     const endMutation = useOrderLocationEnd()
     const updateOrderStatusMutation = useOrderStatusUpdate()
     const driverMoveMutation = useDriverMove()
 
-    const onHandleTakePicture = async () => {
-        if (isTakingPicture) return
-
-        const status = await getCameraPermissions()
-        if (status !== "granted") {
-            alert("카메라 권한이 필요합니다!")
-            return
-        }
-
-        setIsTakingPicture(true)
-        try {
-            const result = await ImagePicker.launchCameraAsync({
-                allowsEditing: false,
-                quality: 0.8,
-            })
-
-            if (!result.canceled) {
-                const uri = result.assets[0].uri
-                const isUnder = await isFileUnder2MB(uri)
-
-                if (!isUnder) {
-                    Alert.alert("알림", "파일 크기는 5MB 이하만 가능합니다.")
-                    await onHandleTakePicture()
-                }
-                else {
-                    await onUploadPhoto(uri, tab.key, 'SUB')
-                }
-            }
-        }
-        finally {
-            setIsTakingPicture(false)
-        }
-    }
-
-    const onUploadPhoto = async (uri, position, subType) => {
-        const file = await uriToFileObject(uri)
-        const sendData = {
-            orderUid: order.uid,
-            orderLocationUid: orderLocation.uid,
-            type: orderLocation.type,
-            subType: subType,
-            position: position,
-            fileList: [
-                {
-                    fileName: file.name,
-                    fileType: file.type
-                }
-            ]
-        }
-
-        const list = await uploadMutation.mutateAsync(sendData)
-        if (Array.isArray(list) && list.length > 0) {
-            const item = list[0]
-            await fetch(item.url, {
-                method: "PUT",
-                headers: {
-                    'Content-Type': file.type,
-                },
-                body: file.blob
-            })
-
-            if (!isMountedRef.current) return
-            if (subType === "MAIN") {
-                setMainOrderPhoto(item, position)
-            }
-            else if (subType === "SUB") {
-                onSaveSubPhoto(item)
-            }
-        }
-        else {
-            Alert.alert("알림", "이미지 등록에 실패 하였습니다. 네트워크 상태를 확인해 주세요.")
-        }
-    }
-
-    const onSaveSubPhoto = (item) => {
-        setPhotoList(prev => {
-            const exists = prev.some(p => p.uid === item.uid)
-            return exists
-                ? prev
-                : [...prev, item]
-        })
-
-        if (orderPhotoList.length < tab.max) {
-            setTimeout(onHandleTakePicture, 100)
-        }
-    }
-
     const { removePhoto } = useRemovePhoto({
-        photoList: photoList[tab.key],
+        photoList: photoList[tab.position],
         setPhotoList: setPhotoList
     })
+
+    const reTakePhotos = () => {
+        router.setParams({
+            id: id,
+            position: tab.position
+        })
+        router.back()
+    }
 
     const renderSlot = useCallback(({ item }) => (
         <ImageThumbnail
@@ -158,11 +74,11 @@ export default function CameraScreen() {
     // 촬영 완료 핸들러
     const handleComplete = async () => {
         let isValid = true
-        for (const _tab of tabs) {
-            const list = photoList.filter(e => e.position === _tab.key)
+        for (const t of tabs) {
+            const list = photoList.filter(e => e.position === t.position)
             const length = list.length
-            if (length < _tab.min || length > _tab.max) {
-                Alert.alert("알림", `${_tab.name} 이미지를 ${_tab.min}장 이상 ${_tab.max}장 이하로 촬영해 주세요.`)
+            if (length < t.min || length > t.max) {
+                Alert.alert("알림", `${t.name} 이미지를 ${t.min}장 이상 ${t.max}장 이하로 촬영해 주세요.`)
                 isValid = false
                 return
             }
@@ -249,38 +165,11 @@ export default function CameraScreen() {
         }
     }
 
-    const reTakePhotos = () => {
-        const tabIndex = tabs.findIndex(t => t.key === tab.key)
-
-        let startIndex = 0
-        switch (tabIndex) {
-            case 1:
-                startIndex = 3
-                break
-            case 2:
-                startIndex = 9
-                break
-            case 3:
-                startIndex = 12
-                break
-            case 4:
-                startIndex = 18
-                break
-        }
-
-        router.setParams({
-            id: id,
-            startIndex: startIndex
-        })
-        router.back()
-    }
-
     useEffect(() => {
         isMountedRef.current = true
 
         return () => {
             isMountedRef.current = false
-            clearMainOrderPhoto()
         }
     }, [])
 
@@ -308,38 +197,14 @@ export default function CameraScreen() {
                     <TouchableOpacity
                         key={`${tab.key}-${index}`}
                         onPress={() => setTab(t)}
-                        className={`py-1 ${tab.key === t.key ? "border-b-2 border-white" : ""}`}
+                        className={`py-1 ${tab.position === t.position ? "border-b-2 border-white" : ""}`}
                     >
-                        <Text className={`color-[#777] text-sm ${tab.key === t.key ? "color-white font-bold" : ""}`}>
+                        <Text className={`color-[#777] text-sm ${tab.position === t.position ? "color-white font-bold" : ""}`}>
                             {t.name}
                         </Text>
                     </TouchableOpacity>
                 ))}
             </View>
-
-            {/* Big Camera Area */}
-            {/*<View className={"h-[260px] mx-5 mt-4 rounded-xl bg-[#222] justify-center items-center relative"}>*/}
-            {/*    {mainOrderPhoto[tab.key] ? (*/}
-            {/*        <Image*/}
-            {/*            source={{ uri: mainOrderPhoto[tab.key].url }}*/}
-            {/*            className={"absolute w-full h-[260px]"}*/}
-            {/*            resizeMode={"contain"}*/}
-            {/*        />*/}
-            {/*    ) : (*/}
-            {/*        <>*/}
-            {/*            <Image source={tab.sampleImage} className={"absolute opacity-60"} />*/}
-            {/*            <Text className={"color-white absolute top-4"}>{tab.name} 사진을 촬영해 주세요.</Text>*/}
-            {/*        </>*/}
-            {/*    )}*/}
-
-            {/*    <TouchableOpacity*/}
-            {/*        className={"absolute right-4 bottom-4"}*/}
-            {/*        onPress={onTakeMainImage}*/}
-            {/*    >*/}
-            {/*        <Image source={require('@assets/icon/ic_photo.png')} className="w-14 h-14" />*/}
-            {/*    </TouchableOpacity>*/}
-
-            {/*</View>*/}
 
             <View className={"flex-col justify-center items-center mt-2"}>
                 <Text className={"color-white text-sm mb-1"}>{tab.min}장 이상 {tab.max}장 이하로 사진을 촬영해 주세요.</Text>
@@ -347,23 +212,35 @@ export default function CameraScreen() {
                 <Text className={"color-white text-sm"}>({tab.imageText})</Text>
             </View>
 
-            <FlatList
-                data={orderPhotoList}
-                renderItem={renderSlot}
-                keyExtractor={(item, index) => `${item?.uid}_${index.toString()}`}
-                numColumns={3}
-                className={"px-5 mt-5"}
-            />
-
-            <TouchableOpacity
-                className={`flex flex-row mx-10 rounded-xl py-4 items-center justify-center bg-secondary gap-2`}
-                onPress={reTakePhotos}
-                disabled={orderPhotoList.length >= tab.max}
-            >
-                <Image source={require("assets/icon/ic_camera_primary.png")} resizeMode={"cover"} />
-                <Text className="font-color-primary text-base font-bold">추가 촬영</Text>
-            </TouchableOpacity>
-
+            <View>
+                <FlatList
+                    data={orderPhotoList}
+                    keyExtractor={(item, index) => `${item?.uid}_${index.toString()}`}
+                    renderItem={renderSlot}
+                    removeClippedSubviews={true}
+                    windowSize={5}
+                    maxToRenderPerBatch={5}
+                    initialNumToRender={5}
+                    numColumns={3}
+                    className={"p-5 mt-4"}
+                    contentContainerStyle={{
+                        alignItems: 'center',
+                    }}
+                    columnWrapperStyle={{
+                        justifyContent: 'center',
+                    }}
+                />
+                <TouchableOpacity
+                    className="flex flex-row rounded-xl py-4 items-center justify-center bg-secondary gap-2 mt-4"
+                    style={{ marginHorizontal: 60 }}
+                    onPress={reTakePhotos}
+                    disabled={orderPhotoList.length >= tab.max}
+                >
+                    <Image source={require("assets/icon/ic_camera_primary.png")} resizeMode={"cover"} />
+                    <Text className="font-color-primary text-base font-bold">추가 촬영</Text>
+                </TouchableOpacity>
+            </View>
+            <View className={"flex-1"}></View>
 
             {/* Bottom Button */}
             <TouchableOpacity
@@ -371,9 +248,9 @@ export default function CameraScreen() {
                     ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                 `}
                 onPress={handleComplete}
-                disabled={isLoading || isTakingPicture}
+                disabled={isLoading}
             >
-                {isLoading || isTakingPicture
+                {isLoading
                     ? (<ActivityIndicator color="#fff" />)
                     : (
                         <Text className="color-white text-base font-semibold">

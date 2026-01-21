@@ -65,7 +65,6 @@ export default function CustomCameraScreen() {
             if (!res?.ok) {
                 if (isAndroid)
                     ToastAndroid.show('이미지 용량이 너무 큽니다. 다시 촬영해주세요.', ToastAndroid.SHORT)
-
                 return
             }
 

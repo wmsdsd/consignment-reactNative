@@ -8,16 +8,14 @@ import { enqueueUpload } from '@/lib/uploadImageQueue'
 import { IMAGE_LAYOUTS } from '@/data/codes'
 
 export default function TakePhotosScreen() {
-    const { id, startIndex } = useLocalSearchParams()
+    const { id, position } = useLocalSearchParams()
     const { data: orderLocation } = useOrderLocationProcess(id)
-
     const { width } = Dimensions.get("window")
     const [permission, requestPermission] = useCameraPermissions()
     const [isLoading, setIsLoading] = useState(false)
+    const [isExtra, setIsExtra] = useState(false)
     const [photoUri, setPhotoUri] = useState(null)
-
     const cameraRef = useRef(null)
-
     const imageLayouts = useMemo(() => IMAGE_LAYOUTS, [])
     const [imageIndex, setImageIndex] = useState(0)
     const selectedImageLayout = useMemo(() => {
@@ -30,11 +28,15 @@ export default function TakePhotosScreen() {
     }, [imageIndex, imageLayouts])
 
     useEffect(() => {
-        const index = parseInt(startIndex)
-        if (startIndex && !isNaN(index)) {
-            setImageIndex(index)
+        const positionList = ['FRONT', 'LEFT', 'RIGHT', 'INSIDE', 'BACK']
+        if (position && positionList.includes(position)) {
+            setIsExtra(true)
         }
-    }, [startIndex])
+
+        return () => {
+            setIsExtra(false)
+        }
+    }, [position])
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -53,38 +55,47 @@ export default function TakePhotosScreen() {
         
         try {
             setIsLoading(true)
+
             const result = await cameraRef.current.takePictureAsync({
                 quality: 0.8,
                 skipProcessing: true
             })
 
-            if (result && result.uri) {
-                const uri = result.uri
-                const file = await uriToFileObject(uri)
-                const promise = enqueueUpload({
-                    id: String(Date.now()),
-                    uri: uri,
-                    mimeType: file.type,
-                    file: file,
-                    extra: {
-                        orderUid: orderLocation.orderUid,
-                        orderLocationUid: orderLocation.uid,
-                        type: orderLocation.type,
-                        subType: selectedImageLayout?.subType ?? "ETC",
-                        position: selectedImageLayout?.position ?? "ETC",
-                        fileList: [
-                            {
-                                fileName: file.name,
-                                fileType: file.type
-                            }
-                        ]
-                    }
-                })
+            if (!result || !result.uri) return
 
+            const uri = result.uri
+            setPhotoUri(uri)
 
-                setPhotoUri(uri)
+            let sendPosition = selectedImageLayout?.position ?? "ETC"
+            let sendSubType = selectedImageLayout?.subType ?? "ETC"
+            if (isExtra) {
+                sendPosition = position
+                sendSubType = "ETC"
+            }
+
+            const file = await uriToFileObject(uri)
+            const promise = enqueueUpload({
+                id: String(Date.now()),
+                uri: uri,
+                mimeType: file.type,
+                file: file,
+                extra: {
+                    type: orderLocation.type,
+                    position: sendPosition,
+                    subType: sendSubType,
+                    fileList: [
+                        {
+                            fileName: file.name,
+                            fileType: file.type
+                        }
+                    ],
+                    orderUid: orderLocation.orderUid,
+                    orderLocationUid: orderLocation.uid,
+                }
+            })
+
+            if (!isExtra) {
                 setImageIndex(prev => prev + 1)
-
                 promise
                     .then(res => {
                         if (res) {
@@ -93,11 +104,11 @@ export default function TakePhotosScreen() {
                             }
                         }
                     })
+
             }
         }
         catch (e) {
             console.warn("takePhoto error:", e)
-            setIsLoading(false)
         }
         finally {
             setIsLoading(false)
@@ -149,34 +160,36 @@ export default function TakePhotosScreen() {
             </View>
 
             {/* ----- 차량 가이드 영역 ----- */}
-            <View
-                style={{
-                    position: 'absolute',
-                    width: width - 40,
-                    height: 100,
-                    backgroundColor: '#000',
-                    borderWidth: 1,
-                    borderColor: '#FFF56C',
-                    top: 15,
-                    left: 20,
-                    borderRadius: 10,
-                }}
-                className={"flex-row p-4"}
-            >
-                <View className={"mr-4"}>
-                    <Image source={selectedImageLayout.thumbnail} className={"w-32 h-20 rounded-lg"} resizeMode={"cover"} />
+            {!isExtra && (
+                <View
+                    style={{
+                        position: 'absolute',
+                        width: width - 40,
+                        height: 100,
+                        backgroundColor: '#000',
+                        borderWidth: 1,
+                        borderColor: '#FFF56C',
+                        top: 15,
+                        left: 20,
+                        borderRadius: 10,
+                    }}
+                    className={"flex-row p-4"}
+                >
+                    <View className={"mr-4"}>
+                        <Image source={selectedImageLayout.thumbnail} className={"w-32 h-20 rounded-lg"} resizeMode={"cover"} />
+                    </View>
+                    <View>
+                        <Text className={"text-white font-bold text-xl"}>{selectedImageLayout.name} {selectedImageLayout.label}</Text>
+                        <Text className={"font-color-price flex-1 flex-wrap text-base flex-shrink"}>
+                            해당 이미지의 촬영 구도와 {"\n"}
+                            맞추어서 촬영해 주세요.
+                        </Text>
+                    </View>
                 </View>
-                <View>
-                    <Text className={"text-white font-bold text-xl"}>{selectedImageLayout.name} {selectedImageLayout.label}</Text>
-                    <Text className={"font-color-price flex-1 flex-wrap text-base flex-shrink"}>
-                        해당 이미지의 촬영 구도와 {"\n"}
-                        맞추어서 촬영해 주세요.
-                    </Text>
-                </View>
-            </View>
+            )}
 
             {/* ----- 이전에 촬영한 사진 ----- */}
-            { photoUri && (
+            {!!photoUri && (
                 <View
                     style={{
                         position: 'absolute',

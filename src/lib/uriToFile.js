@@ -15,12 +15,11 @@ export const uriToFileObject = async (uri) => {
     const filename = uri.split("/").pop() || `image_${Date.now()}.${ext}`
     const mime = blob.type || getMimeType(ext)
 
-    // File-like object 생성
     return {
         uri,
         name: filename,
         type: mime,
         size: blob.size,
-        blob, // 필요하면 blob도 포함
+        blob,
     }
 }
