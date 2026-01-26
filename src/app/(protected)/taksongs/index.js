@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, FlatList, Text } from 'react-native'
+import { ActivityIndicator, Alert, FlatList, Text, ToastAndroid } from 'react-native';
 import TaksongCard from '../../../components/TaksongCard'
 import { useDriverSetToken, useOrderList } from '@/hooks/useApi'
 import { getAddress } from '@/lib/utils'
@@ -6,7 +6,7 @@ import { useCallback, useEffect } from 'react'
 import { useAppContext } from '@/context/AppContext'
 import {router, useFocusEffect, useNavigation} from 'expo-router'
 import { checkAllPermissionsAsync } from '@/lib/permissions'
-import { syncPushToken } from '@/lib/notification'
+import { requestPushPermission, syncPushToken, getPushPermission } from '@/lib/notification'
 import { useAuth } from "@/hooks/useAuth"
 
 export default function TaksongListScreen() {
@@ -69,6 +69,11 @@ export default function TaksongListScreen() {
         return <Text style={{ textAlign: 'center', marginTop: 20, color: 'white' }}>담당 탁송 내역이 없습니다.</Text>
     }
 
+    const setupPushToken = async () => {
+        const updateFlag = !!user?.token
+        await syncPushToken(setTokenMutation, updateFlag)
+    }
+
     useFocusEffect(
         useCallback(() => {
             setMenuConfig(prev => ({
@@ -81,8 +86,25 @@ export default function TaksongListScreen() {
 
     useEffect(() => {
         ;(async () => {
-            const updateFlag = !!user?.token
-            await syncPushToken(setTokenMutation, updateFlag)
+            const isPushGranted = await getPushPermission()
+            if (isPushGranted) {
+                await setupPushToken()
+            }
+            else {
+                Alert.alert(
+                    "알림 안내",
+                    "탁송 알림을 허용시 접수된 탁송 내역, 배송, 공지 알림을 받을 수 있어요.",
+                    [
+                        { text: '취소', style: 'cancel' },
+                        {
+                            text: '확인',
+                            onPress: async () => {
+                                await setupPushToken()
+                            },
+                        },
+                    ]
+                )
+            }
         })()
     }, [])
 

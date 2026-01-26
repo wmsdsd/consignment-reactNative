@@ -27,7 +27,7 @@ import { TABS } from '@/data/codes'
 
 const tabs = deepCopy(TABS)
 export default function CameraScreen() {
-    const { id } = useLocalSearchParams()
+    const { id, type } = useLocalSearchParams()
     const { data: order } = useOrder(id)
     const { data: orderLocation, refetch: refetchOrderLocation } = useOrderLocationProcess(id)
 
@@ -43,23 +43,28 @@ export default function CameraScreen() {
         return list.length > 0 ? [...list] : []
     }, [photoList, tab.position])
 
-    const { data: orderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
+    const { data: orderPhotos, refetch: refetchOrderPhotos } = useOrderPhotoList(order?.uid, orderLocation?.uid, ready)
 
     const endMutation = useOrderLocationEnd()
     const updateOrderStatusMutation = useOrderStatusUpdate()
     const driverMoveMutation = useDriverMove()
 
-    const { removePhoto } = useRemovePhoto({
-        photoList: photoList[tab.position],
-        setPhotoList: setPhotoList
-    })
+    const { removePhoto } = useRemovePhoto()
 
     const reTakePhotos = () => {
-        router.setParams({
-            id: id,
-            position: tab.position
-        })
-        router.back()
+        const isMax = orderPhotoList.length >= tab.max
+        if (isMax) {
+            Alert.alert("알림", `${tab.name} 이미지는 ${tab.max}장 이하로 촬영이 가능합니다.`)
+        }
+        else {
+            router.replace({
+                pathname: `/(protected)/taksongs/${id}/takePhotos`,
+                params: {
+                    position: tab.position,
+                    count: orderPhotoList.length
+                }
+            })
+        }
     }
 
     const renderSlot = useCallback(({ item }) => (
@@ -184,9 +189,15 @@ export default function CameraScreen() {
     useEffect(() => {
         if (!isMountedRef.current) return
 
-        if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
-            setPhotoList(orderPhotos)
-        }
+        ;(async () => {
+            if (type === 'reTake') {
+                await refetchOrderPhotos()
+            }
+
+            if (orderPhotos && Array.isArray(orderPhotos) && orderPhotos.length > 0) {
+                setPhotoList(orderPhotos)
+            }
+        })()
     }, [orderPhotos])
 
     return (
@@ -212,12 +223,11 @@ export default function CameraScreen() {
                 <Text className={"color-white text-sm"}>({tab.imageText})</Text>
             </View>
 
-            <View>
+            <View className={"flex-1"}>
                 <FlatList
                     data={orderPhotoList}
                     keyExtractor={(item, index) => `${item?.uid}_${index.toString()}`}
                     renderItem={renderSlot}
-                    removeClippedSubviews={true}
                     windowSize={5}
                     maxToRenderPerBatch={5}
                     initialNumToRender={5}
@@ -230,34 +240,34 @@ export default function CameraScreen() {
                         justifyContent: 'center',
                     }}
                 />
+            </View>
+            <View>
                 <TouchableOpacity
                     className="flex flex-row rounded-xl py-4 items-center justify-center bg-secondary gap-2 mt-4"
                     style={{ marginHorizontal: 60 }}
                     onPress={reTakePhotos}
-                    disabled={orderPhotoList.length >= tab.max}
                 >
                     <Image source={require("assets/icon/ic_camera_primary.png")} resizeMode={"cover"} />
                     <Text className="font-color-primary text-base font-bold">추가 촬영</Text>
                 </TouchableOpacity>
-            </View>
-            <View className={"flex-1"}></View>
 
-            {/* Bottom Button */}
-            <TouchableOpacity
-                className={`mt-4 mx-5 rounded-xl py-4 mb-16 items-center
+                {/* Bottom Button */}
+                <TouchableOpacity
+                    className={`mt-4 mx-5 rounded-xl py-4 mb-16 items-center
                     ${ isLoading ? "bg-gray-400" : 'bg-primary'}
                 `}
-                onPress={handleComplete}
-                disabled={isLoading}
-            >
-                {isLoading
-                    ? (<ActivityIndicator color="#fff" />)
-                    : (
-                        <Text className="color-white text-base font-semibold">
-                            촬영 완료
-                        </Text>
-                    )}
-            </TouchableOpacity>
+                    onPress={handleComplete}
+                    disabled={isLoading}
+                >
+                    {isLoading
+                        ? (<ActivityIndicator color="#fff" />)
+                        : (
+                            <Text className="color-white text-base font-semibold">
+                                촬영 완료
+                            </Text>
+                        )}
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }

@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications'
 import * as Device from 'expo-device'
-import { Platform } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 import Constants from 'expo-constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -8,7 +8,7 @@ const TOKEN_KEY = 'expo_push_token'
 
 const checkDevice = () => {
     if (!Device.isDevice) {
-        alert('실제 디바이스에서만 Push Notification이 동작합니다.');
+        alert('실제 디바이스에서만 Push Notification이 동작합니다.')
         return false
     }
 
@@ -28,16 +28,17 @@ export async function setupNotifications() {
     }
 }
 
-export async function requestPermission() {
-    let isGranted = await getPermission()
-    if (isGranted) {
-        const { status } = await Notifications.requestPermissionsAsync()
-        isGranted = status === 'granted'
+export async function requestPushPermission() {
+    const { status } = await Notifications.getPermissionsAsync()
+    if (status === 'undetermined') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync()
+        return newStatus === 'granted'
     }
-    return isGranted
+
+    return status === 'granted'
 }
 
-export async function getPermission() {
+export async function getPushPermission() {
     if (!checkDevice()) return
 
     const { status } = await Notifications.getPermissionsAsync()
@@ -47,9 +48,23 @@ export async function getPermission() {
 export async function getPushToken() {
     if (!checkDevice()) return
 
-    let isGranted = await requestPermission()
+    let isGranted = await requestPushPermission()
     if (!isGranted) {
-        alert('알림 권한이 거부되었습니다. 시스템 설정에서 허용해 주세요.')
+        Alert.alert(
+            '알림 권한 없음',
+            '알림 권한이 거부되었습니다. \n알림을 받으려면 설정 > 알림에서 허용해 주세요.', [
+                {
+                    text: '취소',
+                    style: 'cancel'
+                },
+                {
+                    text: '설정 이동',
+                    onPress: () => {
+                        Linking.openSettings()
+                    },
+                },
+            ])
+
         return
     }
 
@@ -59,13 +74,13 @@ export async function getPushToken() {
 
     await setupNotifications()
 
-    console.log("token", token.data)
-
     return token.data
 }
 
 export async function syncPushToken(mutation, checkToken = true) {
     const newToken = await getPushToken()
+    if (!newToken) return
+
     const oldToken = await AsyncStorage.getItem(TOKEN_KEY)
 
     let updateFlag = true

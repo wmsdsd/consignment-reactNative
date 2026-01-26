@@ -5,19 +5,25 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useOrder, useOrderLocationProcess } from '@/hooks/useApi'
 import { uriToFileObject } from '@/lib/uriToFile'
 import { enqueueUpload } from '@/lib/uploadImageQueue'
-import { IMAGE_LAYOUTS } from '@/data/codes'
+import { IMAGE_LAYOUTS, TABS } from '@/data/codes'
 
 export default function TakePhotosScreen() {
-    const { id, position } = useLocalSearchParams()
+    const { id, position, count } = useLocalSearchParams()
     const { data: orderLocation } = useOrderLocationProcess(id)
     const { width } = Dimensions.get("window")
     const [permission, requestPermission] = useCameraPermissions()
+
+    const cameraRef = useRef(null)
+
     const [isLoading, setIsLoading] = useState(false)
     const [isExtra, setIsExtra] = useState(false)
     const [photoUri, setPhotoUri] = useState(null)
-    const cameraRef = useRef(null)
-    const imageLayouts = useMemo(() => IMAGE_LAYOUTS, [])
     const [imageIndex, setImageIndex] = useState(0)
+    const [photoCount, setPhotoCount] = useState(0)
+
+    const imageLayouts = useMemo(() => {
+        return isExtra ? TABS : IMAGE_LAYOUTS
+    }, [isExtra])
     const selectedImageLayout = useMemo(() => {
         if (imageLayouts.length === 0) return null
 
@@ -28,15 +34,26 @@ export default function TakePhotosScreen() {
     }, [imageIndex, imageLayouts])
 
     useEffect(() => {
-        const positionList = ['FRONT', 'LEFT', 'RIGHT', 'INSIDE', 'BACK']
+        console.log("take photo position", position)
+        const positionList = ['FRONT', 'RIGHT', 'BACK', 'LEFT', 'INSIDE']
         if (position && positionList.includes(position)) {
             setIsExtra(true)
+
+            const index = positionList.indexOf(position)
+            setImageIndex(index)
         }
 
         return () => {
             setIsExtra(false)
         }
     }, [position])
+
+    useEffect(() => {
+        const num = parseInt(String(count))
+        if (count && !isNaN(num)) {
+            setPhotoCount(num)
+        }
+    }, [count])
 
     if (!permission) return <View />
     if (!permission.granted) {
@@ -52,6 +69,17 @@ export default function TakePhotosScreen() {
 
     const takePicture = async () => {
         if (!cameraRef.current || isLoading) return
+
+        console.log("isExtra",isExtra)
+        console.log("photoCount", photoCount)
+        console.log("selectedImageLayout?.max", selectedImageLayout?.max)
+
+        if (isExtra) {
+            if (photoCount >= selectedImageLayout?.max) {
+                Alert.alert("알림", `${selectedImageLayout.name} 이미지는 ${selectedImageLayout.max}장 이하로 촬영이 가능합니다.`)
+                return
+            }
+        }
         
         try {
             setIsLoading(true)
@@ -94,7 +122,10 @@ export default function TakePhotosScreen() {
                 }
             })
 
-            if (!isExtra) {
+            if (isExtra) {
+                setPhotoCount(prev => prev + 1)
+            }
+            else {
                 setImageIndex(prev => prev + 1)
                 promise
                     .then(res => {
@@ -104,7 +135,6 @@ export default function TakePhotosScreen() {
                             }
                         }
                     })
-
             }
         }
         catch (e) {
@@ -116,9 +146,19 @@ export default function TakePhotosScreen() {
     }
 
     const onSuccess = () => {
-        router.push({
-            pathname: `/(protected)/taksongs/${id}/photos`
-        })
+        if (isExtra) {
+            router.replace({
+                pathname: `/(protected)/taksongs/${id}/photos`,
+                params: {
+                    type: 'reTake'
+                }
+            })
+        }
+        else {
+            router.push({
+                pathname: `/(protected)/taksongs/${id}/photos`
+            })
+        }
     }
 
     return (
@@ -160,33 +200,31 @@ export default function TakePhotosScreen() {
             </View>
 
             {/* ----- 차량 가이드 영역 ----- */}
-            {!isExtra && (
-                <View
-                    style={{
-                        position: 'absolute',
-                        width: width - 40,
-                        height: 100,
-                        backgroundColor: '#000',
-                        borderWidth: 1,
-                        borderColor: '#FFF56C',
-                        top: 15,
-                        left: 20,
-                        borderRadius: 10,
-                    }}
-                    className={"flex-row p-4"}
-                >
-                    <View className={"mr-4"}>
-                        <Image source={selectedImageLayout.thumbnail} className={"w-32 h-20 rounded-lg"} resizeMode={"cover"} />
-                    </View>
-                    <View>
-                        <Text className={"text-white font-bold text-xl"}>{selectedImageLayout.name} {selectedImageLayout.label}</Text>
-                        <Text className={"font-color-price flex-1 flex-wrap text-base flex-shrink"}>
-                            해당 이미지의 촬영 구도와 {"\n"}
-                            맞추어서 촬영해 주세요.
-                        </Text>
-                    </View>
+            <View
+                style={{
+                    position: 'absolute',
+                    width: width - 40,
+                    height: 100,
+                    backgroundColor: '#000',
+                    borderWidth: 1,
+                    borderColor: '#FFF56C',
+                    top: 15,
+                    left: 20,
+                    borderRadius: 10,
+                }}
+                className={"flex-row p-4"}
+            >
+                <View className={"mr-4"}>
+                    <Image source={selectedImageLayout.thumbnail} className={"w-32 h-20 rounded-lg"} resizeMode={"cover"} />
                 </View>
-            )}
+                <View>
+                    <Text className={"text-white font-bold text-xl"}>{selectedImageLayout.name} {selectedImageLayout.label}</Text>
+                    <Text className={"font-color-price flex-1 flex-wrap text-base flex-shrink"}>
+                        해당 이미지의 촬영 구도와 {"\n"}
+                        맞추어서 촬영해 주세요.
+                    </Text>
+                </View>
+            </View>
 
             {/* ----- 이전에 촬영한 사진 ----- */}
             {!!photoUri && (

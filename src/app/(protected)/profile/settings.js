@@ -1,12 +1,10 @@
-import { View, Text, TouchableOpacity, Switch, Alert } from 'react-native';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getCameraPermissions, getGalleryPermissions, getLocationPermission } from '@/lib/permissions';
+import { View, Text, Switch, Alert } from 'react-native'
+import { useEffect, useState } from 'react'
+import { getCameraPermissions, getGalleryPermissions, getLocationPermission } from '@/lib/permissions'
 import * as Location from 'expo-location'
 import * as ImagePicker from 'expo-image-picker'
-import { useDriverProfile, useDriverSetPush, useDriverSetToken } from '@/hooks/useApi';
-import { getPermission, getPushToken, requestPermission, syncPushToken } from '@/lib/notification';
+import { useDriverSetPush, useDriverSetToken } from '@/hooks/useApi'
+import { getPushPermission, requestPushPermission, syncPushToken } from '@/lib/notification'
 
 export default function SettingsScreen() {
     const [isPush, setIsPush] = useState(false)
@@ -78,7 +76,7 @@ export default function SettingsScreen() {
     const onTogglePush = async (value) => {
         let status = null
         if (value) {
-            status = requestPermission()
+            status = requestPushPermission()
         }
         else {
             await onSavePushNotification(false)
@@ -107,13 +105,12 @@ export default function SettingsScreen() {
 
 
     const noAuthorized = () => {
-        // ❗ 권한은 앱에서 직접 해제 불가
-        Alert.alert('알림', '권한 해제는 시스템 설정에서 가능합니다.');
+        Alert.alert('알림', '권한 해제는 시스템 설정에서 가능합니다.')
     }
 
     useEffect(() => {
         ;(async () => {
-            const pushStatus = await getPermission()
+            const pushStatus = await getPushPermission()
             setIsPush(pushStatus === true)
 
             const locationStatus = await getLocationPermission()

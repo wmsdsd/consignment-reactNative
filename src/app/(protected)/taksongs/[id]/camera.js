@@ -78,8 +78,6 @@ export default function CustomCameraScreen() {
             }
 
             const carNumber = data.plates[0]?.plate
-            console.log("carNumber", carNumber)
-
             if (orderLocation.carNumber !== carNumber) {
                 if (isAndroid)
                     ToastAndroid.show("인식된 번호판과 차량 번호가 일치하지 않습니다.", ToastAndroid.SHORT)
@@ -90,18 +88,16 @@ export default function CustomCameraScreen() {
 
         }
         catch (e) {
-            console.log('fetch error', e)
             Alert.alert("알림", "[오류] 사진 정보가 올바르지 않습니다.")
         }
         finally {
             setIsLoading(false)
             setIsFailed(true)
 
-            const endTime = Date.now()
-            const elapsed = endTime - startTime;
-
-            if (isAndroid)
-                ToastAndroid.show(`경과 시간: ${elapsed / 1000}초`, ToastAndroid.SHORT)
+            // const endTime = Date.now()
+            // const elapsed = endTime - startTime
+            // if (isAndroid)
+                // ToastAndroid.show(`경과 시간: ${elapsed / 1000}초`, ToastAndroid.SHORT)
         }
     }
 
